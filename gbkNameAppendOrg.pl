@@ -2,34 +2,28 @@
 use 5.14.0;
 use utf8;
 use Carp;
-use lib qw(/home/sco /home/sco/perllib);
+use lib qw(/Users/nouser/perllib);
 use File::Basename;
 use Sco::Common qw(tablist linelist tablistE linelistE tabhash tabhashE tabvals
     tablistV tablistVE linelistV linelistVE tablistH linelistH
     tablistER tablistVER linelistER linelistVER tabhashER tabhashVER);
 use File::Spec;
+use File::Path qw(make_path remove_tree);
+use File::Copy;
 
 # {{{ Getopt::Long
 use Getopt::Long;
-my $outdir;
-my $indir;
-my $fofn;
-my $outex; # extension for the output filename when it is derived on infilename.
 my $conffile = qq(local.conf);
+my $indir = qq(rideout);
 my $errfile;
 my $runfile;
-my $outfile;
 my $testCnt = 0;
 our $verbose;
 my $skip = 0;
 my $help;
 GetOptions (
-"outfile:s" => \$outfile,
-"outdir:s" => \$outdir,
-"indir:s" => \$indir,
-"fofn:s" => \$fofn,
-"extension:s" => \$outex,
 "conffile:s" => \$conffile,
+"indir:s" => \$indir,
 "errfile:s" => \$errfile,
 "runfile:s" => \$runfile,
 "testcnt:i" => \$testCnt,
@@ -134,64 +128,12 @@ linelistE("Specified configuration file $conffile not found.");
 }
 # }}}
 
-# {{{ Outdir and outfile business.
-my $ofh;
-my $idofn = 0;    # Flag for input filename derived output filenames. 
-if($outfile) {
-  my $ofn;
-  if($outdir) {
-    unless(-d $outdir) {
-      unless(mkdir($outdir)) {
-        croak("Failed to make $outdir. Exiting.");
-      }
-    }
-    $ofn = File::Spec->catfile($outdir, $outfile);
-  }
-  else {
-    $ofn = $outfile;
-  }
-  open($ofh, ">", $ofn);
+my @infiles = glob($indir . "/*gbk");
+my $outdir = $conf{orgnamegbkdir};
+make_path($outdir);
+unless( -d $outdir) {
+  croak("$outdir does not exist and could not be made either");
 }
-elsif($outdir) {
-linelistE("Output filenames will be derived from input");
-linelistE("filenames and placed in $outdir");
-    unless(-d $outdir) {
-      unless(mkdir($outdir)) {
-        croak("Failed to make $outdir. Exiting.");
-      }
-    }
-$idofn = 1;
-}
-else {
-  open($ofh, ">&STDOUT");
-}
-select($ofh);
-# }}}
-
-# {{{ populate @infiles
-my @infiles;
-if(-e $fofn and -s $fofn) {
-open(FH, "<", $fofn);
-while(my $line = readline(FH)) {
-chomp($line);
-if($line=~m/^\s*\#/ or $line=~m/^\s*$/) {next;}
-my $fn;
-if($indir) {
-$fn = File::Spec->catfile($indir, $line);
-}
-else {
-$fn = $line;
-}
-
-push(@infiles, $fn);
-}
-close(FH);
-}
-else {
-@infiles = @ARGV;
-}
-
-# }}}
 
 # {{{ Cycle through all the infiles.
 for my $infile (@infiles) {
@@ -208,15 +150,16 @@ for (1..$skip) { my $discard = readline($ifh); }
 while(my $line = readline($ifh)) {
 chomp($line);
 if($line =~ m/^SOURCE/) {
-my @ll=split(/\s+/, $line, 2);
-my $org = $ll[1];
-$org =~ s/[().,]+/ /g;
-$org =~ s/ {2,}/ /g;
-$org =~ s/ /_/g;
-$org =~ s/\//_/g;
-my $newname = $org . "_" . $noex . ".gbk";
-my $newpath = File::Spec->catfile("orgnamegbk" , $newname);
-linelist("cp $infile $newpath");
+  my @ll=split(/\s+/, $line, 2);
+  my $org = $ll[1];
+  $org =~ s/[().,]+/ /g;
+  $org =~ s/ {2,}/ /g;
+  $org =~ s/ /_/g;
+  $org =~ s/\//_/g;
+  my $newname = $org . "_" . $noex . ".gbk";
+  my $newpath = File::Spec->catfile($outdir, $newname);
+  linelist("Copying $infile to $newpath");
+  copy($infile, $newpath);
   last;
 }
 
@@ -232,7 +175,6 @@ exit;
 
 # Multiple END blocks run in reverse order of definition.
 END {
-close($ofh);
 close(STDERR);
 close(ERRH);
 # $handle->disconnect();
