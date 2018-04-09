@@ -474,7 +474,9 @@ for my $subft (@subft) {
     unless ($protlen >= $minPPlen and $protlen <= $maxPPlen) {
       push(@recoord, [$st, $en, $str]);
     }
-    if($st == $teSubStart and $en == $teSubEnd) {
+    # if($st == $teSubStart and $en == $teSubEnd) {
+    if(abs($st - $teSubStart) <= 2 and
+      abs($en - $teSubEnd) <= 2) {
       $subft->add_tag_value("color", "0 255 0");
     }
   }
