@@ -324,7 +324,7 @@ my @ll=split(",", $line);
 $teProtAcc = $ll[0];
 $teProtAcc =~ s/\.[^.]*$//;
 $gbkgi = $ll[2];
-my $strand = $ll[6] eq "-" ? -1 : 1;
+my $strand = $ll[6] =~ m/^-/ ? -1 : 1;
 
 my $start = $ll[4];
 my $end = $ll[5];
@@ -335,8 +335,6 @@ if($strand == -1) {
 $start = $ll[5];
 $end = $ll[4];
 }
-
-
 push(@coords, [$start, $end, $strand]);
 
 =head3 Getting the index for the tailoring enzyme used in the RODEO search.
@@ -348,6 +346,9 @@ column 3 will be the same for this protein.
 
 if($ll[0] eq $ll[3]) {
 $teNdx = $lineCnt;
+# tablistE(@ll);
+linelistE("TE Line: $line");
+tablistE("TE Line:", $start, $end, $strand);
 }
 $lineCnt += 1;
 }
@@ -373,6 +374,7 @@ my $end = $cr->[1];
 my $teStart = $cr->[0]; # The tailoring enzyme start.
 my $teEnd = $cr->[1]; # The tailoring enzyme end.
 my $teStrand = $cr->[2]; # The tailoring enzyme strand as 1 or -1.
+
 my $midpos = int(($start + $end)/2);
 my $minpos = $midpos - ($flankLen - 1);
 my $maxpos = $minpos + ($flankLen * 2 - 1);
