@@ -22,13 +22,14 @@ use Net::FTP;
 # {{{ Getopt::Long
 use Getopt::Long;
 my $maxDistFromTE = 8000; # From precursor peptide to the tailoring enzyme.
-my $outdir = qq(gbkout);
+my $outdir = qq(rideout);
 my $indir;
 my $fofn;
 my $outex; # extension for the output filename when it is derived on infilename.
 my $conffile = qq(local.conf);
 my $colorThreshScore = 20;
 my $errfile;
+my $prodigalScoreThresh = 15;
 my $flankLen = 12500;
 my $allowedInGene = 20;
 my $minPPlen = 20; # Minimum precursor peptide length.
@@ -52,8 +53,6 @@ GetOptions (
 "runfile:s" => \$runfile,
 "testcnt:i" => \$testCnt,
 "skip:i" => \$skip,
-"minpplen:i" => \$minPPlen,
-"maxpplen:i" => \$maxPPlen,
 "allowedingene:i" => \$allowedInGene,
 "verbose" => \$verbose,
 "help" => \$help
@@ -172,6 +171,7 @@ open(STDERR, ">&ERRH");
 }
 # }}}
 
+
 # {{{ Populate %conf if a configuration file 
 my %conf;
 if(-s $conffile ) {
@@ -190,8 +190,27 @@ if(-s $conffile ) {
 elsif($conffile ne "local.conf") {
 linelistE("Specified configuration file $conffile not found.");
 }
+if(exists($conf{minPPlen})) { $minPPlen = $conf{minPPlen}; }
+if(exists($conf{maxPPlen})) { $minPPlen = $conf{maxPPlen}; }
+if(exists($conf{maxDistFromTE})) { $maxDistFromTE = $conf{maxDistFromTE}; }
+if(exists($conf{prodigalScoreThresh})) {
+  $prodigalScoreThresh = $conf{prodigalScoreThresh};
+}
+if(exists($conf{fastaOutputLimit})) {
+  $fastaOutputLimit = $conf{fastaOutputLimit};
+}
+if(exists($conf{sameStrandReward})) {
+  $sameStrandReward = $conf{sameStrandReward};
+}
+if(exists($conf{flankLen})) {
+  $flankLen = $conf{flankLen};
+}
+
+
 # }}}
 
+
+# {{{ gbkcache and sqlite initialisation
 my $gbkcache = qq(gbkcache);
 if(exists($conf{gbkcache})) { $gbkcache = $conf{gbkcache}; }
 
@@ -215,7 +234,7 @@ unique(acc, ppser)
 CTS
 # $handle->do("drop table if exists $conf{prepeptab}");
 $handle->do($create_table_str);
-
+# }}}
 
 # {{{ populate @infiles
 my @infiles;
@@ -711,7 +730,7 @@ if($distFromTE <= $maxDistFromTE) {
   if($strand == $teStrand) {
     $strandReward = 1;
   }
-  if($ppFastaOutputCnt <= $fastaOutputLimit or ($ll[3] >= 15)) {
+  if($ppFastaOutputCnt <= $fastaOutputLimit or ($ll[3] >= $prodigalScoreThresh)) {
     my $aaobj = Bio::Seq->new(-seq => $aaseq);
     my $fastaid = $teProtAcc . "_" . $ppFastaOutputCnt;
     $aaobj->display_id($fastaid);
