@@ -185,7 +185,7 @@ if(-s $conffile ) {
     $keyCnt += 1;
   }
   close($cnfh);
-  linelistE("$keyCnt keys placed in conf.");
+#  linelistE("$keyCnt keys placed in conf.");
 }
 elsif($conffile ne "local.conf") {
 linelistE("Specified configuration file $conffile not found.");
@@ -329,7 +329,8 @@ for (1..$skip) { my $discard = readline($ifh); }
 }
 my @coords;
 my $gbkgi; # Column index 2 of outarch.csv. Value is the same in all rows.
-my $teProtAcc;
+my $teProtAcc; # We remove ".1", ".2" from the end of this one.
+my $teProtId; # This is the $teProtAcc without the removal mentioned above.
 my $teNdx; # Index for the tailoring enzyme.
 my $lineCnt = 0;
 
@@ -338,9 +339,12 @@ while(my $line = readline($ifh)) {
 chomp($line);
 if($line=~m/^\s*\#/ or $line=~m/^\s*$/
   or $line=~m/^query/ ) {next;}
-# WP_044852097.1,Amycolatopsis,NZ_CP016174.1,WP_044852097.1,,fwd,1079753,1080448,PF07812,TfuA  TfuA-like protein,6.4e-40,,,,,
+#Query,Genus/Species,Nucleotide_acc,Protein_acc,start,end,dir,PfamID1,Name1,Description1,E-value1,PfamID2,Name2,D
+#POF95626.1,Pseudomonas putida,MINE01000015.1,POF95618.1,459205,459898,+,PF12146,Hydrolase_4,"Serine aminopeptida
+
 my @ll=split(",", $line);
 $teProtAcc = $ll[0];
+$teProtId = $teProtAcc; # In case we need to look in the genbank file.
 $teProtAcc =~ s/\.[^.]*$//;
 $gbkgi = $ll[2];
 my $strand = $ll[6] =~ m/^-/ ? -1 : 1;
@@ -374,11 +378,33 @@ $lineCnt += 1;
 close($ifh);
 # }}}
 
+# TEcoordsByProtId (gbkfile => filename, protid => proteinid);
 unless(defined($teNdx)) {
-linelistE("\$teNdx is undefined. Stopping.\n");
-exit();
+  linelistE("\$teNdx is undefined. Looking into the downloaded genbank file.\n");
+  my($gbkfh, $gbkfn)=tempfile($template, DIR => $tempdir, SUFFIX => '.gbk');
+  my $gbkstored = File::Spec->catfile($gbkcache, ($gbkgi . ".gbk"));
+  if(-e $gbkstored) {
+    copy($gbkstored, $gbkfn);
+    linelistE("$gbkstored copied to $gbkfn");
+  }
+  else {
+    fetchGbk(uid => $gbkgi, outfile => $gbkfn);
+    if(-d $gbkcache) {
+      copy($gbkfn, $gbkstored);
+    }
+  }
+  my $cr = TEcoordsByProtId(gbkfile => $gbkfn, protid => $teProtId);
+  if(ref($cr)) {
+    push(@coords, $cr);
+    $teNdx = $#coords;
+    tablistE("Found TE ($teProtId) in $gbkstored: ", @{$cr}, $teNdx);
+  }
+  else {
+    linelistE("No $teProtId found in $gbkstored. Stopping.");
+    unlink($gbkfn);
+    exit();
+  }
 }
-
 
 =head3 Coordinates to be extracted from the Genbank file.
 
@@ -1016,6 +1042,29 @@ sub subgenbank {
 
 }
 # }}}
+
+# {{{ sub TEcoordsByProtId (gbkfile => filename, protid => proteinid);
+sub TEcoordsByProtId {
+  my %args = @_;
+  my $ingbk = $args{gbkfile};
+  my $protid = $args{protid};
+  my $seqio = Bio::SeqIO->new(-file => $ingbk);
+  my $seqobj=$seqio->next_seq();
+  for my $ft ($seqobj->get_all_SeqFeatures()) {
+    if($ft->has_tag("protein_id")) {
+      my (@temp) = $ft->get_tag_values("protein_id");
+      if(grep {$_ eq $protid} @temp) {
+        my $start = $ft->start();
+        my $end = $ft->end();
+        my $strand = $ft->strand();
+        return([$start, $end, $strand]);
+      }
+    }
+  }
+return();
+}
+# }}}
+
 
 __END__
 

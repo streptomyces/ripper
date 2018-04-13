@@ -141,7 +141,7 @@ if(-s $conffile ) {
     $keyCnt += 1;
   }
   close($cnfh);
-  linelistE("$keyCnt keys placed in conf.");
+#  linelistE("$keyCnt keys placed in conf.");
 }
 elsif($conffile ne "local.conf") {
 linelistE("Specified configuration file $conffile not found.");
