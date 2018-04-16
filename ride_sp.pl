@@ -191,7 +191,7 @@ elsif($conffile ne "local.conf") {
 linelistE("Specified configuration file $conffile not found.");
 }
 if(exists($conf{minPPlen})) { $minPPlen = $conf{minPPlen}; }
-if(exists($conf{maxPPlen})) { $minPPlen = $conf{maxPPlen}; }
+if(exists($conf{maxPPlen})) { $maxPPlen = $conf{maxPPlen}; }
 if(exists($conf{maxDistFromTE})) { $maxDistFromTE = $conf{maxDistFromTE}; }
 if(exists($conf{prodigalScoreThresh})) {
   $prodigalScoreThresh = $conf{prodigalScoreThresh};
