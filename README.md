@@ -50,29 +50,29 @@ nucleotides in the default build.
 
 
 
-# fetchGbk called on 391 and 437
-# TEcoordsByProtId called on 397
-# 
-# locateTE called on 495
-# 
-# subgenbank called on 499
-# 
-# prodigal-short called on 557
-# 
-# for my $lr (@sprdl) is 612 to 788
-# 
-# 
-# distTE called on 693
-# 
-# prdcol called on 706
-# 
-# aaseq  called on 725
-# 
-# 
-# sub prodigal2aa is not used. Looks like it was replaced by aaseq() at
-# some point.
-# 
-# sub seqobj2print is not used.
+> fetchGbk called on 391 and 437
+> TEcoordsByProtId called on 397
+> 
+> locateTE called on 495
+> 
+> subgenbank called on 499
+> 
+> prodigal-short called on 557
+> 
+> for my $lr (@sprdl) is 612 to 788
+> 
+> 
+> distTE called on 693
+> 
+> prdcol called on 706
+> 
+> aaseq  called on 725
+> 
+> 
+> sub prodigal2aa is not used. Looks like it was replaced by aaseq() at
+> some point.
+> 
+> sub seqobj2print is not used.
 
 
 For all the genes found by _prodigal-short_ the following is done.
@@ -234,28 +234,28 @@ _prodigal_ source download.
 
 ## Other supporting Perl scripts
 
-## pfam\_sqlite.pl
+### pfam\_sqlite.pl
 
 _pfam_sqlite.pl_ takes all the proteins in a specified table in a
 specified sqlite3 database and searches them for Pfam domains. The
 results of these searches are placed in a new table in the same
 sqlite3 database.
 
-## mergeRidePfam.pl
+### mergeRidePfam.pl
 
 _mergeRidePfam.pl_ merges the information contained in the two sqlite3
 tables, one containing the output of prodigal-short and the other
 containing the output of Pfam searches on the proteins selected from
 the output of prodigal-short. It writes out a tab delimited file.
 
-## gbkNameAppendOrg.pl
+### gbkNameAppendOrg.pl
 
 Copies the output genbank files to a new directory with the organism
 names appended to the filenames for ease of identification. Files are
 copied to the directory specified in the configuration variable
 _orgnamegbkdir_.
 
-## collectFiles.pl
+### collectFiles.pl
 
 _collectFiles.pl_ copies files from a specified directory (and
 subdirectories) to another directory if the base filename matches the
