@@ -187,9 +187,10 @@ read by F<ride_sp.pl> and the following scripts in the pipeline.
 
 =head2 Building I<prodigal-short>
 
-The following changes were made to I<prodigal> source files before
-building I<prodigal-short> according to instructions provided with the
-prodigal download.
+The following changes (shown as the output of the C<git diff> command)
+were made to I<prodigal> source files before building
+I<prodigal-short> according to instructions provided with the
+I<prodigal> source download.
 
  diff --git a/Makefile b/Makefile
  index 23ffe00..6edbb53 100644
