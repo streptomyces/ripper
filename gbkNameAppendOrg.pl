@@ -2,11 +2,7 @@
 use 5.14.0;
 use utf8;
 use Carp;
-use lib qw(/Users/nouser/perllib);
 use File::Basename;
-use Sco::Common qw(tablist linelist tablistE linelistE tabhash tabhashE tabvals
-    tablistV tablistVE linelistV linelistVE tablistH linelistH
-    tablistER tablistVER linelistER linelistVER tabhashER tabhashVER);
 use File::Spec;
 use File::Path qw(make_path remove_tree);
 use File::Copy;
@@ -179,4 +175,29 @@ close(STDERR);
 close(ERRH);
 # $handle->disconnect();
 }
+
+# {{{ subroutines tablist, linelist, tabhash and their *E versions.
+# The E versions are for printing to STDERR.
+
+sub tablist {
+  my @in = @_;
+  print(join("\t", @in), "\n");
+}
+
+sub tablistE {
+  my @in = @_;
+  print(STDERR join("\t", @in), "\n");
+}
+
+sub linelist {
+  my @in = @_;
+  print(join("\n", @in), "\n");
+}
+
+sub linelistE {
+  my @in = @_;
+  print(STDERR join("\n", @in), "\n");
+}
+
+# }}}
 

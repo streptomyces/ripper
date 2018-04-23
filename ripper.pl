@@ -2,12 +2,12 @@
 use 5.14.0;
 use utf8;
 use Carp;
-use lib qw(/Users/nouser/perllib);
+# use lib qw(/Users/nouser/perllib);
 use File::Basename;
 use File::Temp qw(tempfile tempdir);
 use File::Spec;
 use File::Copy;
-use Sco::Common qw(tablist tablistE linelistE);
+# use Sco::Common qw(tablist tablistE linelistE);
 use Bio::SeqIO;
 use Bio::Seq;
 use Bio::SeqFeature::Generic;
@@ -1065,6 +1065,32 @@ return();
 }
 # }}}
 
+
+
+# {{{ subroutines tablist, linelist, tabhash and their *E versions.
+# The E versions are for printing to STDERR.
+
+sub tablist {
+  my @in = @_;
+  print(join("\t", @in), "\n");
+}
+
+sub tablistE {
+  my @in = @_;
+  print(STDERR join("\t", @in), "\n");
+}
+
+sub linelist {
+  my @in = @_;
+  print(join("\n", @in), "\n");
+}
+
+sub linelistE {
+  my @in = @_;
+  print(STDERR join("\n", @in), "\n");
+}
+
+# }}}
 
 __END__
 

@@ -65,3 +65,28 @@ sub onfind {
 # }}}
 
 
+# {{{ subroutines tablist, linelist, tabhash and their *E versions.
+# The E versions are for printing to STDERR.
+
+sub tablist {
+  my @in = @_;
+  print(join("\t", @in), "\n");
+}
+
+sub tablistE {
+  my @in = @_;
+  print(STDERR join("\t", @in), "\n");
+}
+
+sub linelist {
+  my @in = @_;
+  print(join("\n", @in), "\n");
+}
+
+sub linelistE {
+  my @in = @_;
+  print(STDERR join("\n", @in), "\n");
+}
+
+# }}}
+
