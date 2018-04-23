@@ -112,32 +112,32 @@ Example of Bash script to run _rodeo\_main.py_ followed by
 _ride\_sp.pl_ and some other scripts to organise the output and output
 files.
 
- 
-> for hcd in rodout rideout sqlite gbkcache orgnamegbk rodeohtml; do
-> if [[ ! -d $hcd ]]; then
->   mkdir $hcd
-> fi
-> done
->
-> queryfn="in.list";
-> asdir=/Users/nouser;
-> codedir=${asdir}/code/ride;
-> ln -s ${asdir}/databases/pfam ./hmm_dir
-> ln -s ${asdir}/github/rodeo2/confs ./
-> perlbin="/usr/bin/perl"
-> for acc in $(cat $queryfn); do 
->   echo python ${asdir}/github/rodeo2/rodeo_main.py -out rodout/${acc} ${acc}
->   python ${asdir}/github/rodeo2/rodeo_main.py -out rodout/${acc} ${acc}
->   echo $perlbin ${codedir}/ride_sp.pl -outdir rideout -- rodout/${acc}/main_co_occur.csv
->   $perlbin ${codedir}/ride_sp.pl -outdir rideout -- rodout/${acc}/main_co_occur.csv
->   # break;
-> done
->
-> $perlbin ${codedir}/pfam_sqlite.pl
-> $perlbin ${codedir}/mergeRidePfam.pl -out out.txt
-> $perlbin ${codedir}/gbkNameAppendOrg.pl -indir rideout
-> $perlbin ${codedir}/collectFiles.pl rodout '\.html$'
+```BASH 
+for hcd in rodout rideout sqlite gbkcache orgnamegbk rodeohtml; do
+if [[ ! -d $hcd ]]; then
+  mkdir $hcd
+fi
+done
 
+queryfn="in.list";
+asdir=/Users/nouser;
+codedir=${asdir}/code/ride;
+ln -s ${asdir}/databases/pfam ./hmm_dir
+ln -s ${asdir}/github/rodeo2/confs ./
+perlbin="/usr/bin/perl"
+for acc in $(cat $queryfn); do 
+  echo python ${asdir}/github/rodeo2/rodeo_main.py -out rodout/${acc} ${acc}
+  python ${asdir}/github/rodeo2/rodeo_main.py -out rodout/${acc} ${acc}
+  echo $perlbin ${codedir}/ride_sp.pl -outdir rideout -- rodout/${acc}/main_co_occur.csv
+  $perlbin ${codedir}/ride_sp.pl -outdir rideout -- rodout/${acc}/main_co_occur.csv
+  # break;
+done
+
+$perlbin ${codedir}/pfam_sqlite.pl
+$perlbin ${codedir}/mergeRidePfam.pl -out out.txt
+$perlbin ${codedir}/gbkNameAppendOrg.pl -indir rideout
+$perlbin ${codedir}/collectFiles.pl rodout '\.html$'
+```
 
 ## Example of _local.conf_
 
@@ -147,53 +147,53 @@ read by _ride\_sp.pl_ and the following scripts in the pipeline.
 A file named _local.conf_ is included in the repository.
 
 
-> # Lines beginning with # are comments.
-> # All names are case sensitive.
-> 
-> # Downloaded genbank files are cached here.
-> gbkcache            gbkcache
-> 
-> # Filename for the SQLite3 database.
-> sqlite3fn           sqlite/ride.sqlite3
-> sqlitefn            sqlite/ride.sqlite3
-> 
-> # Directory containing the Pfam database files.
-> # Note that this is an absolute path.
-> # Should be the same as pfamdir in the ripper_run.sh file.
-> hmmdir              /home/sco/blast_databases/pfam
-> 
-> # Name of the Pfam database to use.
-> hmmdb               Pfam-A.hmm
-> 
-> # Name of the Pfam data file.
-> # Used for reading information about models.
-> pfamhmmdatfn        Pfam-A.hmm.dat
-> 
-> # Name of the SQLite3 table where results of
-> # hmmer searches are stored.
-> pfamrestab          pfamscan
-> 
-> # Name of the SQLite3 table where results of
-> # prodigal search are stored.
-> prepeptab           ride
-> 
-> # Directory where output genbank files are stored.
-> # Organism names are prefixed to the file names for
-> # ease of identification.
-> orgnamegbkdir       orgnamegbk
-> 
-> 
-> 
-> # Below are some defaults (commented out) that can also
-> # be specified in this file. The names are case sensitive!
-> 
-> # minPPlen                   20
-> # maxPPlen                  120
-> # prodigalScoreThresh        15
-> # maxDistFromTE            8000
-> # fastaOutputLimit            3
-> # sameStrandReward            5
-> # flankLen                12500
+    # Lines beginning with \# are comments.
+    # All names are case sensitive.
+    
+    # Downloaded genbank files are cached here.
+    bkcache            gbkcache
+    
+    # Filename for the SQLite3 database.
+    qlite3fn           sqlite/ride.sqlite3
+    qlitefn            sqlite/ride.sqlite3
+    
+    # Directory containing the Pfam database files.
+    # Note that this is an absolute path.
+    # Should be the same as pfamdir in the ripper_run.sh file.
+    mmdir              /home/sco/blast_databases/pfam
+    
+    # Name of the Pfam database to use.
+    mmdb               Pfam-A.hmm
+    
+    # Name of the Pfam data file.
+    # Used for reading information about models.
+    famhmmdatfn        Pfam-A.hmm.dat
+    
+    # Name of the SQLite3 table where results of
+    # hmmer searches are stored.
+    famrestab          pfamscan
+    
+    # Name of the SQLite3 table where results of
+    # prodigal search are stored.
+    repeptab           ride
+    
+    # Directory where output genbank files are stored.
+    # Organism names are prefixed to the file names for
+    # ease of identification.
+    rgnamegbkdir       orgnamegbk
+    
+    
+    
+    # Below are some defaults (commented out) that can also
+    # be specified in this file. The names are case sensitive!
+    
+    # minPPlen                   20
+    # maxPPlen                  120
+    # prodigalScoreThresh        15
+    # maxDistFromTE            8000
+    # fastaOutputLimit            3
+    # sameStrandReward            5
+    # flankLen                12500
 
 
 ## Building _prodigal-short_
@@ -203,55 +203,55 @@ were made to _prodigal_ source files before building
 _prodigal-short_ according to instructions provided with the
 _prodigal_ source download.
 
-> diff --git a/Makefile b/Makefile
-> index 23ffe00..6edbb53 100644
-> --- a/Makefile
-> +++ b/Makefile
-> @@ -24,7 +24,7 @@ CC      = gcc
->  CFLAGS  += -pedantic -Wall -O3
->  LFLAGS = -lm $(LDFLAGS)
->
-> -TARGET  = prodigal
-> +TARGET  = prodigal-short
->  SOURCES = $(shell echo *.c)
->  HEADERS = $(shell echo *.h)
->  OBJECTS = $(SOURCES:.c=.o)
-> 
-> 
-> diff --git a/dprog.h b/dprog.h
-> index d729f4c..ea7fa10 100644
-> --- a/dprog.h
-> +++ b/dprog.h
-> @@ -26,7 +26,7 @@
->  #include "sequence.h"
->  #include "node.h"
->
-> -#define MAX_SAM_OVLP 60
-> +#define MAX_SAM_OVLP 45
->  #define MAX_OPP_OVLP 200
->  #define MAX_NODE_DIST 500
->
-> diff --git a/node.h b/node.h
-> index 6c722be..551c7b8 100644
-> --- a/node.h
-> +++ b/node.h
-> @@ -27,11 +27,11 @@
->  #include "training.h"
->
->  #define STT_NOD 100000
-> -#define MIN_GENE 90
-> -#define MIN_EDGE_GENE 60
-> -#define MAX_SAM_OVLP 60
-> -#define ST_WINDOW 60
-> -#define OPER_DIST 60
-> +#define MIN_GENE 60
-> +#define MIN_EDGE_GENE 45
-> +#define MAX_SAM_OVLP 45
-> +#define ST_WINDOW 45
-> +#define OPER_DIST 45
->  #define EDGE_BONUS 0.74
->  #define EDGE_UPS -1.00
->  #define META_PEN 7.5
+    diff --git a/Makefile b/Makefile
+    index 23ffe00..6edbb53 100644
+    --- a/Makefile
+    +++ b/Makefile
+    @@ -24,7 +24,7 @@ CC      = gcc
+     CFLAGS  += -pedantic -Wall -O3
+     LFLAGS = -lm $(LDFLAGS)
+    
+    -TARGET  = prodigal
+    +TARGET  = prodigal-short
+     SOURCES = $(shell echo *.c)
+     HEADERS = $(shell echo *.h)
+     OBJECTS = $(SOURCES:.c=.o)
+    
+    
+    diff --git a/dprog.h b/dprog.h
+    index d729f4c..ea7fa10 100644
+    --- a/dprog.h
+    +++ b/dprog.h
+    @@ -26,7 +26,7 @@
+     #include "sequence.h"
+     #include "node.h"
+    
+    -#define MAX_SAM_OVLP 60
+    +#define MAX_SAM_OVLP 45
+     #define MAX_OPP_OVLP 200
+     #define MAX_NODE_DIST 500
+    
+    diff --git a/node.h b/node.h
+    index 6c722be..551c7b8 100644
+    --- a/node.h
+    +++ b/node.h
+    @@ -27,11 +27,11 @@
+     #include "training.h"
+    
+     #define STT_NOD 100000
+    -#define MIN_GENE 90
+    -#define MIN_EDGE_GENE 60
+    -#define MAX_SAM_OVLP 60
+    -#define ST_WINDOW 60
+    -#define OPER_DIST 60
+    +#define MIN_GENE 60
+    +#define MIN_EDGE_GENE 45
+    +#define MAX_SAM_OVLP 45
+    +#define ST_WINDOW 45
+    +#define OPER_DIST 45
+     #define EDGE_BONUS 0.74
+     #define EDGE_UPS -1.00
+     #define META_PEN 7.5
 
 
 
