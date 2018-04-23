@@ -1,11 +1,9 @@
 # ripper.pl
-ripper.pl
-=========
 
 ## Description
 
-The _rodeo2_ Python script _rodeo\_main.py_ produces and output file
-named _main\_co\_occur.csv_. An example of this is shown below.
+The *rodeo2* Python script *rodeo\_main.py* produces and output file
+named *main\_co\_occur.csv*. An example of this is shown below.
 
     Query,Genus/Species,Nucleotide_acc,Protein_acc,start,end,dir,PfamID1,Name1,Description1,E-value1,PfamID2,Name2,Description2,E-value2,PfamID3,Name3,Description3,E-value3  
     AIB37403.1,Pseudomonas simiae,CP007637.1,AIB37395.1,3876197,3875843,-  
@@ -26,8 +24,8 @@ named _main\_co\_occur.csv_. An example of this is shown below.
     AIB37403.1,Pseudomonas simiae,CP007637.1,AIB37410.1,3894534,3895305,+,PF01557,FAA_hydrolase,Fumarylacetoacetate (FAA) hydrolase family,1.7e-57  
     AIB37403.1,Pseudomonas simiae,CP007637.1,AIB37411.1,3895310,3896771,+,PF00171,Aldedh,Aldehyde dehydrogenase family,1.5e-174  
 
-_ride\_sp.pl_ reads the _main\_co\_occur.csv_ file produced by
-_rodeo2_ and
+*ride\_sp.pl* reads the *main\_co\_occur.csv* file produced by
+*rodeo2* and
 
 
 1. Determines the genbank accession to fetch based on the
@@ -39,43 +37,16 @@ column 4 are identical.
 
 Then the genbank file is fetched from Genbank and a smaller genbank
 file is generated from it whose length is twice the value of the
-variable _$flankLen_. This smaller genbank file, hereafter referred
-to as the _sub-genbank_ file, is centered around the centre of the
+variable *$flankLen*. This smaller genbank file, hereafter referred
+to as the *sub-genbank* file, is centered around the centre of the
 tailoring enzyme.
 
-A specially built version of _prodigal_ renamed _prodigal-short_ is
-then used to find genes in the sub-genbank file. _prodigal-short_ is
+A specially built version of *prodigal* renamed *prodigal-short* is
+then used to find genes in the sub-genbank file. *prodigal-short* is
 configured to find genes as short as 60 nucleotides compared to 90
 nucleotides in the default build.
 
-
-
-> fetchGbk called on 391 and 437
-> TEcoordsByProtId called on 397
-> 
-> locateTE called on 495
-> 
-> subgenbank called on 499
-> 
-> prodigal-short called on 557
-> 
-> for my $lr (@sprdl) is 612 to 788
-> 
-> 
-> distTE called on 693
-> 
-> prdcol called on 706
-> 
-> aaseq  called on 725
-> 
-> 
-> sub prodigal2aa is not used. Looks like it was replaced by aaseq() at
-> some point.
-> 
-> sub seqobj2print is not used.
-
-
-For all the genes found by _prodigal-short_ the following is done.
+For all the genes found by *prodigal-short* the following is done.
 
 1. The prodigal score is enhanced by a reward if the gene is on the
 same strand as the tailoring enzyme.
@@ -95,56 +66,87 @@ the genbank file and its distance from the tailoring enzyme is
 determined.
 
 7. If the gene is within a specified distance from the TE it is
-included in the list to be output and also saved in a _Sqlite3_
+included in the list to be output and also saved in a *Sqlite3*
 table.
 
 ## Example Bash script implementing the full analysis pipeline
 
-A file named ripper_run.sh is included in the GitHub repository.
+A file named *ripper\_run.sh* is included in the GitHub repository.
 
 The starting point is a query file containing Genpept accessions for
-tailoring enzymes. In the example below this file is named _in.list_.
-Each query file with its list of tailoring enzyme accession should be
-processed in a directory of its own. This directory should also
-contain _local.conf_ and the Bash script listed below.
+tailoring enzymes. In the example below this file is named
+*minitest.txt*. Each query file containing a list of tailoring enzyme
+accessions should be processed in a directory of its own. This
+directory should also contain *local.conf* and the Bash script listed
+below.
 
-Example of Bash script to run _rodeo\_main.py_ followed by
-_ride\_sp.pl_ and some other scripts to organise the output and output
+Example of Bash script to run *rodeo\_main.py* followed by
+*ride\_sp.pl* and some other scripts to organise the output and output
 files.
 
 ```BASH 
+# This file should be in the directory from where it
+# will be run as
+#
+#  source ripper_run.sh
+#
+#
+
+homedir="/home/sco";
+queryfn="minitest.txt";
+ripperdir=${homedir}/fromgithub/ripper;
+rodeodir=${homedir}/fromgithub/rodeo2;
+pfamdir=${homedir}/blast_databases/pfam
+
+# $perlbin and $pythonbin. Both these should have BioPerl and Biopython
+# (respectively) installed for them. It is not uncommon to have more than one
+# versions of perl and python installed on the same machine. Hence the need for
+# the next two lines.
+
+perlbin="/usr/local/bin/perl"
+pythonbin="/usr/bin/python"
+
+########################################################
+### Users should not need to make changes below this ###
+########################################################
+
+# Make a couple of symlinks to keep rodeo_main.py happy.
+ln -s $pfamdir ./hmm_dir
+ln -s ${rodeodir}/confs ./
+
+# Make the various directories where output will be placed.
 for hcd in rodout rideout sqlite gbkcache orgnamegbk rodeohtml; do
 if [[ ! -d $hcd ]]; then
   mkdir $hcd
 fi
 done
 
-queryfn="in.list";
-asdir=/Users/nouser;
-codedir=${asdir}/code/ride;
-ln -s ${asdir}/databases/pfam ./hmm_dir
-ln -s ${asdir}/github/rodeo2/confs ./
-perlbin="/usr/bin/perl"
+### Setup is now complete. Actual runs below. ###
+
+# rodeo run and ripper.pl run for each query in $queryfn
+
 for acc in $(cat $queryfn); do 
-  echo python ${asdir}/github/rodeo2/rodeo_main.py -out rodout/${acc} ${acc}
-  python ${asdir}/github/rodeo2/rodeo_main.py -out rodout/${acc} ${acc}
-  echo $perlbin ${codedir}/ride_sp.pl -outdir rideout -- rodout/${acc}/main_co_occur.csv
-  $perlbin ${codedir}/ride_sp.pl -outdir rideout -- rodout/${acc}/main_co_occur.csv
-  # break;
+  echo $pythonbin ${rodeodir}/rodeo_main.py -out rodout/${acc} ${acc}
+  $pythonbin ${rodeodir}/rodeo_main.py -out rodout/${acc} ${acc}
+  echo $perlbin ${ripperdir}/ripper.pl -outdir rideout -- rodout/${acc}/main_co_occur.csv
+  $perlbin ${ripperdir}/ripper.pl -outdir rideout -- rodout/${acc}/main_co_occur.csv
 done
 
-$perlbin ${codedir}/pfam_sqlite.pl
-$perlbin ${codedir}/mergeRidePfam.pl -out out.txt
-$perlbin ${codedir}/gbkNameAppendOrg.pl -indir rideout
-$perlbin ${codedir}/collectFiles.pl rodout '\.html$'
+# Run the postprocessing scripts
+
+$perlbin ${ripperdir}/pfam_sqlite.pl
+$perlbin ${ripperdir}/mergeRidePfam.pl -out out.txt
+$perlbin ${ripperdir}/gbkNameAppendOrg.pl -indir rideout
+$perlbin ${ripperdir}/collectFiles.pl rodout '\.html$'
+
 ```
 
-## Example of _local.conf_
+## Example of *local.conf*
 
-_local.conf_ is a two column (space delimited) text file which is
-read by _ride\_sp.pl_ and the following scripts in the pipeline.
+A file named *local.conf* is included in the repository.
 
-A file named _local.conf_ is included in the repository.
+*local.conf* is a two column (space delimited) text file which is
+read by *ride\_sp.pl* and the following scripts in the pipeline.
 
 
     # Lines beginning with \# are comments.
@@ -196,12 +198,12 @@ A file named _local.conf_ is included in the repository.
     # flankLen                12500
 
 
-## Building _prodigal-short_
+## Building *prodigal-short*
 
-The following changes (shown as the output of the _git diff_ command)
-were made to _prodigal_ source files before building
-_prodigal-short_ according to instructions provided with the
-_prodigal_ source download.
+The following changes (shown as the output of the *git diff* command)
+were made to *prodigal* source files before building
+*prodigal-short* according to instructions provided with the
+*prodigal* source download.
 
     diff --git a/Makefile b/Makefile
     index 23ffe00..6edbb53 100644
@@ -259,14 +261,14 @@ _prodigal_ source download.
 
 ### pfam\_sqlite.pl
 
-_pfam\_sqlite.pl_ takes all the proteins in a specified table in a
+*pfam\_sqlite.pl* takes all the proteins in a specified table in a
 specified sqlite3 database and searches them for Pfam domains. The
 results of these searches are placed in a new table in the same
 sqlite3 database.
 
 ### mergeRidePfam.pl
 
-_mergeRidePfam.pl_ merges the information contained in the two sqlite3
+*mergeRidePfam.pl* merges the information contained in the two sqlite3
 tables, one containing the output of prodigal-short and the other
 containing the output of Pfam searches on the proteins selected from
 the output of prodigal-short. It writes out a tab delimited file.
@@ -276,17 +278,17 @@ the output of prodigal-short. It writes out a tab delimited file.
 Copies the output genbank files to a new directory with the organism
 names appended to the filenames for ease of identification. Files are
 copied to the directory specified in the configuration variable
-_orgnamegbkdir_.
+*orgnamegbkdir*.
 
 ### collectFiles.pl
 
-_collectFiles.pl_ copies files from a specified directory (and
+*collectFiles.pl* copies files from a specified directory (and
 subdirectories) to another directory if the base filename matches the
 specified regular expression.
 
  perl collectFiles.pl -indir rodout -pat '\.html$' -outdir rodeohtml
 
-The options shown above are the defaults. _-outdir_ may be specified
-in _local.conf_ as _rodeohtmldir_. Value in the configuration file
+The options shown above are the defaults. *-outdir* may be specified
+in *local.conf* as *rodeohtmldir*. Value in the configuration file
 takes precedence.
 
