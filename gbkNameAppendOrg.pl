@@ -29,66 +29,6 @@ GetOptions (
 );
 # }}}
 
-# {{{ POD Example
-
-=head1 Name
-
-Change me.
-
-=head2 Example
-
- perl changeme.pl -outfile out.txt -- inputfile1 inputfile2
-
-Note that input files are always specified as non-option arguments.
-
-# }}}
-
-# {{{ POD Options and blurb
-
-=head2 Options
-
-=over 2
-
-=item -help
-
-Displays help and exits. All other arguments are ignored.
-
-=item -outfile
-
-If specified, output is written to this file. Otherwise it
-is written to STDOUT. This is affected by the -outdir option
-described below.
-
-=item -outdir
-
-The directory in which output files will be placed. If this is
-specified without -outfile then the output filenames are derived
-from input filenames and placed in this directory.
-
-If this directory does not exist then an attempt is made to make
-it. Failure to make this directory is a fatal error (croak is called).
-
-If -outdir is specified with -outfile then the outfile is placed
-in this directory.
-
-=item -extension
-
-By default this ($outex) is undefined. This is the extension to use
-when output filenames are derived from input filenames. 
-
-=back
-
-=head2 Blurb
-
-Uses F<Sco::Common> for a variety of printing functions.
-
-If neither -outfile nor -outdir are specified then the output
-is to STDOUT.
-
-=cut
-
-
-# }}}
 
 if($help) {
 exec("perldoc $0");

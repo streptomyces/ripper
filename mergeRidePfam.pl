@@ -28,69 +28,6 @@ GetOptions (
 );
 # }}}
 
-# {{{ POD Example
-
-=head1 Name
-
-Change me.
-
-=head2 Example
-
- perl code/mergeRidePfam.pl -outfile rodeo_pfam.csv
- perl code/mergeRidePfam.pl -outfile rodeo_pfam_${dpf}.csv
-
-No input files are needed. Queries tables F<ride> and F<pfamscan>
-in the database F<andy>. The two tables are linked by
-ride.fastaid and pfamscan.qname.
-
-=cut
-
-# }}}
-
-# {{{ POD blurb
-
-=head2 Blurb
-
-Some kind of description here.
-
-=cut
-
-# }}}
-
-# {{{ POD Options
-
-=head2 Options
-
-=over 2
-
-=item -help
-
-Displays help and exits. All other arguments are ignored.
-
-=item -outfile
-
-If specified, output is written to this file. Otherwise it
-is written to STDOUT. This is affected by the -outdir option
-described below.
-
-=item -outdir
-
-The directory in which output files will be placed. If this is
-specified without -outfile then the output filenames are derived
-from input filenames and placed in this directory.
-
-If this directory does not exist then an attempt is made to make
-it. Failure to make this directory is a fatal error (croak is called).
-
-If -outdir is specified with -outfile then the outfile is placed
-in this directory.
-
-=back
-
-=cut
-
-# }}}
-
 if($help) {
 exec("perldoc $0");
 exit;

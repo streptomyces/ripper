@@ -14,7 +14,6 @@ use File::Temp qw(tempfile tempdir);
 my $tempdir = qw(/tmp);
 my $template="PfamXXXXX";
 
-
 # {{{ Getopt::Long
 use Getopt::Long;
 my $outdir;
@@ -46,76 +45,6 @@ GetOptions (
 "help" => \$help
 );
 # }}}
-
-# {{{ POD Example
-
-=head1 Name
-
-Change me.
-
-=head2 Example
-
- perl code/pfam.pl
-
-Provided you are in the right directory, no arguments are needed.
-relies on a couple of hardcoded defaults.
-
- my $pfamhmmdat = qq(/home/sco/blast_databases/pfam/pfam.table);
- my $restab = qq(pfamscan); # The table to which output is written.
-
-# }}}
-
-# {{{ POD Options and blurb
-
-=head2 Options
-
-=over 2
-
-=item -help
-
-Displays help and exits. All other arguments are ignored.
-
-=item -outfile
-
-If specified, output is written to this file. Otherwise it
-is written to STDOUT. This is affected by the -outdir option
-described below.
-
-=item -outdir
-
-The directory in which output files will be placed. If this is
-specified without -outfile then the output filenames are derived
-from input filenames and placed in this directory.
-
-If this directory does not exist then an attempt is made to make
-it. Failure to make this directory is a fatal error (croak is called).
-
-If -outdir is specified with -outfile then the outfile is placed
-in this directory.
-
-=item -extension
-
-By default this ($outex) is undefined. This is the extension to use
-when output filenames are derived from input filenames. 
-
-=back
-
-=head2 Blurb
-
-Uses F<Sco::Common> for a variety of printing functions.
-
-If neither -outfile nor -outdir are specified then the output
-is to STDOUT.
-
-=cut
-
-
-# }}}
-
-if($help) {
-exec("perldoc $0");
-exit;
-}
 
 # {{{ open the errfile
 if($errfile) {
@@ -426,20 +355,3 @@ sub linelistE {
 
 __END__
 
-
-create table pfamscan (
-qname text,
-qlen integer,
-hname text,
-hlen integer,
-qstart integer,
-qend integer,
-qcov float,
-hstart integer,
-hend integer,
-hcov float,
-fracid float,
-signif float,
-hdesc text
-unique(qname, qstart, qend, hname)
-);

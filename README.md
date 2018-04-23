@@ -100,14 +100,16 @@ table.
 
 ## Example Bash script implementing the full analysis pipeline
 
+A file named ripper_run.sh is included in the GitHub repository.
+
 The starting point is a query file containing Genpept accessions for
 tailoring enzymes. In the example below this file is named _in.list_.
 Each query file with its list of tailoring enzyme accession should be
 processed in a directory of its own. This directory should also
 contain _local.conf_ and the Bash script listed below.
 
-Example of Bash script to run _rodeo_main.py_ followed by
-_ride_sp.pl_ and some other scripts to organise the output and output
+Example of Bash script to run _rodeo\_main.py_ followed by
+_ride\_sp.pl_ and some other scripts to organise the output and output
 files.
 
  
@@ -140,18 +142,47 @@ files.
 ## Example of _local.conf_
 
 _local.conf_ is a two column (space delimited) text file which is
-read by _ride_sp.pl_ and the following scripts in the pipeline.
+read by _ride\_sp.pl_ and the following scripts in the pipeline.
 
+A file named _local.conf_ is included in the repository.
+
+
+> # Lines beginning with # are comments.
+> # All names are case sensitive.
+> 
+> # Downloaded genbank files are cached here.
 > gbkcache            gbkcache
+> 
+> # Filename for the SQLite3 database.
 > sqlite3fn           sqlite/ride.sqlite3
 > sqlitefn            sqlite/ride.sqlite3
-> hmmdir              /Users/nouser/databases/pfam
+> 
+> # Directory containing the Pfam database files.
+> # Note that this is an absolute path.
+> # Should be the same as pfamdir in the ripper_run.sh file.
+> hmmdir              /home/sco/blast_databases/pfam
+> 
+> # Name of the Pfam database to use.
 > hmmdb               Pfam-A.hmm
+> 
+> # Name of the Pfam data file.
+> # Used for reading information about models.
 > pfamhmmdatfn        Pfam-A.hmm.dat
+> 
+> # Name of the SQLite3 table where results of
+> # hmmer searches are stored.
 > pfamrestab          pfamscan
+> 
+> # Name of the SQLite3 table where results of
+> # prodigal search are stored.
 > prepeptab           ride
+> 
+> # Directory where output genbank files are stored.
+> # Organism names are prefixed to the file names for
+> # ease of identification.
 > orgnamegbkdir       orgnamegbk
-> rodeohtmldir        rodeohtml
+> 
+> 
 > 
 > # Below are some defaults (commented out) that can also
 > # be specified in this file. The names are case sensitive!
@@ -163,14 +194,6 @@ read by _ride_sp.pl_ and the following scripts in the pipeline.
 > # fastaOutputLimit            3
 > # sameStrandReward            5
 > # flankLen                12500
-> 
-> maxPPlen                  100
-> prodigalScoreThresh        10
-> maxDistFromTE            3000
-> fastaOutputLimit            3
-> sameStrandReward            5
-> flankLen                10000
- 
 
 
 ## Building _prodigal-short_
@@ -236,7 +259,7 @@ _prodigal_ source download.
 
 ### pfam\_sqlite.pl
 
-_pfam_sqlite.pl_ takes all the proteins in a specified table in a
+_pfam\_sqlite.pl_ takes all the proteins in a specified table in a
 specified sqlite3 database and searches them for Pfam domains. The
 results of these searches are placed in a new table in the same
 sqlite3 database.
