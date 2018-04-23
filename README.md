@@ -7,24 +7,24 @@ ripper.pl
 The _rodeo2_ Python script _rodeo\_main.py_ produces and output file
 named _main\_co\_occur.csv_. An example of this is shown below.
 
-> Query,Genus/Species,Nucleotide_acc,Protein_acc,start,end,dir,PfamID1,Name1,Description1,E-value1,PfamID2,Name2,Description2,E-value2,PfamID3,Name3,Description3,E-value3  
-> AIB37403.1,Pseudomonas simiae,CP007637.1,AIB37395.1,3876197,3875843,-  
-> AIB37403.1,Pseudomonas simiae,CP007637.1,AIB37396.1,3878350,3877288,-,PF07143,CrtC,CrtC N-terminal lipocalin domain,6.4e-57,PF17186,Lipocalin_9,Lipocalin-like domain,7.1e-42  
-> AIB37403.1,Pseudomonas simiae,CP007637.1,AIB37397.1,3880802,3878339,-,PF02687,FtsX,FtsX-like permease family,9.3e-22,PF12704,MacB_PCD,MacB-like periplasmic core domain,2.5e-10,PF01568,Molydop_binding,Molydopterin dinucleotide binding domain,6.9e-05  
-> AIB37403.1,Pseudomonas simiae,CP007637.1,AIB37398.1,3881472,3880803,-,PF00005,ABC_tran,ABC transporter,6.9e-28,PF13304,AAA_21,"AAA domain, putative AbiEii toxin, Type IV TA system",2.3e-05,PF05729,NACHT,NACHT domain,4e-05,PF13401,AAA_22,AAA domain,9.7e-05,PF13191,AAA_16,AAA ATPase domain,0.0001  
-> AIB37403.1,Pseudomonas simiae,CP007637.1,AIB37399.1,3881748,3882423,+,PF00300,His_Phos_1,Histidine phosphatase superfamily (branch 1),2.6e-05  
-> AIB37403.1,Pseudomonas simiae,CP007637.1,AIB37400.1,3882597,3884253,+,PF02366,PMT,Dolichyl-phosphate-mannose-protein mannosyltransferase,7.3e-28,PF13231,PMT_2,Dolichyl-phosphate-mannose-protein mannosyltransferase,8.5e-19  
-> AIB37403.1,Pseudomonas simiae,CP007637.1,AIB37401.1,3885283,3884569,-,PF13304,AAA_21,"AAA domain, putative AbiEii toxin, Type IV TA system",1.6e-16,PF00005,ABC_tran,ABC transporter,1.2e-14  
-> AIB37403.1,Pseudomonas simiae,CP007637.1,AIB37402.1,3886026,3885282,-  
-> AIB37403.1,Pseudomonas simiae,CP007637.1,AIB37403.1,3887228,3886034,-,PF02624,YcaO,"YcaO cyclodehydratase, ATP-ad Mg2+-binding",3e-15  
-> AIB37403.1,Pseudomonas simiae,CP007637.1,AIB37404.1,3888021,3887214,-,PF00881,Nitroreductase,Nitroreductase family,0.00082  
-> AIB37403.1,Pseudomonas simiae,CP007637.1,AIB37405.1,3888875,3888017,-  
-> AIB37403.1,Pseudomonas simiae,CP007637.1,AIB37406.1,3889975,3889744,-  
-> AIB37403.1,Pseudomonas simiae,CP007637.1,AIB37407.1,3892677,3890124,-,PF03272,Mucin_bdg,Putative mucin or carbohydrate-binding module,3.8e-31,PF13402,Peptidase_M60,"Peptidase M60, enhancin and enhancin-like",2.4e-13  
-> AIB37403.1,Pseudomonas simiae,CP007637.1,AIB37408.1,3893744,3892883,-,PF12833,HTH_18,Helix-turn-helix domain,4.3e-16,PF02311,AraC_binding,AraC-like ligand binding domain,5.2e-15,PF07883,Cupin_2,Cupin domain,9.8e-07,PF00165,HTH_AraC,"Bacterial regulatory helix-turn-helix proteins, AraC family",9.1e-05,PF14525,AraC_binding_2,AraC-binding-like domain,0.00019  
-> AIB37403.1,Pseudomonas simiae,CP007637.1,AIB37409.1,3893872,3894538,+,PF01557,FAA_hydrolase,Fumarylacetoacetate (FAA) hydrolase family,2.3e-48  
-> AIB37403.1,Pseudomonas simiae,CP007637.1,AIB37410.1,3894534,3895305,+,PF01557,FAA_hydrolase,Fumarylacetoacetate (FAA) hydrolase family,1.7e-57  
-> AIB37403.1,Pseudomonas simiae,CP007637.1,AIB37411.1,3895310,3896771,+,PF00171,Aldedh,Aldehyde dehydrogenase family,1.5e-174  
+    Query,Genus/Species,Nucleotide_acc,Protein_acc,start,end,dir,PfamID1,Name1,Description1,E-value1,PfamID2,Name2,Description2,E-value2,PfamID3,Name3,Description3,E-value3  
+    AIB37403.1,Pseudomonas simiae,CP007637.1,AIB37395.1,3876197,3875843,-  
+    AIB37403.1,Pseudomonas simiae,CP007637.1,AIB37396.1,3878350,3877288,-,PF07143,CrtC,CrtC N-terminal lipocalin domain,6.4e-57,PF17186,Lipocalin_9,Lipocalin-like domain,7.1e-42  
+    AIB37403.1,Pseudomonas simiae,CP007637.1,AIB37397.1,3880802,3878339,-,PF02687,FtsX,FtsX-like permease family,9.3e-22,PF12704,MacB_PCD,MacB-like periplasmic core domain,2.5e-10,PF01568,Molydop_binding,Molydopterin dinucleotide binding domain,6.9e-05  
+    AIB37403.1,Pseudomonas simiae,CP007637.1,AIB37398.1,3881472,3880803,-,PF00005,ABC_tran,ABC transporter,6.9e-28,PF13304,AAA_21,"AAA domain, putative AbiEii toxin, Type IV TA system",2.3e-05,PF05729,NACHT,NACHT domain,4e-05,PF13401,AAA_22,AAA domain,9.7e-05,PF13191,AAA_16,AAA ATPase domain,0.0001  
+    AIB37403.1,Pseudomonas simiae,CP007637.1,AIB37399.1,3881748,3882423,+,PF00300,His_Phos_1,Histidine phosphatase superfamily (branch 1),2.6e-05  
+    AIB37403.1,Pseudomonas simiae,CP007637.1,AIB37400.1,3882597,3884253,+,PF02366,PMT,Dolichyl-phosphate-mannose-protein mannosyltransferase,7.3e-28,PF13231,PMT_2,Dolichyl-phosphate-mannose-protein mannosyltransferase,8.5e-19  
+    AIB37403.1,Pseudomonas simiae,CP007637.1,AIB37401.1,3885283,3884569,-,PF13304,AAA_21,"AAA domain, putative AbiEii toxin, Type IV TA system",1.6e-16,PF00005,ABC_tran,ABC transporter,1.2e-14  
+    AIB37403.1,Pseudomonas simiae,CP007637.1,AIB37402.1,3886026,3885282,-  
+    AIB37403.1,Pseudomonas simiae,CP007637.1,AIB37403.1,3887228,3886034,-,PF02624,YcaO,"YcaO cyclodehydratase, ATP-ad Mg2+-binding",3e-15  
+    AIB37403.1,Pseudomonas simiae,CP007637.1,AIB37404.1,3888021,3887214,-,PF00881,Nitroreductase,Nitroreductase family,0.00082  
+    AIB37403.1,Pseudomonas simiae,CP007637.1,AIB37405.1,3888875,3888017,-  
+    AIB37403.1,Pseudomonas simiae,CP007637.1,AIB37406.1,3889975,3889744,-  
+    AIB37403.1,Pseudomonas simiae,CP007637.1,AIB37407.1,3892677,3890124,-,PF03272,Mucin_bdg,Putative mucin or carbohydrate-binding module,3.8e-31,PF13402,Peptidase_M60,"Peptidase M60, enhancin and enhancin-like",2.4e-13  
+    AIB37403.1,Pseudomonas simiae,CP007637.1,AIB37408.1,3893744,3892883,-,PF12833,HTH_18,Helix-turn-helix domain,4.3e-16,PF02311,AraC_binding,AraC-like ligand binding domain,5.2e-15,PF07883,Cupin_2,Cupin domain,9.8e-07,PF00165,HTH_AraC,"Bacterial regulatory helix-turn-helix proteins, AraC family",9.1e-05,PF14525,AraC_binding_2,AraC-binding-like domain,0.00019  
+    AIB37403.1,Pseudomonas simiae,CP007637.1,AIB37409.1,3893872,3894538,+,PF01557,FAA_hydrolase,Fumarylacetoacetate (FAA) hydrolase family,2.3e-48  
+    AIB37403.1,Pseudomonas simiae,CP007637.1,AIB37410.1,3894534,3895305,+,PF01557,FAA_hydrolase,Fumarylacetoacetate (FAA) hydrolase family,1.7e-57  
+    AIB37403.1,Pseudomonas simiae,CP007637.1,AIB37411.1,3895310,3896771,+,PF00171,Aldedh,Aldehyde dehydrogenase family,1.5e-174  
 
 _ride\_sp.pl_ reads the _main\_co\_occur.csv_ file produced by
 _rodeo2_ and
