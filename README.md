@@ -167,8 +167,8 @@ read by *ripper.pl* and the following scripts in the pipeline.
     gbkcache            gbkcache
     
     # Filename for the SQLite3 database.
-    sqlite3fn           sqlite/ride.sqlite3
-    sqlitefn            sqlite/ride.sqlite3
+    sqlite3fn           sqlite/ripp.sqlite3
+    sqlitefn            sqlite/ripp.sqlite3
     
     # Directory containing the Pfam database files.
     # Note that this is an absolute path.
@@ -188,7 +188,7 @@ read by *ripper.pl* and the following scripts in the pipeline.
     
     # Name of the SQLite3 table where results of
     # prodigal search are stored.
-    prepeptab           ride
+    prepeptab           ripper
     
     # Directory where output genbank files are stored.
     # Organism names are prefixed to the file names for

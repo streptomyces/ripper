@@ -63,30 +63,30 @@ GetOptions (
 
 =head1 Name
 
-ride_sp.pl
+ripper.pl
 
 =head2 Example
 
- perl code/ride_sp.pl -outdir ripout
+ perl code/ripper.pl -outdir ripout
 
  export rwb=rodeowork
  export listfn=TfuA_Actino_Accessions_080217.txt
  export outdir=output_21_07_2017
- fp-ride () {
+ fp-rip () {
    listbn=$(basenameNoex.pl $listfn);
    ofn=${listbn}.csv
      for iline in $(tail -n 1 $listfn); do
        line=$(basenameNoex.pl $iline);
        incsv=$rwb"/"${line}"/outarch.csv"
-       echo perl code/ride_sp.pl -outdir $outdir -- $incsv
+       echo perl code/ripper.pl -outdir $outdir -- $incsv
      done
  }
 
- fp-ride | parallel
+ fp-rip | parallel
 
 Below is a standalone test command.
 
- perl code/ride_sp.pl -outdir ripout -- rodout/main_co_occur.csv
+ perl code/ripper.pl -outdir ripout -- rodout/main_co_occur.csv
 
 =cut
 
@@ -153,7 +153,7 @@ exit;
 }
 
 # {{{ Some file globals
-my $template='rideXXXXX';
+my $template='rippXXXXX';
 my $tempdir = qw(/tmp);
 my $esearchURL='http://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?';
 my $efetchURL='http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?';
@@ -553,7 +553,7 @@ concerned with.
 # Below, run prodigal on the subsequence fasta file.
 my($prdfh, $prdfn)=tempfile($template, DIR => $tempdir, SUFFIX => '.prodigal');
 close($prdfh);
-my $xstr = qq(prodigal-short -p meta -f gff -i $subfn -s $prdfn);
+my $xstr = qq($conf{"prodigal-shortbin"} -p meta -f gff -i $subfn -s $prdfn);
 my $discard = qx($xstr); # Only interested in the output in file $prdfn.
 
 # {{{ Read prodigal output and populate @prdl.

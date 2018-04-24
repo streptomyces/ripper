@@ -23,7 +23,6 @@ my $outex; # extension for the output filename when it is derived on infilename.
 my $conffile = qq(local.conf);
 my $errfile;
 my $runfile;
-my $ridetable = qq(ride);
 my $outfile;
 my $testCnt = 0;
 our $verbose;
@@ -33,7 +32,6 @@ GetOptions (
 "outfile:s" => \$outfile,
 "outdir:s" => \$outdir,
 "indir:s" => \$indir,
-"ridetable:s" => \$ridetable,
 "fofn:s" => \$fofn,
 "extension:s" => \$outex,
 "conffile:s" => \$conffile,
@@ -137,7 +135,7 @@ unless($handle->do($create_table_str)) {
 croak($create_table_str);
 }
 
-my $qstr="select fastaid, aaseq from $ridetable";
+my $qstr="select fastaid, aaseq from $conf{prepeptab}";
 my $stmt=$handle->prepare($qstr);
 $stmt->execute();
 
@@ -265,7 +263,7 @@ sub scan {
   }
     my($fh, $fn)=tempfile($template, DIR => $tempdir, SUFFIX => ".hmmscan");
     close($fh);
-    my $xstr = qq(hmmscan --acc -o $fn $hmmdb $aafile);
+    my $xstr = qq($conf{hmmscanbin} --acc -o $fn $hmmdb $aafile);
     qx($xstr);
     if($deleteQuery) { unlink($aafile); }
     return($fn);
