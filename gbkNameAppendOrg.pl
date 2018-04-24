@@ -10,7 +10,7 @@ use File::Copy;
 # {{{ Getopt::Long
 use Getopt::Long;
 my $conffile = qq(local.conf);
-my $indir = qq(rideout);
+my $indir = qq(ripout);
 my $errfile;
 my $runfile;
 my $testCnt = 0;

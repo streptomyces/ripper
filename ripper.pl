@@ -22,7 +22,7 @@ use Net::FTP;
 # {{{ Getopt::Long
 use Getopt::Long;
 my $maxDistFromTE = 8000; # From precursor peptide to the tailoring enzyme.
-my $outdir = qq(rideout);
+my $outdir = qq(ripout);
 my $indir;
 my $fofn;
 my $outex; # extension for the output filename when it is derived on infilename.
@@ -67,7 +67,7 @@ ride_sp.pl
 
 =head2 Example
 
- perl code/ride_sp.pl -outdir rideout
+ perl code/ride_sp.pl -outdir ripout
 
  export rwb=rodeowork
  export listfn=TfuA_Actino_Accessions_080217.txt
@@ -86,7 +86,7 @@ ride_sp.pl
 
 Below is a standalone test command.
 
- perl code/ride_sp.pl -outdir rideout -- rodout/main_co_occur.csv
+ perl code/ride_sp.pl -outdir ripout -- rodout/main_co_occur.csv
 
 =cut
 

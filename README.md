@@ -69,6 +69,17 @@ determined.
 included in the list to be output and also saved in a *Sqlite3*
 table.
 
+## Pre-requisites
+
+1. Perl >= 5.14.0
+2. BioPerl modules installed for the Perl being used.
+3. Python >= 2.7.0
+4. Biopython modules installed for the Python being used.
+5. [Prodigal](https://github.com/hyattpd/Prodigal). We actually use
+a specially built form of Prodigal which we call _prodigal-short_.
+The building of _prodigal-short_ is described later under the section
+**Building prodigal-short**.
+
 ## Example Bash script implementing the full analysis pipeline
 
 A file named *ripper\_run.sh* is included in the GitHub repository.
@@ -115,7 +126,7 @@ ln -s $pfamdir ./hmm_dir
 ln -s ${rodeodir}/confs ./
 
 # Make the various directories where output will be placed.
-for hcd in rodout rideout sqlite gbkcache orgnamegbk rodeohtml; do
+for hcd in rodout ripout sqlite gbkcache orgnamegbk rodeohtml; do
 if [[ ! -d $hcd ]]; then
   mkdir $hcd
 fi
@@ -128,15 +139,15 @@ done
 for acc in $(cat $queryfn); do 
   echo $pythonbin ${rodeodir}/rodeo_main.py -out rodout/${acc} ${acc}
   $pythonbin ${rodeodir}/rodeo_main.py -out rodout/${acc} ${acc}
-  echo $perlbin ${ripperdir}/ripper.pl -outdir rideout -- rodout/${acc}/main_co_occur.csv
-  $perlbin ${ripperdir}/ripper.pl -outdir rideout -- rodout/${acc}/main_co_occur.csv
+  echo $perlbin ${ripperdir}/ripper.pl -outdir ripout -- rodout/${acc}/main_co_occur.csv
+  $perlbin ${ripperdir}/ripper.pl -outdir ripout -- rodout/${acc}/main_co_occur.csv
 done
 
 # Run the postprocessing scripts
 
 $perlbin ${ripperdir}/pfam_sqlite.pl
 $perlbin ${ripperdir}/mergeRidePfam.pl -out out.txt
-$perlbin ${ripperdir}/gbkNameAppendOrg.pl -indir rideout
+$perlbin ${ripperdir}/gbkNameAppendOrg.pl -indir ripout
 $perlbin ${ripperdir}/collectFiles.pl rodout '\.html$'
 
 ```

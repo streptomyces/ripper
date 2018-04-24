@@ -30,7 +30,7 @@ ln -s $pfamdir ./hmm_dir
 ln -s ${rodeodir}/confs ./
 
 # Make the various directories where output will be placed.
-for hcd in rodout rideout sqlite gbkcache orgnamegbk rodeohtml; do
+for hcd in rodout ripout sqlite gbkcache orgnamegbk rodeohtml; do
 if [[ ! -d $hcd ]]; then
   mkdir $hcd
 fi
@@ -43,14 +43,14 @@ done
 for acc in $(cat $queryfn); do 
   echo $pythonbin ${rodeodir}/rodeo_main.py -out rodout/${acc} ${acc}
   $pythonbin ${rodeodir}/rodeo_main.py -out rodout/${acc} ${acc}
-  echo $perlbin ${ripperdir}/ripper.pl -outdir rideout -- rodout/${acc}/main_co_occur.csv
-  $perlbin ${ripperdir}/ripper.pl -outdir rideout -- rodout/${acc}/main_co_occur.csv
+  echo $perlbin ${ripperdir}/ripper.pl -outdir ripout -- rodout/${acc}/main_co_occur.csv
+  $perlbin ${ripperdir}/ripper.pl -outdir ripout -- rodout/${acc}/main_co_occur.csv
 done
 
 # Run the postprocessing scripts
 
 $perlbin ${ripperdir}/pfam_sqlite.pl
 $perlbin ${ripperdir}/mergeRidePfam.pl -out out.txt
-$perlbin ${ripperdir}/gbkNameAppendOrg.pl -indir rideout
+$perlbin ${ripperdir}/gbkNameAppendOrg.pl -indir ripout
 $perlbin ${ripperdir}/collectFiles.pl rodout '\.html$'
 
