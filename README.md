@@ -2,8 +2,9 @@
 
 ## Description
 
-The *rodeo2* Python script *rodeo\_main.py* produces and output file
-named *main\_co\_occur.csv*. An example of this is shown below.
+The [rodeo2](https://github.com/thedamlab/rodeo2) Python script
+*rodeo\_main.py* produces and output file named *main\_co\_occur.csv*.
+An example of this is shown below.
 
     Query,Genus/Species,Nucleotide_acc,Protein_acc,start,end,dir,PfamID1,Name1,Description1,E-value1,PfamID2,Name2,Description2,E-value2,PfamID3,Name3,Description3,E-value3  
     AIB37403.1,Pseudomonas simiae,CP007637.1,AIB37395.1,3876197,3875843,-  
@@ -24,9 +25,8 @@ named *main\_co\_occur.csv*. An example of this is shown below.
     AIB37403.1,Pseudomonas simiae,CP007637.1,AIB37410.1,3894534,3895305,+,PF01557,FAA_hydrolase,Fumarylacetoacetate (FAA) hydrolase family,1.7e-57  
     AIB37403.1,Pseudomonas simiae,CP007637.1,AIB37411.1,3895310,3896771,+,PF00171,Aldedh,Aldehyde dehydrogenase family,1.5e-174  
 
-*ride\_sp.pl* reads the *main\_co\_occur.csv* file produced by
-*rodeo2* and
-
+*ripper.pl* reads the *main\_co\_occur.csv* file produced by
+the *rodeo2* script *rodeo\_main.py* and then does the following.
 
 1. Determines the genbank accession to fetch based on the
 value in column 3.
@@ -81,7 +81,7 @@ directory should also contain *local.conf* and the Bash script listed
 below.
 
 Example of Bash script to run *rodeo\_main.py* followed by
-*ride\_sp.pl* and some other scripts to organise the output and output
+*ripper.pl* and some other scripts to organise the output and output
 files.
 
 ```BASH 
@@ -146,43 +146,43 @@ $perlbin ${ripperdir}/collectFiles.pl rodout '\.html$'
 A file named *local.conf* is included in the repository.
 
 *local.conf* is a two column (space delimited) text file which is
-read by *ride\_sp.pl* and the following scripts in the pipeline.
+read by *ripper.pl* and the following scripts in the pipeline.
 
 
     # Lines beginning with \# are comments.
     # All names are case sensitive.
     
     # Downloaded genbank files are cached here.
-    bkcache            gbkcache
+    gbkcache            gbkcache
     
     # Filename for the SQLite3 database.
-    qlite3fn           sqlite/ride.sqlite3
-    qlitefn            sqlite/ride.sqlite3
+    sqlite3fn           sqlite/ride.sqlite3
+    sqlitefn            sqlite/ride.sqlite3
     
     # Directory containing the Pfam database files.
     # Note that this is an absolute path.
     # Should be the same as pfamdir in the ripper_run.sh file.
-    mmdir              /home/sco/blast_databases/pfam
+    hmmdir              /home/sco/blast_databases/pfam
     
     # Name of the Pfam database to use.
-    mmdb               Pfam-A.hmm
+    hmmdb               Pfam-A.hmm
     
     # Name of the Pfam data file.
     # Used for reading information about models.
-    famhmmdatfn        Pfam-A.hmm.dat
+    pfamhmmdatfn        Pfam-A.hmm.dat
     
     # Name of the SQLite3 table where results of
     # hmmer searches are stored.
-    famrestab          pfamscan
+    pfamrestab          pfamscan
     
     # Name of the SQLite3 table where results of
     # prodigal search are stored.
-    repeptab           ride
+    prepeptab           ride
     
     # Directory where output genbank files are stored.
     # Organism names are prefixed to the file names for
     # ease of identification.
-    rgnamegbkdir       orgnamegbk
+    orgnamegbkdir       orgnamegbk
     
     
     
@@ -286,7 +286,9 @@ copied to the directory specified in the configuration variable
 subdirectories) to another directory if the base filename matches the
 specified regular expression.
 
- perl collectFiles.pl -indir rodout -pat '\.html$' -outdir rodeohtml
+```
+perl collectFiles.pl -indir rodout -pat '\.html$' -outdir rodeohtml
+```
 
 The options shown above are the defaults. *-outdir* may be specified
 in *local.conf* as *rodeohtmldir*. Value in the configuration file
