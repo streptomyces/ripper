@@ -75,7 +75,7 @@ table.
 2. BioPerl modules installed for the Perl being used.
 3. Python >= 2.7.0
 4. Biopython modules installed for the Python being used.
-5. hmmer
+5. [HMMER](http://hmmer.org/).
 6. [Prodigal](https://github.com/hyattpd/Prodigal). We actually use
 a specially built form of Prodigal which we call _prodigal-short_.
 The building of _prodigal-short_ is described later under the section

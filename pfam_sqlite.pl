@@ -22,6 +22,7 @@ my $fofn;
 my $outex; # extension for the output filename when it is derived on infilename.
 my $conffile = qq(local.conf);
 my $errfile;
+my $hmmscanbin = qq(hmmscan);
 my $runfile;
 my $outfile;
 my $testCnt = 0;
@@ -70,6 +71,9 @@ if(-s $conffile ) {
 }
 elsif($conffile ne "local.conf") {
 linelistE("Specified configuration file $conffile not found.");
+}
+if(exists($conf{hmmscanbin})) {
+  $hmmscanbin = $conf{hmmscanbin};
 }
 # }}}
 
@@ -263,7 +267,7 @@ sub scan {
   }
     my($fh, $fn)=tempfile($template, DIR => $tempdir, SUFFIX => ".hmmscan");
     close($fh);
-    my $xstr = qq($conf{hmmscanbin} --acc -o $fn $hmmdb $aafile);
+    my $xstr = qq($hmmscanbin --acc -o $fn $hmmdb $aafile);
     qx($xstr);
     if($deleteQuery) { unlink($aafile); }
     return($fn);
