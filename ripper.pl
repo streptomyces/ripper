@@ -30,6 +30,7 @@ my $conffile = qq(local.conf);
 my $colorThreshScore = 20;
 my $errfile;
 my $prodigalScoreThresh = 15;
+my $prodigalshortbin = qq(prodigal-short);
 my $flankLen = 12500;
 my $allowedInGene = 20;
 my $minPPlen = 20; # Minimum precursor peptide length.
@@ -204,6 +205,9 @@ if(exists($conf{sameStrandReward})) {
 }
 if(exists($conf{flankLen})) {
   $flankLen = $conf{flankLen};
+}
+if(exists($conf{"prodigalshortbin"})) {
+  $prodigalshortbin = $conf{prodigalshortbin};
 }
 
 
@@ -553,7 +557,7 @@ concerned with.
 # Below, run prodigal on the subsequence fasta file.
 my($prdfh, $prdfn)=tempfile($template, DIR => $tempdir, SUFFIX => '.prodigal');
 close($prdfh);
-my $xstr = qq($conf{"prodigal-shortbin"} -p meta -f gff -i $subfn -s $prdfn);
+my $xstr = qq($prodigalshortbin -p meta -f gff -i $subfn -s $prdfn);
 my $discard = qx($xstr); # Only interested in the output in file $prdfn.
 
 # {{{ Read prodigal output and populate @prdl.
