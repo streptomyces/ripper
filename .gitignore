@@ -3,3 +3,5 @@ check*.pl
 test*.pl
 test*.sh
 commitmesg
+*.doc
+*.docx
