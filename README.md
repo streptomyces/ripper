@@ -75,7 +75,8 @@ nucleotides in the default build.
 For all the genes found by *prodigal-short* the following is done.
 
 1. The prodigal score is enhanced by a reward if the gene is on the
-same strand as the tailoring enzyme (variable `$sameStrandReward`,
+same strand as the tailoring enzyme and its score before reward is 
+more than negative of the reward number.(variable `$sameStrandReward`,
 default = 5).
 
 2. Determine overlap with already annotated genes.
@@ -305,7 +306,7 @@ index 23ffe00..6edbb53 100644
 2. In the file *dprog.h* first and only occurrence of
 `#define MAX_SAM_OVLP 60` was changed to `#define MAX_SAM_OVLP 45`
 
-```
+```diff
 diff --git a/dprog.h b/dprog.h
 index d729f4c..ea7fa10 100644
 --- a/dprog.h
@@ -320,7 +321,7 @@ index d729f4c..ea7fa10 100644
  #define MAX_NODE_DIST 500
 ```
 
-2. In the file *node.h* the following lines
+3. In the file *node.h* the following lines
 
 ```
 #define MIN_GENE 90
@@ -340,7 +341,7 @@ Were changed to the following lines.
 #define OPER_DIST 45
 ```    
 
-```
+```diff
 diff --git a/node.h b/node.h
 index 6c722be..551c7b8 100644
 --- a/node.h
