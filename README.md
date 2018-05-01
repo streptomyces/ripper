@@ -236,8 +236,13 @@ read by *ripper.pl* and the following scripts in the pipeline.
     
     # Filename for the SQLite3 database.
     sqlite3fn           sqlite/ripp.sqlite3
-    sqlitefn            sqlite/ripp.sqlite3
-    
+
+    # Location of prodigal-short binary
+    prodigalshortbin      /usr/local/bin/prodigal-short
+
+    # Location of hmmscan binary
+    hmmscanbin      /usr/local/bin/hmmscan
+
     # Directory containing the Pfam database files.
     # Note that this is an absolute path.
     # Should be the same as pfamdir in the ripper_run.sh file.
@@ -262,7 +267,6 @@ read by *ripper.pl* and the following scripts in the pipeline.
     # Organism names are prefixed to the file names for
     # ease of identification.
     orgnamegbkdir       orgnamegbk
-    
     
     
     # Below are some defaults (commented out) that can also
