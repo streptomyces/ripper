@@ -574,7 +574,7 @@ close(PRD);
 =head3 Same strand reward
 
 For loop below applies the same strand reward to all
-prodigal output records with positive scores.
+prodigal output records with scores > -($sameStrandReward).
 
 =cut
 

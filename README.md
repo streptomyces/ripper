@@ -158,17 +158,29 @@ files.
 #
 #
 
-homedir="/home/sco";
+
+homedir=\<insert home directory here\>;
+# Below are a couple of examples
+# homedir="/home/sco";
+# homedir="/Users/sco";
+
+
 queryfn="minitest.txt";
+
+# Two lines below assume that in your home directory you have
+# a sub-directory named "fromgithub" where you have cloned
+# ripper and rodeo2 repositories using commands like. 
+# git clone https://github.com/streptomyces/ripper.git
+# git clone https://github.com/thedamlab/rodeo2.git
 ripperdir=${homedir}/fromgithub/ripper;
 rodeodir=${homedir}/fromgithub/rodeo2;
+
 pfamdir=${homedir}/blast_databases/pfam
 
 # $perlbin and $pythonbin. Both these should have BioPerl and Biopython
 # (respectively) installed for them. It is not uncommon to have more than one
-# versions of perl and python installed on the same machine. Hence the need for
+# versions of Perl and Python installed on the same machine. Hence the need for
 # the next two lines.
-
 perlbin="/usr/local/bin/perl"
 pythonbin="/usr/bin/python"
 
@@ -271,56 +283,86 @@ were made to *prodigal* source files before building
 *prodigal-short* according to instructions provided with the
 *prodigal* source download.
 
-    diff --git a/Makefile b/Makefile
-    index 23ffe00..6edbb53 100644
-    --- a/Makefile
-    +++ b/Makefile
-    @@ -24,7 +24,7 @@ CC      = gcc
-     CFLAGS  += -pedantic -Wall -O3
-     LFLAGS = -lm $(LDFLAGS)
-    
-    -TARGET  = prodigal
-    +TARGET  = prodigal-short
-     SOURCES = $(shell echo *.c)
-     HEADERS = $(shell echo *.h)
-     OBJECTS = $(SOURCES:.c=.o)
-    
-    
-    diff --git a/dprog.h b/dprog.h
-    index d729f4c..ea7fa10 100644
-    --- a/dprog.h
-    +++ b/dprog.h
-    @@ -26,7 +26,7 @@
-     #include "sequence.h"
-     #include "node.h"
-    
-    -#define MAX_SAM_OVLP 60
-    +#define MAX_SAM_OVLP 45
-     #define MAX_OPP_OVLP 200
-     #define MAX_NODE_DIST 500
-    
-    diff --git a/node.h b/node.h
-    index 6c722be..551c7b8 100644
-    --- a/node.h
-    +++ b/node.h
-    @@ -27,11 +27,11 @@
-     #include "training.h"
-    
-     #define STT_NOD 100000
-    -#define MIN_GENE 90
-    -#define MIN_EDGE_GENE 60
-    -#define MAX_SAM_OVLP 60
-    -#define ST_WINDOW 60
-    -#define OPER_DIST 60
-    +#define MIN_GENE 60
-    +#define MIN_EDGE_GENE 45
-    +#define MAX_SAM_OVLP 45
-    +#define ST_WINDOW 45
-    +#define OPER_DIST 45
-     #define EDGE_BONUS 0.74
-     #define EDGE_UPS -1.00
-     #define META_PEN 7.5
+1. In the file *makefile* first and only occurrence of
+`TARGET = prodigal` was changed to `TARGET = prodigal-short`.
 
+```diff
+diff --git a/Makefile b/Makefile
+index 23ffe00..6edbb53 100644
+--- a/Makefile
++++ b/Makefile
+@@ -24,7 +24,7 @@ CC      = gcc
+ CFLAGS  += -pedantic -Wall -O3
+ LFLAGS = -lm $(LDFLAGS)
+
+-TARGET  = prodigal
++TARGET  = prodigal-short
+ SOURCES = $(shell echo *.c)
+ HEADERS = $(shell echo *.h)
+ OBJECTS = $(SOURCES:.c=.o)
+```
+
+2. In the file *dprog.h* first and only occurrence of
+`#define MAX_SAM_OVLP 60` was changed to `#define MAX_SAM_OVLP 45`
+
+```
+diff --git a/dprog.h b/dprog.h
+index d729f4c..ea7fa10 100644
+--- a/dprog.h
++++ b/dprog.h
+@@ -26,7 +26,7 @@
+ #include "sequence.h"
+ #include "node.h"
+
+-#define MAX_SAM_OVLP 60
++#define MAX_SAM_OVLP 45
+ #define MAX_OPP_OVLP 200
+ #define MAX_NODE_DIST 500
+```
+
+2. In the file *node.h* the following lines
+
+```
+#define MIN_GENE 90
+#define MIN_EDGE_GENE 60
+#define MAX_SAM_OVLP 60
+#define ST_WINDOW 60
+#define OPER_DIST 60
+```
+
+Were changed to the following lines.
+
+```
+#define MIN_GENE 60
+#define MIN_EDGE_GENE 45
+#define MAX_SAM_OVLP 45
+#define ST_WINDOW 45
+#define OPER_DIST 45
+```    
+
+```
+diff --git a/node.h b/node.h
+index 6c722be..551c7b8 100644
+--- a/node.h
++++ b/node.h
+@@ -27,11 +27,11 @@
+ #include "training.h"
+
+ #define STT_NOD 100000
+-#define MIN_GENE 90
+-#define MIN_EDGE_GENE 60
+-#define MAX_SAM_OVLP 60
+-#define ST_WINDOW 60
+-#define OPER_DIST 60
++#define MIN_GENE 60
++#define MIN_EDGE_GENE 45
++#define MAX_SAM_OVLP 45
++#define ST_WINDOW 45
++#define OPER_DIST 45
+ #define EDGE_BONUS 0.74
+ #define EDGE_UPS -1.00
+ #define META_PEN 7.5
+```
 
 
 ## Other supporting Perl scripts
