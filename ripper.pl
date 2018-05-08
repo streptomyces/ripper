@@ -574,13 +574,13 @@ close(PRD);
 =head3 Same strand reward
 
 For loop below applies the same strand reward to all
-prodigal output records with scores > -($sameStrandReward).
+prodigal output records.
 
 =cut
 
 for my $lr (@prdl) {
   my $prdStrand = $lr->[2] eq '+' ? 1 : -1;
-  if($prdStrand == $teStrand and $lr->[3] > -($sameStrandReward)) {
+  if($prdStrand == $teStrand) {
     $lr->[3] += $sameStrandReward;
   }
 }
