@@ -13,7 +13,6 @@ use Bio::Seq;
 use Bio::SeqFeature::Generic;
 use DBI;
 
-
 use XML::Simple;
 use LWP::Simple;
 use Net::FTP;
