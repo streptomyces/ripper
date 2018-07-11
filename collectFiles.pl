@@ -13,7 +13,7 @@ if($ARGV[0]) { $dir = $ARGV[0]; }
 else { $dir = "."; }
 my $destdir;
 if($ARGV[1]) { $destdir = $ARGV[1]; }
-else { $destdir = "/home/mnt/rodeohtml"; }
+else { $destdir = "/home/mnt/rodeohtml/"; }
 
 
 my $pat;

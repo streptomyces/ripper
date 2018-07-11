@@ -380,7 +380,7 @@ $lineCnt += 1;
 }
 close($ifh);
 unless($lineCnt) {
-  croak("Only a header line in $infile.\nStopping."); # main_co_occur.csv
+  croak("Only a header line in $infile.\nStopping"); # main_co_occur.csv
 }
 # }}}
 
