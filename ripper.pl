@@ -325,7 +325,7 @@ $fastafn = $taildir . ".faa";
 linelistE("Genbank output is $ofn. Fasta output is $fastafn");
 
 
-open(my $ifh, "<$infile") or croak("Could not open $infile"); # outarch.csv.
+open(my $ifh, "<$infile") or croak("Could not open $infile"); # main_co_occur.csv
 $skip = 1; # There is a header.
 if($skip) {
 for (1..$skip) { my $discard = readline($ifh); }
@@ -379,6 +379,9 @@ tablistE("TE Line:", $start, $end, $strand);
 $lineCnt += 1;
 }
 close($ifh);
+unless($lineCnt) {
+  croak("Only a header line in $infile.\nStopping."); # main_co_occur.csv
+}
 # }}}
 
 # TEcoordsByProtId (gbkfile => filename, protid => proteinid);
