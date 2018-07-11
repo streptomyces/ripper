@@ -2,6 +2,7 @@ use 5.14.0;
 use File::Find;
 use File::Basename;
 use File::Copy;
+use File::Spec;
 
 my %ffoptions = (
 wanted => \&onfind,
@@ -13,7 +14,7 @@ if($ARGV[0]) { $dir = $ARGV[0]; }
 else { $dir = "."; }
 my $destdir;
 if($ARGV[1]) { $destdir = $ARGV[1]; }
-else { $destdir = "/home/mnt/rodeohtml/"; }
+else { $destdir = "/home/mnt/rodeohtml"; }
 
 
 my $pat;
@@ -54,7 +55,7 @@ sub onfind {
             # my $jdn = pop(@dl);
             # print(join("\t", @dl, $jdn, $dlen, $dl[$#dl]), "---\n");
             print(join("\t", @dl, $dlen, $dl[$#dl]), "    ---\n");
-            copy($fp, $destdir . $dl[$#dl] . ".html");
+            copy($fp, File::Spec->catfile($destdir, $dl[$#dl] . ".html"));
 
         # push(@files, [$fp, $size]);
       }
