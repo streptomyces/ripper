@@ -6,3 +6,4 @@ commitmesg
 *.doc
 *.docx
 *comment*
+pfam_lengths.pl

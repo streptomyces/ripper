@@ -198,8 +198,38 @@ close(ERRH);
 $handle->disconnect();
 }
 
+
 # {{{ sub pflens
 sub pflens {
+  my $pfamhmmfn = File::Spec->catfile($conf{hmmdir}, $conf{hmmdb});
+  open(PFT, "<", $pfamhmmfn) or croak "Failed to open $pfamhmmfn";
+  my %rethash;
+  local $/ = "\n//\n";
+    while(<PFT>) {
+      my $record = $_;
+      chomp($record);
+      my @lines = split(/\n/, $record);
+      my %hmmrec;
+      for my $line (@lines) {
+        if($line =~ m/^HMM\s+/) { last; }
+        chomp($line);
+        my @ll = split(/\s+/, $line);
+        $hmmrec{$ll[0]} = $ll[1];
+      }
+      if(exists($hmmrec{ACC}) and exists($hmmrec{LENG})) {
+        my $acc = $hmmrec{ACC};
+        $acc =~ s/\.\d+$//;
+        $rethash{$acc} = $hmmrec{LENG};
+      }
+    }
+  close(PFT);
+  return(%rethash);
+}
+# }}}
+
+
+# {{{ sub pflens_old
+sub pflens_old {
   my $pfamhmmdatfn = File::Spec->catfile($conf{hmmdir}, $conf{pfamhmmdatfn});
   open(PFT, "<", $pfamhmmdatfn) or croak "Failed to open $pfamhmmdatfn";
   my %rethash;
