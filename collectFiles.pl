@@ -52,9 +52,9 @@ sub onfind {
             my @dl = split(/\//, $dir);
             my $dlen = scalar(@dl);
             # my $jdn = pop(@dl);
-            # print(join("\t", @dl, $jdn, $dlen, $dl[1]), "---\n");
-            print(join("\t", @dl, $dlen, $dl[1]), "    ---\n");
-            copy($fp, $destdir . $dl[1] . ".html");
+            # print(join("\t", @dl, $jdn, $dlen, $dl[$#dl]), "---\n");
+            print(join("\t", @dl, $dlen, $dl[$#dl]), "    ---\n");
+            copy($fp, $destdir . $dl[$#dl] . ".html");
 
         # push(@files, [$fp, $size]);
       }
