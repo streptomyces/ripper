@@ -66,5 +66,5 @@ done
 $perlbin ${ripperdir}/pfam_sqlite.pl
 $perlbin ${ripperdir}/mergeRidePfam.pl -out out.txt
 $perlbin ${ripperdir}/gbkNameAppendOrg.pl -indir $ripoutdir
-$perlbin ${ripperdir}/collectFiles.pl ${rodoutdir} '\.html$'
+$perlbin ${ripperdir}/collectFiles.pl ${rodoutdir} ${rodeohtmldir} '\.html$'
 
