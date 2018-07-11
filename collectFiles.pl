@@ -11,9 +11,14 @@ no_chdir => 1
 my $dir;
 if($ARGV[0]) { $dir = $ARGV[0]; }
 else { $dir = "."; }
+my $destdir;
+if($ARGV[1]) { $destdir = $ARGV[1]; }
+else { $destdir = "/home/mnt/rodeohtml"; }
+
+
 my $pat;
-if($ARGV[1]) {
-  $pat = $ARGV[1];
+if($ARGV[2]) {
+  $pat = $ARGV[2];
 }
 
 my @files;
@@ -49,7 +54,7 @@ sub onfind {
             # my $jdn = pop(@dl);
             # print(join("\t", @dl, $jdn, $dlen, $dl[1]), "---\n");
             print(join("\t", @dl, $dlen, $dl[1]), "    ---\n");
-            copy($fp, "rodeohtml/" . $dl[1] . ".html");
+            copy($fp, $destdir . $dl[1] . ".html");
 
         # push(@files, [$fp, $size]);
       }
