@@ -23,6 +23,8 @@ pfamdir=/home/work/pfam
 # output dirs
 rodoutdir=/home/mnt/rodout;
 ripoutdir=/home/mnt/ripout;
+orgnamegbkdir=/home/mnt/orgnamegbk;
+rodeohtmldir=/home/mnt/rodeohtml;
 
 
 # $perlbin and $pythonbin. Both these should have BioPerl and Biopython
@@ -42,7 +44,7 @@ ln -s $pfamdir ./hmm_dir
 ln -s ${rodeodir}/confs ./
 
 # Make the various directories where output will be placed.
-for hcd in $rodoutdir $ripoutdir sqlite gbkcache orgnamegbk rodeohtml; do
+for hcd in $rodoutdir $ripoutdir sqlite gbkcache $orgnamegbkdir $rodeohtmldir; do
 if [[ ! -d $hcd ]]; then
   mkdir $hcd
 fi
