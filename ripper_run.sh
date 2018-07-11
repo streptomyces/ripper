@@ -14,15 +14,15 @@
 #
 
 
-homedir="/home/sco";
+homedir="/home/work";
 queryfn="minitest.txt";
-ripperdir=${homedir}/fromgithub/ripper;
-rodeodir=${homedir}/fromgithub/rodeo2;
-pfamdir=${homedir}/blast_databases/pfam
+ripperdir=/home/work/ripper;
+rodeodir=/home/work/rodeo2;
+pfamdir=/home/work/pfam
 
 # output dirs
-rodoutdir=rodout;
-ripoutdir=ripout;
+rodoutdir=/home/mnt/rodout;
+ripoutdir=/home/mnt/ripout;
 
 
 # $perlbin and $pythonbin. Both these should have BioPerl and Biopython
@@ -30,8 +30,8 @@ ripoutdir=ripout;
 # versions of perl and python installed on the same machine. Hence the need for
 # the next two lines.
 
-perlbin="/usr/local/bin/perl"
-pythonbin="/usr/bin/python"
+perlbin="perl"
+pythonbin="python"
 
 ########################################################
 ### Users should not need to make changes below this ###

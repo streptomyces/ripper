@@ -2,6 +2,9 @@
 
 ## Description
 
+This file is for the standalone version. It needs to be changed for
+the Docker version.
+
 RiPPER (RiPP Precursor Peptide Enhanced Recognition) identifies genes
 encoding putative precursor peptides within RiPP (ribosomally
 synthesised and post-translationally modified peptide) gene clusters.
