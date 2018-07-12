@@ -27,6 +27,7 @@ fi
 
 if [[ ! -s ${queryfn} || ! -e ${queryfn} ]]; then
 echo "Either $queryfn does not exists or is zero in size. Aborting."; 
+exit 1;
 fi
 
 
