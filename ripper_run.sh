@@ -10,7 +10,7 @@
 #
 # Run this file with an argument as shown in the example below.
 #
-# source ripper_run.sh /home/mnt/inlist.txt
+# ./ripper_run.sh /home/mnt/inlist.txt
 #
 # The file inlist.txt should have protein accession numbers, one
 # per line. A test list is provided in the file minitest.txt. Since
