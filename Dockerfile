@@ -13,7 +13,7 @@ ADD prodigal-short /usr/local/bin/
 
 WORKDIR /home/work/pfam
 RUN wget --no-verbose ftp://ftp.ebi.ac.uk/pub/databases/Pfam/current_release/Pfam-A.hmm.gz
-RUN wget --no-verbose ftp://ftp.ebi.ac.uk/pub/databases/Pfam/current_release/Pfam-A.hmm.dat.gz
+# RUN wget --no-verbose ftp://ftp.ebi.ac.uk/pub/databases/Pfam/current_release/Pfam-A.hmm.dat.gz
 RUN gunzip *.gz
 
 # && rm Pfam-A.hmm
