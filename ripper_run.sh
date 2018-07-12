@@ -7,24 +7,53 @@
 # will be run. The local.conf file (featuring any parameter
 # modifications) should also be placed in this directory
 #
-# Run this file with the following command from the analysis directory:
+# Run this file with an argument as shown in the example below.
 #
-#  source ripper_run.sh
+# source ripper_run.sh /home/mnt/inlist.txt
 #
-#
+# The file inlist.txt should have protein accession numbers, one
+# per line. A test list is provided in the file minitest.txt. Since
+# it is in the working directory when this container starts you can
+# specify it just with the filename (without any path).
 
 
-homedir="/home/work";
-queryfn="minitest.txt";
+
+queryfn=$1;
+
+if [[ ${#queryfn} -lt 1 ]]; then
+  queryfn="minitest.txt";
+fi
+
+if [[ ! -s ${queryfn} || ! -e ${queryfn} ]]; then
+echo "Either $queryfn does not exists or is zero in size. Aborting."; 
+fi
+
+
+
+
+# homedir="/home/work";
 ripperdir=/home/work/ripper;
 rodeodir=/home/work/rodeo2;
 pfamdir=/home/work/pfam
 
-# output dirs
+
+
+# Tab delimited output file for results including pfam hits.
+outfile=/home/mnt/out.txt
+
+# Rodeo output directory
 rodoutdir=/home/mnt/rodout;
+
+# ripper output directory. Contains gbk files.
 ripoutdir=/home/mnt/ripout;
+
+# ripper output directory. Contains gbk files where filenames
+# have the organism name prepended for convenience. 
 orgnamegbkdir=/home/mnt/orgnamegbk;
+
+# The html file output by rodeo2 are here.
 rodeohtmldir=/home/mnt/rodeohtml;
+
 
 
 # $perlbin and $pythonbin. Both these should have BioPerl and Biopython
@@ -64,7 +93,7 @@ done
 # Run the postprocessing scripts
 
 $perlbin ${ripperdir}/pfam_sqlite.pl
-$perlbin ${ripperdir}/mergeRidePfam.pl -out out.txt
+$perlbin ${ripperdir}/mergeRidePfam.pl -out ${outfile}
 $perlbin ${ripperdir}/gbkNameAppendOrg.pl -indir $ripoutdir
 $perlbin ${ripperdir}/collectFiles.pl ${rodoutdir} ${rodeohtmldir} '\.html$'
 
