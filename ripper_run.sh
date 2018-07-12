@@ -1,3 +1,4 @@
+#!/bin/bash
 # This file is the bash script that provides a full RiPPER analysis
 # that encompasses a number of related Perl scripts. Final outputs
 # are found in orgnamegbk (GenBank files featuring RiPPER annotations),
