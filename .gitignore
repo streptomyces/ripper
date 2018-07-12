@@ -1,0 +1,32 @@
+# Place this in .gitignore in the source tree.
+
+# Each line in a gitignore file specifies a pattern. When deciding
+# whether to ignore a path, Git normally checks gitignore patterns
+# from multiple sources.
+
+# Precedence, from highest to lowest is as below.
+
+# 1. Patterns read from the command line
+# 2. Patterns read from a .gitignore file in the same directory as the
+#    path.
+# 3. Patterns read from $GIT_DIR/info/exclude.
+# 4. Patterns read from the file specified by the configuration
+#    variable core.excludesFile.
+
+# git config --system --list --show-origin
+# git config --global --list --show-origin
+# git config --local --list --show-origin
+# git config --file <filename> --list --show-origin
+
+# Within one level of precedence, the last matching pattern decides
+# the outcome.
+
+*
+!Dockerfile
+!.gitignore
+# !*.p[lm]
+# !*.bash
+# !*.sh
+# !*.pod
+# !*.[rR]
+
