@@ -4,23 +4,22 @@ use File::Basename;
 use File::Copy;
 use File::Spec;
 
+# {{{ Getopt::Long
+use Getopt::Long;
+my $dir = qq(/home/mnt/rodout);
+my $destdir = qq(/home/mnt/rodeohtml);
+my $pat = '\.html$';
+GetOptions (
+"indir|dir=s" => \$dir,
+"destdir=s" => \$destdir,
+"pattern|regex:s" => \$pat
+);
+# }}}
+
 my %ffoptions = (
 wanted => \&onfind,
 no_chdir => 1
 ); 
-
-my $dir;
-if($ARGV[0]) { $dir = $ARGV[0]; }
-else { $dir = "."; }
-my $destdir;
-if($ARGV[1]) { $destdir = $ARGV[1]; }
-else { $destdir = "/home/mnt/rodeohtml"; }
-
-
-my $pat;
-if($ARGV[2]) {
-  $pat = $ARGV[2];
-}
 
 my @files;
 

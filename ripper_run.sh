@@ -58,10 +58,7 @@ rodeohtmldir=/home/mnt/rodeohtml;
 
 
 
-# $perlbin and $pythonbin. Both these should have BioPerl and Biopython
-# (respectively) installed for them. It is not uncommon to have more than one
-# versions of perl and python installed on the same machine. Hence the need for
-# the next two lines.
+# Below is legacy from the Linux installable version of this script.
 
 perlbin="perl"
 pythonbin="python"
