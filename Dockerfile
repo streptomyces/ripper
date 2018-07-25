@@ -43,6 +43,7 @@ WORKDIR /home/work
 RUN git clone https://github.com/thedamlab/rodeo2.git
 
 RUN cp ripper/ripper_run.sh ripper/minitest.txt ripper/local.conf ./
+RUN cp ripper/postprocess.sh ./
 
 WORKDIR /home/work
 
