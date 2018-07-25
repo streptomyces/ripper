@@ -26,7 +26,8 @@ RUN gunzip *.gz
 
 # && rm Pfam-A.hmm
 
-RUN cat /home/work/ripper/ripp.hmm >> Pfam-A.hmm
+# RUN cat /home/work/ripper/ripp.hmm >> Pfam-A.hmm
+RUN cat ripp.hmm >> Pfam-A.hmm
 RUN hmmpress Pfam-A.hmm
 
 
