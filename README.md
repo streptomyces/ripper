@@ -11,8 +11,7 @@ docker pull streptomyces/ripdock
 The default is to pull the image tagged as latest.
 
 ~~~ {.sh}
-docker run -it -v "$PWD":/home/mnt \
-streptomyces/ripdock
+docker run -it -v "$PWD":/home/mnt streptomyces/ripdock
 ~~~
 
 On Linux $PWD expands to the current directory. You can use a different
@@ -40,7 +39,7 @@ Run a small test analysis
 ~~~
 
 The above uses a small list of 3 accessions as input saved in a file
-named minitest.txt. Analyse your own list
+named *minitest.txt*. Analyse your own list
 
 ~~~ {.sh}
 ./ripper_run.sh /home/mnt/te_accessions.txt
@@ -64,7 +63,7 @@ visualisation in
 peptides are analysed for Pfam domains and the results are then
 tabulated from a batch input for further analysis.
 
-## Pre-requisites
+### Pre-requisites
 
 1. Perl >= 5.14.0
 2. BioPerl modules installed for the Perl being used.
@@ -77,7 +76,7 @@ a specially built form of Prodigal which we call _prodigal-short_.
 The building of _prodigal-short_ is described later under the section
 **Building prodigal-short**.
 
-## Brief workflow
+### Brief workflow
 
 A bash script (ripper_run.sh, further details below) runs a series of
 scripts to provide a full RiPPER analysis. This uses analysis settings
@@ -175,7 +174,7 @@ configuration variable *orgnamegbkdir* (default = orgnamegbk).
 single directory defined by the *rodeohtmldir* variable in the
 configuration file (default = rodeohtml).
 
-## The Bash script implementing the full analysis pipeline
+### The Bash script implementing the full analysis pipeline
 
 A file named *ripper\_run.sh* is included. If it is run without any
 arguments it reads the file *minitest.txt* as input. You can supply a
@@ -277,7 +276,7 @@ $perlbin ${ripperdir}/gbkNameAppendOrg.pl -indir $ripoutdir
 $perlbin ${ripperdir}/collectFiles.pl ${rodoutdir} ${rodeohtmldir} '\.html$'
 ~~~
 
-## Example of *local.conf*
+### Example of *local.conf*
 
 A file named *local.conf* is included in the repository.
 
@@ -344,7 +343,7 @@ orgnamegbkdir       /home/mnt/orgnamegbk
 # flankLen                12500
 ~~~
 
-## Building *prodigal-short*
+### Building *prodigal-short*
 
 This is for documentation only. *prodigal-short* is provided in the
 docker version.
@@ -436,30 +435,30 @@ index 6c722be..551c7b8 100644
 ~~~
 
 
-## Other supporting Perl scripts
+### Other supporting Perl scripts
 
-### pfam\_sqlite.pl
+#### pfam\_sqlite.pl
 
 *pfam\_sqlite.pl* takes all the proteins in a specified table in a
 specified sqlite3 database and searches them for Pfam domains. The
 results of these searches are placed in a new table in the same
 sqlite3 database.
 
-### mergeRidePfam.pl
+#### mergeRidePfam.pl
 
 *mergeRidePfam.pl* merges the information contained in the two sqlite3
 tables, one containing the output of prodigal-short and the other
 containing the output of Pfam searches on the proteins selected from
 the output of prodigal-short. It writes out a tab delimited file.
 
-### gbkNameAppendOrg.pl
+#### gbkNameAppendOrg.pl
 
 Copies the output genbank files to a new directory with the organism
 names appended to the filenames for ease of identification. Files are
 copied to the directory specified in the configuration variable
 *orgnamegbkdir*.
 
-### collectFiles.pl
+#### collectFiles.pl
 
 *collectFiles.pl* copies files from a specified directory (and
 subdirectories) to another directory if the base filename matches the
