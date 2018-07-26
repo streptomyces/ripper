@@ -7,18 +7,9 @@
 # This file should be in the directory from where it
 # will be run. The local.conf file (featuring any parameter
 # modifications) should also be placed in this directory
-#
-# Run this file with an argument as shown in the example below.
-#
-# ./ripper_run.sh /home/mnt/inlist.txt
-#
-# The file inlist.txt should have protein accession numbers, one
-# per line. A test list is provided in the file minitest.txt. Since
-# it is in the working directory when this container starts you can
-# specify it just with the filename (without any path).
 
 
-
+# Query file name defaults to minitest.txt.
 queryfn=$1;
 
 if [[ ${#queryfn} -lt 1 ]]; then
@@ -31,9 +22,6 @@ exit 1;
 fi
 
 
-
-
-# homedir="/home/work";
 ripperdir=/home/work/ripper;
 rodeodir=/home/work/rodeo2;
 pfamdir=/home/work/pfam
@@ -56,16 +44,11 @@ orgnamegbkdir=/home/mnt/orgnamegbk;
 # The html file output by rodeo2 are here.
 rodeohtmldir=/home/mnt/rodeohtml;
 
-
-
 # Below is legacy from the Linux installable version of this script.
 
 perlbin="perl"
 pythonbin="python"
 
-########################################################
-### Users should not need to make changes below this ###
-########################################################
 
 # Make a couple of symlinks to keep rodeo_main.py happy.
 ln -s $pfamdir ./hmm_dir

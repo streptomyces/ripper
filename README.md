@@ -114,10 +114,7 @@ variable *$flankLen*. This smaller genbank file, hereafter referred
 to as the *sub-genbank* file, is centered around the centre of the
 tailoring enzyme.
 
-```
 Rodeo retrieves the entire genbank file as it exists in Genbank.
-```
-
 
 A specially built version of *prodigal* renamed *prodigal-short* is
 then used to find genes in the sub-genbank file. *prodigal-short* is
@@ -178,75 +175,84 @@ configuration variable *orgnamegbkdir* (default = orgnamegbk).
 single directory defined by the *rodeohtmldir* variable in the
 configuration file (default = rodeohtml).
 
-## Example Bash script implementing the full analysis pipeline
+## The Bash script implementing the full analysis pipeline
 
-A file named *ripper\_run.sh* is included in the GitHub repository.
+A file named *ripper\_run.sh* is included. If it is run without any
+arguments it reads the file *minitest.txt* as input. You can supply a
+different input file an argument to *ripper\_run.sh*.
 
 The starting point is a query file containing Genpept accessions for
 tailoring enzymes. In the example below this file is named
-*minitest.txt*. Each query file containing a list of tailoring enzyme
-accessions should be processed in a directory of its own. This
-directory should also contain *local.conf* including any optional
-changes to analysis variables) and the *ripper\_run.sh* Bash script
-(queryfn=”xxx.txt” should be modified to list the file that contains
-the list of accessions).
+*minitest.txt*. The input file should contain a list of tailoring
+enzyme accessions.
 
-Within *ripper\_run.sh*, `queryfn=xxx.txt` should be modified to list
-the file that contains the list of accessions, `ripperdir` specifies the
-directory of the ripper Perl scripts, `rodeodir` specifies the directory
-that contains the rodeo scripts and `pfamdir` specifies the directory
-that contains the Pfam databases. `perlbin` and `pythonbin` specify the
-respective locations of perl and python.
+Contents of *ripper_run.sh* are listed below. There is no need to make
+any changes to it.
 
-
-Example of Bash script to run *rodeo\_main.py* followed by
-*ripper.pl* and some other scripts to organise the output and output
-files.
-
-```BASH 
+~~~ {.sh}
+#!/bin/bash
+# This file is the bash script that provides a full RiPPER analysis
+# that encompasses a number of related Perl scripts. Final outputs
+# are found in orgnamegbk (GenBank files featuring RiPPER annotations),
+# out.txt (tab-delimited table containing retrieved peptides and
+# associated data) and rodeohtml (RODEO2 html output).
+# This file should be in the directory from where it
+# will be run. The local.conf file (featuring any parameter
+# modifications) should also be placed in this directory
 # This file should be in the directory from where it
 # will be run as
 #
-#  source ripper_run.sh
+#  ./ripper_run.sh <inputfilename>
 #
 #
 
+# Query file name defaults to minitest.txt.
+queryfn=$1;
 
-homedir=\<insert home directory here\>;
-# Below are a couple of examples
-# homedir="/home/sco";
-# homedir="/Users/sco";
+if [[ ${#queryfn} -lt 1 ]]; then
+  queryfn="minitest.txt";
+fi
+
+if [[ ! -s ${queryfn} || ! -e ${queryfn} ]]; then
+echo "Either $queryfn does not exists or is zero in size. Aborting."; 
+exit 1;
+fi
 
 
-queryfn="minitest.txt";
+ripperdir=/home/work/ripper;
+rodeodir=/home/work/rodeo2;
+pfamdir=/home/work/pfam
 
-# Two lines below assume that in your home directory you have
-# a sub-directory named "fromgithub" where you have cloned
-# ripper and rodeo2 repositories using commands like. 
-# git clone https://github.com/streptomyces/ripper.git
-# git clone https://github.com/thedamlab/rodeo2.git
-ripperdir=${homedir}/fromgithub/ripper;
-rodeodir=${homedir}/fromgithub/rodeo2;
 
-pfamdir=${homedir}/blast_databases/pfam
 
-# $perlbin and $pythonbin. Both these should have BioPerl and Biopython
-# (respectively) installed for them. It is not uncommon to have more than one
-# versions of Perl and Python installed on the same machine. Hence the need for
-# the next two lines.
-perlbin="/usr/local/bin/perl"
-pythonbin="/usr/bin/python"
+# Tab delimited output file for results including pfam hits.
+outfile=/home/mnt/out.txt
 
-########################################################
-### Users should not need to make changes below this ###
-########################################################
+# Rodeo output directory
+rodoutdir=/home/mnt/rodout;
+
+# ripper output directory. Contains gbk files.
+ripoutdir=/home/mnt/ripout;
+
+# ripper output directory. Contains gbk files where filenames
+# have the organism name prepended for convenience. 
+orgnamegbkdir=/home/mnt/orgnamegbk;
+
+# The html file output by rodeo2 are here.
+rodeohtmldir=/home/mnt/rodeohtml;
+
+# Below is legacy from the Linux installable version of this script.
+
+perlbin="perl"
+pythonbin="python"
+
 
 # Make a couple of symlinks to keep rodeo_main.py happy.
 ln -s $pfamdir ./hmm_dir
 ln -s ${rodeodir}/confs ./
 
 # Make the various directories where output will be placed.
-for hcd in rodout ripout sqlite gbkcache orgnamegbk rodeohtml; do
+for hcd in $rodoutdir $ripoutdir sqlite gbkcache $orgnamegbkdir $rodeohtmldir; do
 if [[ ! -d $hcd ]]; then
   mkdir $hcd
 fi
@@ -257,83 +263,91 @@ done
 # rodeo run and ripper.pl run for each query in $queryfn
 
 for acc in $(cat $queryfn); do 
-  echo $pythonbin ${rodeodir}/rodeo_main.py -out rodout/${acc} ${acc}
-  $pythonbin ${rodeodir}/rodeo_main.py -out rodout/${acc} ${acc}
-  echo $perlbin ${ripperdir}/ripper.pl -outdir ripout -- rodout/${acc}/main_co_occur.csv
-  $perlbin ${ripperdir}/ripper.pl -outdir ripout -- rodout/${acc}/main_co_occur.csv
+  echo $pythonbin ${rodeodir}/rodeo_main.py -out ${rodoutdir}/${acc} ${acc}
+  $pythonbin ${rodeodir}/rodeo_main.py -out ${rodoutdir}/${acc} ${acc}
+  echo $perlbin ${ripperdir}/ripper.pl -outdir $ripoutdir -- ${rodoutdir}/${acc}/main_co_occur.csv
+  $perlbin ${ripperdir}/ripper.pl -outdir $ripoutdir -- ${rodoutdir}/${acc}/main_co_occur.csv
 done
 
 # Run the postprocessing scripts
 
 $perlbin ${ripperdir}/pfam_sqlite.pl
-$perlbin ${ripperdir}/mergeRidePfam.pl -out out.txt
-$perlbin ${ripperdir}/gbkNameAppendOrg.pl -indir ripout
-$perlbin ${ripperdir}/collectFiles.pl rodout '\.html$'
-
-```
+$perlbin ${ripperdir}/mergeRidePfam.pl -out ${outfile}
+$perlbin ${ripperdir}/gbkNameAppendOrg.pl -indir $ripoutdir
+$perlbin ${ripperdir}/collectFiles.pl ${rodoutdir} ${rodeohtmldir} '\.html$'
+~~~
 
 ## Example of *local.conf*
 
 A file named *local.conf* is included in the repository.
 
-*local.conf* is a two column (space delimited) text file which is
-read by *ripper.pl* and the following scripts in the pipeline.
+*local.conf* is a two column (space delimited) text file which is read
+by *ripper.pl* and the postprocessing scripts in the pipeline. There
+should be no need to make changes to this file.
 
+~~~ 
+# Lines beginning with # are comments.
+# All names are case sensitive.
 
-    # Lines beginning with \# are comments.
-    # All names are case sensitive.
-    
-    # Downloaded genbank files are cached here.
-    gbkcache            gbkcache
-    
-    # Filename for the SQLite3 database.
-    sqlite3fn           sqlite/ripp.sqlite3
+# Downloaded genbank files are cached here.
+# ripper_run.sh automatically generates a gbkcache
+# directory in the directory it is run from.
+gbkcache            gbkcache
 
-    # Location of prodigal-short binary
-    prodigalshortbin      /usr/local/bin/prodigal-short
+# Filename for the SQLite3 database.
+# ripper_run.sh automatically generates a sqlite
+# directory in the directory it is run from.
+sqlite3fn           sqlite/ripp.sqlite3
 
-    # Location of hmmscan binary
-    hmmscanbin      /usr/local/bin/hmmscan
+# Location of prodigal-short binary
+# prodigalshortbin          /usr/local/bin/prodigal-short
 
-    # Directory containing the Pfam database files.
-    # Note that this is an absolute path.
-    # Should be the same as pfamdir in the ripper_run.sh file.
-    hmmdir              /home/sco/blast_databases/pfam
-    
-    # Name of the Pfam database to use.
-    hmmdb               Pfam-A.hmm
-    
-    # Name of the Pfam data file.
-    # Used for reading information about models.
-    pfamhmmdatfn        Pfam-A.hmm.dat
-    
-    # Name of the SQLite3 table where results of
-    # hmmer searches are stored.
-    pfamrestab          pfamscan
-    
-    # Name of the SQLite3 table where results of
-    # prodigal search are stored.
-    prepeptab           ripper
-    
-    # Directory where output genbank files are stored.
-    # Organism names are prefixed to the file names for
-    # ease of identification.
-    orgnamegbkdir       orgnamegbk
-    
-    
-    # Below are some defaults (commented out) that can also
-    # be specified in this file. The names are case sensitive!
-    
-    # minPPlen                   20
-    # maxPPlen                  120
-    # prodigalScoreThresh        15
-    # maxDistFromTE            8000
-    # fastaOutputLimit            3
-    # sameStrandReward            5
-    # flankLen                12500
+# Location of hmmscan binary
+# hmmscanbin          /usr/local/bin/hmmscan
 
+# Directory containing the Pfam database files.
+# Should be the same as pfamdir in the ripper_run.sh file.
+hmmdir              pfam
+
+# Name of the Pfam database to use.
+hmmdb               Pfam-A.hmm
+
+# Name of the Pfam data file.
+# Used for reading information about models.
+pfamhmmdatfn        Pfam-A.hmm.dat
+
+# Name of the SQLite3 table where results of
+# hmmer searches are stored.
+pfamrestab          pfamscan
+
+# Name of the SQLite3 table where results of
+# prodigal search are stored.
+prepeptab           ripper
+
+# Directory where output genbank files are stored.
+# Organism names are prefixed to the file names for
+# ease of identification.
+# ripper_run.sh automatically generates an orgnamegbk directory in the
+# directory it is run from.
+orgnamegbkdir       /home/mnt/orgnamegbk
+
+# Below are some defaults (commented out) that can also
+# be specified in this file by removing the hashtag.
+# The names are case sensitive!
+
+# minPPlen                   20
+# maxPPlen                  120
+# prodigalScoreThresh        15
+# maxDistFromTE            8000
+# fastaOutputLimit            3
+# sameStrandReward            5
+# flankLen                12500
+~~~
 
 ## Building *prodigal-short*
+
+This is for documentation only. *prodigal-short* is provided in the
+docker version.
 
 The following changes (shown as the output of the *git diff* command)
 were made to *prodigal* source files before building
@@ -343,7 +357,7 @@ were made to *prodigal* source files before building
 1. In the file *makefile* first and only occurrence of
 `TARGET = prodigal` was changed to `TARGET = prodigal-short`.
 
-```diff
+~~~ {.diff}
 diff --git a/Makefile b/Makefile
 index 23ffe00..6edbb53 100644
 --- a/Makefile
@@ -357,12 +371,12 @@ index 23ffe00..6edbb53 100644
  SOURCES = $(shell echo *.c)
  HEADERS = $(shell echo *.h)
  OBJECTS = $(SOURCES:.c=.o)
-```
+~~~
 
 2. In the file *dprog.h* first and only occurrence of
 `#define MAX_SAM_OVLP 60` was changed to `#define MAX_SAM_OVLP 45`
 
-```diff
+~~~ {.diff}
 diff --git a/dprog.h b/dprog.h
 index d729f4c..ea7fa10 100644
 --- a/dprog.h
@@ -375,29 +389,29 @@ index d729f4c..ea7fa10 100644
 +#define MAX_SAM_OVLP 45
  #define MAX_OPP_OVLP 200
  #define MAX_NODE_DIST 500
-```
+~~~
 
 3. In the file *node.h* the following lines
 
-```
+~~~ {.diff}
 #define MIN_GENE 90
 #define MIN_EDGE_GENE 60
 #define MAX_SAM_OVLP 60
 #define ST_WINDOW 60
 #define OPER_DIST 60
-```
+~~~
 
 Were changed to the following lines.
 
-```
+~~~ {.diff}
 #define MIN_GENE 60
 #define MIN_EDGE_GENE 45
 #define MAX_SAM_OVLP 45
 #define ST_WINDOW 45
 #define OPER_DIST 45
-```    
+~~~
 
-```diff
+~~~ {.diff}
 diff --git a/node.h b/node.h
 index 6c722be..551c7b8 100644
 --- a/node.h
@@ -419,7 +433,7 @@ index 6c722be..551c7b8 100644
  #define EDGE_BONUS 0.74
  #define EDGE_UPS -1.00
  #define META_PEN 7.5
-```
+~~~
 
 
 ## Other supporting Perl scripts
