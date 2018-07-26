@@ -1,9 +1,57 @@
-# ripper.pl
+# Docker image for ripper.pl
 
-## Description
+## Quick start
 
-This file is for the standalone version. It needs to be changed for
-the Docker version.
+### Getting an image and running a container from it
+
+~~~ {.sh}
+docker pull streptomyces/ripdock
+~~~
+
+The default is to pull the image tagged as latest.
+
+~~~ {.sh}
+docker run -it -v "$PWD":/home/mnt \
+streptomyces/ripdock
+~~~
+
+On Linux $PWD expands to the current directory. You can use a different
+directory name here, as long as it exists, as shown below.
+
+~~~ {.sh}
+docker run -it -v /home/sco/analysis/set1:/home/mnt \
+streptomyces/ripper:first
+~~~
+
+Do not change the `/home/mnt` part. Scripts in the container expect to
+find this directory. The host directory you mount on `/home/mnt` in the
+container is where the output directories and files are written. You
+can place your input list in the mounted host directory on the host
+side and access it in /home/mnt/ on the container side. See the
+example Run on your own list below.
+
+Analysis carried out in the running container
+
+Run a small test analysis
+
+
+~~~ {.sh}
+./ripper_run.sh
+~~~
+
+The above uses a small list of 3 accessions as input saved in a file
+named minitest.txt. Analyse your own list
+
+~~~ {.sh}
+./ripper_run.sh /home/mnt/te_accessions.txt
+~~~
+
+The filename given as argument to ripper_run.sh should contain protein
+(genpept) accession numbers, one on each line.
+
+
+
+## Detailed description
 
 RiPPER (RiPP Precursor Peptide Enhanced Recognition) identifies genes
 encoding putative precursor peptides within RiPP (ribosomally
