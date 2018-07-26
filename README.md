@@ -465,9 +465,9 @@ copied to the directory specified in the configuration variable
 subdirectories) to another directory if the base filename matches the
 specified regular expression.
 
-```
+~~~ {.sh}
 perl collectFiles.pl -indir rodout -pat '\.html$' -outdir rodeohtml
-```
+~~~
 
 The options shown above are the defaults. *-outdir* may be specified
 in *local.conf* as *rodeohtmldir*. Value in the configuration file
