@@ -113,8 +113,6 @@ $outobj->display_id("RiPP|" . $fid);
 $seqout->write_seq($outobj);
 }
 
-
-
 close($faafh);
 
 exit;
