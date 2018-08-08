@@ -615,7 +615,7 @@ my $prdlCnt = 0;
 my $ppFastaOutputCnt = 1; # Init to one because of later sql insertion.
 my @terpos; # To hold the positions of the last nucleotide of genes.
 my $seqout1;
-SPRDL: for my $lr (@sprdl) {
+SPRDL: for my $lr (@sprdl) { # @sprdl: sorted (by score) prodigal results.
 my @ll = @{$lr}; 
 my ($start, $end, $temp) = @ll[0,1,2];
 my $score = $ll[3];
@@ -753,7 +753,8 @@ derived from $taildir. See B<Genbank and fasta file names> above.
 
 =cut
 
-# {{{ if within specified range of the TE, insert a record in SQL table $conf{prepeptab}.
+# {{{ if within specified range of the TE, insert a record in SQL
+# table $conf{prepeptab}.
 if($distFromTE <= $maxDistFromTE) {
   if($ppFastaOutputCnt == 1) {
     $seqout1=Bio::SeqIO->new(-file => ">$fastafn");

@@ -7,3 +7,4 @@ commitmesg
 *.docx
 *comment*
 pfam_lengths.pl
+ignore/

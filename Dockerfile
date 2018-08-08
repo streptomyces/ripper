@@ -29,6 +29,7 @@ RUN gunzip *.gz
 # RUN cat /home/work/ripper/ripp.hmm >> Pfam-A.hmm
 RUN cat ripp.hmm >> Pfam-A.hmm
 RUN hmmpress Pfam-A.hmm
+RUN hmmpress ripp.hmm
 
 
 WORKDIR /home/work

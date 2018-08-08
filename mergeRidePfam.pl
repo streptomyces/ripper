@@ -5,19 +5,23 @@ use Carp;
 use File::Basename;
 use File::Spec;
 use DBI;
+use Bio::SeqIO;
+use Bio::Seq;
 
 # {{{ Getopt::Long
 use Getopt::Long;
 my $conffile = qq(local.conf);
 my $errfile;
 my $runfile;
-my $outfile;
+my $outfile = qq(out.txt);
+my $outfaa = qq(out.faa);
 my $testCnt = 0;
 our $verbose;
 my $skip = 0;
 my $help;
 GetOptions (
-"outfile:s" => \$outfile,
+"outfile=s" => \$outfile,
+"faafile=s" => \$outfaa,
 "conffile:s" => \$conffile,
 "errfile:s" => \$errfile,
 "runfile:s" => \$runfile,
@@ -76,7 +80,8 @@ select($ofh);
 
 my $dbfile=$conf{sqlite3fn};
 my $handle=DBI->connect("DBI:SQLite:dbname=$dbfile", '', '');
-
+open(my $faafh, ">", $outfaa);
+my $seqout = BiO::SeqIO->new(-fh => $faafh, -format => 'fasta');
 
 my @head = qw(Accession Organism PPSerial FastaID Sequence SameStrand
 PP_TE_Distance Prodigalscore hname signif hdesc);
@@ -103,11 +108,14 @@ else {
 push(@rr, "none", "none", "none");
 }
 tablist(@rr);
+my $outobj = Bio::Seq->new(-seq => $hr->{aaseq});
+$outobj->display_id("RiPP|" . $fid);
+$seqout->write_seq($outobj);
 }
 
 
 
-
+close($faafh);
 
 exit;
 
