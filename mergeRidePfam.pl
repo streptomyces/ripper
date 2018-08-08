@@ -81,7 +81,7 @@ select($ofh);
 my $dbfile=$conf{sqlite3fn};
 my $handle=DBI->connect("DBI:SQLite:dbname=$dbfile", '', '');
 open(my $faafh, ">", $outfaa);
-my $seqout = BiO::SeqIO->new(-fh => $faafh, -format => 'fasta');
+my $seqout = Bio::SeqIO->new(-fh => $faafh, -format => 'fasta');
 
 my @head = qw(Accession Organism PPSerial FastaID Sequence SameStrand
 PP_TE_Distance Prodigalscore hname signif hdesc);
