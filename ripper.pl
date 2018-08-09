@@ -588,7 +588,7 @@ for my $lr (@prdl) {
   }
   $lr->[2] = $prdStrand;
   my $shadig = sha1_hex(join("_", $lr->[0], $lr->[1], $lr->[2]));
-  $lr->[4] = $shadig;
+  push(@{$lr}, $shadig);
 }
 
 =pod
@@ -676,7 +676,7 @@ else {
 
 my @prodHead = qw(
 Beg End Std Total CodPot StrtSc Codon RBSMot
-Spacer RBSScr UpsScr TypeScr GCCont
+Spacer RBSScr UpsScr TypeScr GCCont ShaHex
 );
 
 my $dx = 0;
