@@ -12,6 +12,7 @@ use Bio::SeqIO;
 use Bio::Seq;
 use Bio::SeqFeature::Generic;
 use DBI;
+use Digest::SHA qw(sha1_hex);
 
 use XML::Simple;
 use LWP::Simple;
@@ -585,6 +586,9 @@ for my $lr (@prdl) {
   if($prdStrand == $teStrand) {
     $lr->[3] += $sameStrandReward;
   }
+  $lr->[2] = $prdStrand;
+  my $shadig = sha1_hex(join("_", $lr->[0], $lr->[1], $lr->[2]));
+  $lr->[4] = $shadig;
 }
 
 =pod
@@ -613,50 +617,33 @@ Loop through the sorted (by score) prodigal output
 
 my $prdlCnt = 0;
 my $ppFastaOutputCnt = 1; # Init to one because of later sql insertion.
+my $allFastaOutputCnt = 9001; # Init to one because of later sql insertion.
 my @terpos; # To hold the positions of the last nucleotide of genes.
 my $seqout1;
 SPRDL: for my $lr (@sprdl) { # @sprdl: sorted (by score) prodigal results.
 my @ll = @{$lr}; 
-my ($start, $end, $temp) = @ll[0,1,2];
+my ($start, $end, $strand) = @ll[0,1,2];
 my $score = $ll[3];
 my $peplen = (($end - $start) + 1) / 3; $peplen -= 1;
-my $strand = $temp eq '+' ? 1 : -1;
+# my $strand = $temp eq '+' ? 1 : -1;
 splice(@ll, 2, 1, $strand);
 my $terpos;
 if($strand == 1) { $terpos = $end; }
 elsif($strand == -1) { $terpos = $start; }
 
-=pod
+# Proceed only for a range of peptide lengths. Otherwise look at
+# the next prodigal record.
+# 
+# $ll[3] is the total prodigal score.
+unless ($peplen >= $minPPlen and $peplen <= $maxPPlen) { next SPRDL; }
 
-If an end position ($terpos) has been seen before, skip it.
-
-=cut
-
+# If an end position ($terpos) has been seen before, skip it.
 if(grep {$_ == $terpos} @terpos) { next SPRDL; }
 
 else {
-
-=pod
-
-Proceed only for a range of peptide lengths. Otherwise look at
-the next prodigal record.
-
-$ll[3] is the total prodigal score.
-
-=cut
-
-unless ($peplen >= $minPPlen and $peplen <= $maxPPlen) { next SPRDL; }
-
-my $inGene = 0; #flag
-
-=pod
-
-Test for overlap with an annotated gene.
-Basically we check for overlap with coordinates in @recoord. 
-
-=cut
-
 #  {{{ Test for overlap with an annotated gene.
+# Basically we check for overlap with coordinates in @recoord. 
+my $inGene = 0; #flag
 OUTER: for my $pos ($start, $end) {
   for my $cr (@recoord) {
     if($pos >= ($cr->[0] + $allowedInGene)
@@ -673,7 +660,8 @@ a feature in the sequence object.
 
 =cut
 
-unless($inGene) {
+if($inGene) { next SPRDL; }
+else {
   for my $cr (@recoord) {
     if($start <= $cr->[0] and $end >= $cr->[1]) {
       $inGene = 1;
@@ -683,7 +671,9 @@ unless($inGene) {
 }
 # }}}
 
-if($inGene) { next SPRDL; }
+
+
+
 my @prodHead = qw(
 Beg End Std Total CodPot StrtSc Codon RBSMot
 Spacer RBSScr UpsScr TypeScr GCCont
@@ -742,7 +732,7 @@ are added only if their prodigal score > 0.
 
 =cut
 
-  if($ll[3] <= 0 and $prdlCnt >= 20) { last; } # $ll[3] is the prodigal score.
+  if($ll[3] <= 0 and $prdlCnt >= 20) { next; } # $ll[3] is the prodigal score.
 
 
 =pod
@@ -756,7 +746,7 @@ derived from $taildir. See B<Genbank and fasta file names> above.
 # {{{ if within specified range of the TE, insert a record in SQL
 # table $conf{prepeptab}.
 if($distFromTE <= $maxDistFromTE) {
-  if($ppFastaOutputCnt == 1) {
+  unless(ref($seqout1)) {
     $seqout1=Bio::SeqIO->new(-file => ">$fastafn");
   }
   my $strandReward = "0";
@@ -772,27 +762,41 @@ if($distFromTE <= $maxDistFromTE) {
 # print(">$teProtAcc\n$aaseq\n");
     my $spbinom = $species->binomial("FULL");
     $spbinom =~ s/'//g;
-    my $instr = qq/insert or replace into $conf{prepeptab} values(/;
-        $instr .= $handle->quote($teProtAcc) . ", ";
-        $instr .= $handle->quote($spbinom) . ", ";
-        $instr .= $ppFastaOutputCnt . ", ";
-        $instr .= $handle->quote($fastaid) . ", ";
-        $instr .= $handle->quote($aaseq) . ", ";
-        $instr .= $strand . ", ";
-        $instr .= $teStrand . ", ";
-        $instr .= $distFromTE . ", ";
-        $instr .= $score . ")";
-        unless($handle->do($instr)) {
-        linelistE($instr);
-        }
-        $ppFastaOutputCnt += 1;
-        }
+    insertSQL($teProtAcc, $spbinom, $ppFastaOutputCnt, $fastaid, $aaseq,
+        $strand, $teStrand, $distFromTE, $score);
+    $ppFastaOutputCnt += 1;
+  }
+}
+# The else below is only to use a different series of fastaid postfix,
+# $allFastaOutputCnt. And in this case we don't care about how many have
+# already been reported.
+else {
+  unless(ref($seqout1)) {
+    $seqout1=Bio::SeqIO->new(-file => ">$fastafn");
+  }
+  my $strandReward = "0";
+  if($strand == $teStrand) {
+    $strandReward = 1;
+  }
+  if($ll[3] >= $prodigalScoreThresh) {
+    my $aaobj = Bio::Seq->new(-seq => $aaseq);
+    my $fastaid = $teProtAcc . "_" . $allFastaOutputCnt;
+    $aaobj->display_id($fastaid);
+    $aaobj->description("SameStrand: $strandReward; " . $prodStr);
+    $seqout1->write_seq($aaobj);
+# print(">$teProtAcc\n$aaseq\n");
+    my $spbinom = $species->binomial("FULL");
+    $spbinom =~ s/'//g;
+    insertSQL($teProtAcc, $spbinom, $allFastaOutputCnt, $fastaid, $aaseq,
+        $strand, $teStrand, $distFromTE, $score);
+    $allFastaOutputCnt += 1;
+  }
 }
 # }}}
   push(@terpos, $terpos);
 }
 
-}
+} # end of SPRDL: for my $lr (@sprdl)
 
 =pod
 
@@ -832,6 +836,27 @@ close(STDERR);
 close(ERRH);
 $handle->disconnect();
 }
+
+
+sub insertSQL {
+        my ($teProtAcc, $spbinom, $ppFastaOutputCnt, $fastaid, $aaseq,
+        $strand, $teStrand, $distFromTE, $score) = @_;
+    my $instr = qq/insert or replace into $conf{prepeptab} values(/;
+        $instr .= $handle->quote($teProtAcc) . ", ";
+        $instr .= $handle->quote($spbinom) . ", ";
+        $instr .= $ppFastaOutputCnt . ", ";
+        $instr .= $handle->quote($fastaid) . ", ";
+        $instr .= $handle->quote($aaseq) . ", ";
+        $instr .= $strand . ", ";
+        $instr .= $teStrand . ", ";
+        $instr .= $distFromTE . ", ";
+        $instr .= $score . ")";
+        unless($handle->do($instr)) {
+        linelistE($instr);
+        }
+}
+
+
 
 # {{{ sub distTE.
 
