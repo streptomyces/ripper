@@ -8,10 +8,17 @@
 docker pull streptomyces/ripdock
 ~~~
 
-The default is to pull the image tagged as latest.
+The default is to pull the image tagged as *latest*.
 
 ~~~ {.sh}
 docker run -it -v "$PWD":/home/mnt streptomyces/ripdock
+~~~
+
+You could pull a different image if you have a tagname. See
+eaxmple below where *testing* is the tagname.
+
+~~~ {.sh}
+docker pull streptomyces/ripdock:testing
 ~~~
 
 On Linux $PWD expands to the current directory. You can use a different
