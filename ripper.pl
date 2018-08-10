@@ -752,7 +752,6 @@ if($distFromTE <= $maxDistFromTE and $ll[3] > 0 and $prdlCnt < 20) {
     $aaobj->display_id($fastaid);
     $aaobj->description("SameStrand: $strandReward; " . $prodStr);
     $seqout1->write_seq($aaobj);
-# print(">$teProtAcc\n$aaseq\n");
     my $spbinom = $species->binomial("FULL");
     $spbinom =~ s/'//g;
     insertSQL($teProtAcc, $spbinom, $ppFastaOutputCnt, $fastaid, $aaseq,
@@ -771,13 +770,13 @@ else {
   if($strand == $teStrand) {
     $strandReward = 1;
   }
-  if($ll[3] >= $prodigalScoreThresh) {
+  if($ll[3] > 0) {
+#  if($ll[3] >= $prodigalScoreThresh) {
     my $aaobj = Bio::Seq->new(-seq => $aaseq);
     my $fastaid = $teProtAcc . "_" . $allFastaOutputCnt;
     $aaobj->display_id($fastaid);
     $aaobj->description("SameStrand: $strandReward; " . $prodStr);
     $seqout1->write_seq($aaobj);
-# print(">$teProtAcc\n$aaseq\n");
     my $spbinom = $species->binomial("FULL");
     $spbinom =~ s/'//g;
     insertSQL($teProtAcc, $spbinom, $allFastaOutputCnt, $fastaid, $aaseq,
