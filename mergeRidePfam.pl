@@ -14,6 +14,7 @@ my $conffile = qq(local.conf);
 my $errfile;
 my $runfile;
 my $outfile = qq(out.txt);
+my $distfile = qq(distout.txt);
 my $outfaa = qq(out.faa);
 my $distfaa = qq(distant.faa);
 my $testCnt = 0;
@@ -77,6 +78,7 @@ else {
   open($ofh, ">&STDOUT");
 }
 select($ofh);
+open(my $dfh, ">", $distfile);
 # }}}
 
 
@@ -111,7 +113,16 @@ push(@rr, $pr->{hname}, $pr->{signif}, $pr->{hdesc});
 else {
 push(@rr, "none", "none", "none");
 }
+
+
+if($fid =~ m/_9\d{3,}/) {
+tablistH($dfh, @rr);
+}
+else {
 tablist(@rr);
+}
+
+
 my $outobj = Bio::Seq->new(-seq => $hr->{aaseq});
 $outobj->display_id("RiPP|" . $fid);
 if($fid =~ m/_9\d{3,}/) {
@@ -124,6 +135,7 @@ $seqout->write_seq($outobj);
 
 close($faafh);
 close($distfh);
+close($dfh);
 
 exit;
 
@@ -152,6 +164,13 @@ else { return 0; }
 
 # {{{ subroutines tablist, linelist, tabhash and their *E versions.
 # The E versions are for printing to STDERR.
+#
+
+sub tablistH {
+  my @in = @_;
+  my $fh = shift(@_);
+  print($fh, join("\t", @in), "\n");
+}
 
 sub tablist {
   my @in = @_;
