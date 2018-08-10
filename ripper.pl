@@ -737,15 +737,17 @@ are added only if their prodigal score > 0.
 
 =pod
 
-If within specified range of the TE, insert a record in SQL table $conf{prepeptab}.
-and also write the peptide sequences to the fasta filename $fastafn
+If within specified distance of the TE and score > 0 and count < 20
+insert a record in SQL table $conf{prepeptab}.
+Also write the peptide sequences to the fasta filename $fastafn
 derived from $taildir. See B<Genbank and fasta file names> above.
+
 
 =cut
 
 # {{{ if within specified range of the TE, insert a record in SQL
 # table $conf{prepeptab}.
-if($distFromTE <= $maxDistFromTE) {
+if($distFromTE <= $maxDistFromTE and $ll[3] > 0 and $prdlCnt < 20) {
   unless(ref($seqout1)) {
     $seqout1=Bio::SeqIO->new(-file => ">$fastafn");
   }
@@ -838,6 +840,7 @@ $handle->disconnect();
 }
 
 
+# {{{ sub insertSQL {
 sub insertSQL {
         my ($teProtAcc, $spbinom, $ppFastaOutputCnt, $fastaid, $aaseq,
         $strand, $teStrand, $distFromTE, $score) = @_;
@@ -855,8 +858,7 @@ sub insertSQL {
         linelistE($instr);
         }
 }
-
-
+# }}}
 
 # {{{ sub distTE.
 
