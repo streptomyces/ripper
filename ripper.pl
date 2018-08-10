@@ -725,15 +725,6 @@ $aaseq =~ s/^[vl]/m/;
 $prft->add_tag_value("translation", $aaseq);
   $prdlCnt += 1;
 
-=pod
-
-Prodigal features are added upto 20 features. More than that
-are added only if their prodigal score > 0.
-
-=cut
-
-  if($ll[3] <= 0 and $prdlCnt >= 20) { next; } # $ll[3] is the prodigal score.
-
 
 =pod
 
