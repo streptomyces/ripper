@@ -31,6 +31,7 @@ pfamdir=/home/work/pfam
 # Tab delimited output file for results including pfam hits.
 outfile=/home/mnt/out.txt
 outfaa=/home/mnt/out.faa
+distfaa=/home/mnt/distant.faa
 
 # Rodeo output directory
 rodoutdir=/home/mnt/rodout;
@@ -76,7 +77,7 @@ done
 # Run the postprocessing scripts
 
 $perlbin ${ripperdir}/pfam_sqlite.pl
-$perlbin ${ripperdir}/mergeRidePfam.pl -out ${outfile} -faa ${outfaa}
+$perlbin ${ripperdir}/mergeRidePfam.pl -out ${outfile} -faa ${outfaa} -distfaa ${distfaa}
 $perlbin ${ripperdir}/gbkNameAppendOrg.pl -indir $ripoutdir
 $perlbin ${ripperdir}/collectFiles.pl ${rodoutdir} ${rodeohtmldir} '\.html$'
 

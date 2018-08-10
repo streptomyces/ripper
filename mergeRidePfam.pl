@@ -15,6 +15,7 @@ my $errfile;
 my $runfile;
 my $outfile = qq(out.txt);
 my $outfaa = qq(out.faa);
+my $distfaa = qq(distant.faa);
 my $testCnt = 0;
 our $verbose;
 my $skip = 0;
@@ -22,6 +23,7 @@ my $help;
 GetOptions (
 "outfile=s" => \$outfile,
 "faafile=s" => \$outfaa,
+"distfaa=s" => \$distfaa,
 "conffile:s" => \$conffile,
 "errfile:s" => \$errfile,
 "runfile:s" => \$runfile,
@@ -82,6 +84,8 @@ my $dbfile=$conf{sqlite3fn};
 my $handle=DBI->connect("DBI:SQLite:dbname=$dbfile", '', '');
 open(my $faafh, ">", $outfaa);
 my $seqout = Bio::SeqIO->new(-fh => $faafh, -format => 'fasta');
+open(my $distfh, ">", $distfaa);
+my $seqdist = Bio::SeqIO->new(-fh => $distfh, -format => 'fasta');
 
 my @head = qw(Accession Organism PPSerial FastaID Sequence SameStrand
 PP_TE_Distance Prodigalscore hname signif hdesc);
@@ -110,10 +114,16 @@ push(@rr, "none", "none", "none");
 tablist(@rr);
 my $outobj = Bio::Seq->new(-seq => $hr->{aaseq});
 $outobj->display_id("RiPP|" . $fid);
+if($fid =~ m/_9\d{3,}/) {
+$seqdist->write_seq($outobj);
+}
+else {
 $seqout->write_seq($outobj);
+}
 }
 
 close($faafh);
+close($distfh);
 
 exit;
 
