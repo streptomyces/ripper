@@ -133,14 +133,14 @@ $seqout->write_seq($outobj);
 }
 }
 
-close($faafh);
-close($distfh);
-close($dfh);
 
 exit;
 
 # Multiple END blocks run in reverse order of definition.
 END {
+close($faafh);
+close($distfh);
+close($dfh);
 close($ofh);
 close(STDERR);
 close(ERRH);
