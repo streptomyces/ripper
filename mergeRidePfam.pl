@@ -14,7 +14,7 @@ my $conffile = qq(local.conf);
 my $errfile;
 my $runfile;
 my $outfile = qq(out.txt);
-my $distfile = qq(distout.txt);
+my $distfile = qq(distant.txt);
 my $outfaa = qq(out.faa);
 my $distfaa = qq(distant.faa);
 my $testCnt = 0;
@@ -25,6 +25,7 @@ GetOptions (
 "outfile=s" => \$outfile,
 "faafile=s" => \$outfaa,
 "distfaa=s" => \$distfaa,
+"distfile=s" => \$distfile,
 "conffile:s" => \$conffile,
 "errfile:s" => \$errfile,
 "runfile:s" => \$runfile,
@@ -115,7 +116,7 @@ push(@rr, "none", "none", "none");
 }
 
 
-if($fid =~ m/_9\d{3,}/) {
+if($fid =~ m/_9\d{3,}$/) {
 tablistH($dfh, @rr);
 }
 else {
@@ -125,7 +126,7 @@ tablist(@rr);
 
 my $outobj = Bio::Seq->new(-seq => $hr->{aaseq});
 $outobj->display_id("RiPP|" . $fid);
-if($fid =~ m/_9\d{3,}/) {
+if($fid =~ m/_9\d{3,}$/) {
 $seqdist->write_seq($outobj);
 }
 else {
@@ -168,7 +169,7 @@ else { return 0; }
 
 sub tablistH {
   my @in = @_;
-  my $fh = shift(@_);
+  my $fh = shift(@in);
   print($fh, join("\t", @in), "\n");
 }
 
