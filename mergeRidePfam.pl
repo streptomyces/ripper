@@ -170,7 +170,7 @@ else { return 0; }
 sub tablistH {
   my @in = @_;
   my $fh = shift(@in);
-  print($fh, join("\t", @in), "\n");
+  print($fh join("\t", @in), "\n");
 }
 
 sub tablist {
