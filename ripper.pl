@@ -719,7 +719,7 @@ derived from $taildir. See B<Genbank and fasta file names> above.
 
 # if within specified range of the TE, insert a record in SQL
 # table $conf{prepeptab}.
-if($distFromTE <= $maxDistFromTE and $score > 0 and $prdlCnt < 20) {
+if($distFromTE <= $maxDistFromTE and $prdlCnt < 20) {
   unless(ref($seqout1)) {
     $seqout1=Bio::SeqIO->new(-file => ">$fastafn");
   }
@@ -766,7 +766,7 @@ else {
   }
 }
   push(@terpos, $terpos);
-}
+} # End of else for the if which skips done terpos.
 
 } # end of SPRDL: for my $lr (@sprdl)
 

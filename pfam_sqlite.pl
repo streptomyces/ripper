@@ -114,6 +114,7 @@ select($ofh);
 my %pfl = pflens();
 
 my $hmmdb = File::Spec->catfile($conf{hmmdir}, $conf{hmmdb});
+my $ripphmmdb = File::Spec->catfile($conf{hmmdir}, $conf{ripphmmdb});
 
 my $dbfile=$conf{sqlite3fn};
 my $handle=DBI->connect("DBI:SQLite:dbname=$dbfile", '', '');
@@ -146,8 +147,13 @@ $stmt->execute();
 while(my $hr=$stmt->fetchrow_hashref()) {
 my $id=$hr->{fastaid};
 my $aaseq=$hr->{aaseq};
-
-my $hmmoutfn = scan(aaseq => $aaseq, hmmdb => $hmmdb, name => $id);
+my $hmmoutfn;
+if($id =~ m/_9\d+$/) {
+$hmmoutfn = scan(aaseq => $aaseq, hmmdb => $ripphmmdb, name => $id);
+}
+else {
+$hmmoutfn = scan(aaseq => $aaseq, hmmdb => $hmmdb, name => $id);
+}
 
 # linelist($hmmoutfn);
 my $copyFlag = 0;
