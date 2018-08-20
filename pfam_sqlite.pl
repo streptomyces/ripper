@@ -148,7 +148,7 @@ while(my $hr=$stmt->fetchrow_hashref()) {
 my $id=$hr->{fastaid};
 my $aaseq=$hr->{aaseq};
 my $hmmoutfn;
-if($id =~ m/_9\d+$/) {
+if($id =~ m/_9\d{3,}$/) {
 $hmmoutfn = scan(aaseq => $aaseq, hmmdb => $ripphmmdb, name => $id);
 }
 else {

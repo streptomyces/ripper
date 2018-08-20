@@ -117,17 +117,21 @@ push(@rr, "none", "none", "none");
 
 
 if($fid =~ m/_9\d{3,}$/) {
-tablistH($dfh, @rr);
+  if($rr[-3] ne "none") {
+    tablistH($dfh, @rr);
+  }
 }
 else {
-tablist(@rr);
+  tablist(@rr);
 }
 
 
 my $outobj = Bio::Seq->new(-seq => $hr->{aaseq});
 $outobj->display_id("RiPP|" . $fid);
 if($fid =~ m/_9\d{3,}$/) {
-$seqdist->write_seq($outobj);
+  if($rr[-3] ne "none") {
+    $seqdist->write_seq($outobj);
+  }
 }
 else {
 $seqout->write_seq($outobj);
