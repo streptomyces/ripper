@@ -751,19 +751,16 @@ else {
   if($strand == $teStrand) {
     $strandReward = 1;
   }
-  if($score > 0) {
-#  if($score >= $prodigalScoreThresh)
-    my $aaobj = Bio::Seq->new(-seq => $aaseq);
-    my $fastaid = $teProtAcc . "_" . $allFastaOutputCnt;
-    $aaobj->display_id($fastaid);
-    $aaobj->description("SameStrand: $strandReward; " . $prodStr);
-    $seqout1->write_seq($aaobj);
-    my $spbinom = $species->binomial("FULL");
-    $spbinom =~ s/'//g;
-    insertSQL($teProtAcc, $spbinom, $allFastaOutputCnt, $fastaid, $aaseq,
-        $strand, $teStrand, $distFromTE, $score);
-    $allFastaOutputCnt += 1;
-  }
+  my $aaobj = Bio::Seq->new(-seq => $aaseq);
+  my $fastaid = $teProtAcc . "_" . $allFastaOutputCnt;
+  $aaobj->display_id($fastaid);
+  $aaobj->description("SameStrand: $strandReward; " . $prodStr);
+  $seqout1->write_seq($aaobj);
+  my $spbinom = $species->binomial("FULL");
+  $spbinom =~ s/'//g;
+  insertSQL($teProtAcc, $spbinom, $allFastaOutputCnt, $fastaid, $aaseq,
+      $strand, $teStrand, $distFromTE, $score);
+  $allFastaOutputCnt += 1;
 }
   push(@terpos, $terpos);
 } # End of else for the if which skips done terpos.
