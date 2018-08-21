@@ -93,6 +93,7 @@ my $seqdist = Bio::SeqIO->new(-fh => $distfh, -format => 'fasta');
 my @head = qw(Accession Organism PPSerial FastaID Sequence SameStrand
 PP_TE_Distance Prodigalscore hname signif hdesc);
 tablist(@head);
+tablistH($dfh, @head);
 my $qstr = qq/select * from $conf{prepeptab} order by species/;
 my $stmt = $handle->prepare($qstr);
 $stmt->execute();
