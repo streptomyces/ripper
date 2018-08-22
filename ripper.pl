@@ -537,7 +537,6 @@ for my $subft (@subft) {
   }
   if($subft->primary_tag() ne 'gene') {
     $subgbk->add_SeqFeature($subft);
-    $subgbkFT->add_SeqFeature($subft);
   }
 }
 
@@ -821,21 +820,21 @@ $handle->disconnect();
 
 # {{{ sub insertSQL {
 sub insertSQL {
-        my ($teProtAcc, $spbinom, $ppFastaOutputCnt, $fastaid, $aaseq,
-        $strand, $teStrand, $distFromTE, $score) = @_;
-    my $instr = qq/insert or replace into $conf{prepeptab} values(/;
-        $instr .= $handle->quote($teProtAcc) . ", ";
-        $instr .= $handle->quote($spbinom) . ", ";
-        $instr .= $ppFastaOutputCnt . ", ";
-        $instr .= $handle->quote($fastaid) . ", ";
-        $instr .= $handle->quote($aaseq) . ", ";
-        $instr .= $strand . ", ";
-        $instr .= $teStrand . ", ";
-        $instr .= $distFromTE . ", ";
-        $instr .= $score . ")";
-        unless($handle->do($instr)) {
-        linelistE($instr);
-        }
+  my ($teProtAcc, $spbinom, $ppFastaOutputCnt, $fastaid, $aaseq,
+      $strand, $teStrand, $distFromTE, $score) = @_;
+  my $instr = qq/insert or replace into $conf{prepeptab} values(/;
+      $instr .= $handle->quote($teProtAcc) . ", ";
+      $instr .= $handle->quote($spbinom) . ", ";
+      $instr .= $ppFastaOutputCnt . ", ";
+      $instr .= $handle->quote($fastaid) . ", ";
+      $instr .= $handle->quote($aaseq) . ", ";
+      $instr .= $strand . ", ";
+      $instr .= $teStrand . ", ";
+      $instr .= $distFromTE . ", ";
+      $instr .= $score . ")";
+      unless($handle->do($instr)) {
+      linelistE($instr);
+      }
 }
 # }}}
 

@@ -308,7 +308,6 @@ sub scan {
     if($?) {
       tablistE($args{name});
       tablistE($args{aaseq});
-      copy($aafile, "query.faa");
     }
     if($deleteQuery) { unlink($aafile); }
     return($fn);
