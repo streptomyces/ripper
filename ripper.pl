@@ -646,8 +646,7 @@ a feature in the sequence object.
 
 =cut
 
-if($inGene) { next SPRDL; }
-else {
+unless($inGene) {
   for my $cr (@recoord) {
     if($start <= $cr->[0] and $end >= $cr->[1]) {
       $inGene = 1;
@@ -656,6 +655,7 @@ else {
   }
 }
 
+if($inGene) { next SPRDL; }
 
 my @prodHead = qw(
 Beg End Std Total CodPot StrtSc Codon RBSMot
