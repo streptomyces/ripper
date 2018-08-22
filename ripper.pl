@@ -700,13 +700,12 @@ my $prft = Bio::SeqFeature::Generic->new(
 # $teSubEnd: End of the TE in the subsequence.
 # $teStrand: Strand of the TE.
 # filename, organism, PPsequence, PPstrand, TEstrand.
-my $aaseq;
-if($prdlCnt < $ppFeatAddLimit) {
-$subgbk->add_SeqFeature($prft);
-$aaseq = aaseq($prft);
+my $aaseq = aaseq($prft);
 $aaseq =~ s/\*$//;
 $aaseq =~ s/^[VL]/M/;
 $aaseq =~ s/^[vl]/m/;
+if($prdlCnt < $ppFeatAddLimit) {
+$subgbk->add_SeqFeature($prft);
 $prft->add_tag_value("translation", $aaseq);
 }
 
