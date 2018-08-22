@@ -54,8 +54,13 @@ pythonbin="python"
 
 
 # Make a couple of symlinks to keep rodeo_main.py happy.
+if [[ ! -L hmm_dir ]]; then
 ln -s $pfamdir ./hmm_dir
+fi
+
+if [[ ! -L confs ]]; then
 ln -s ${rodeodir}/confs ./
+fi
 
 # Make the various directories where output will be placed.
 for hcd in $rodoutdir $ripoutdir sqlite gbkcache $orgnamegbkdir $rodeohtmldir; do
@@ -63,6 +68,8 @@ if [[ ! -d $hcd ]]; then
   mkdir $hcd
 fi
 done
+
+rm sqlite/*
 
 ### Setup is now complete. Actual runs below. ###
 
