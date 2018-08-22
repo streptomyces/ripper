@@ -704,6 +704,7 @@ my $aaseq = aaseq($prft);
 $aaseq =~ s/\*$//;
 $aaseq =~ s/^[VL]/M/;
 $aaseq =~ s/^[vl]/m/;
+
 if($prdlCnt < $ppFeatAddLimit) {
 $subgbk->add_SeqFeature($prft);
 $prft->add_tag_value("translation", $aaseq);
