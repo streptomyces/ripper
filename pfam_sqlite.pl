@@ -305,6 +305,9 @@ sub scan {
     close($fh);
     my $xstr = qq($hmmscanbin --acc -o $fn $hmmdb $aafile);
     qx($xstr);
+    if($?) {
+      tablistE($args{name});
+    }
     if($deleteQuery) { unlink($aafile); }
     return($fn);
 }
