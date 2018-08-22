@@ -28,6 +28,7 @@ my $fofn;
 my $outex; # extension for the output filename when it is derived on infilename.
 my $conffile = qq(local.conf);
 my $colorThreshScore = 20;
+my $ppFeatAddLimit = 20;
 my $errfile;
 my $prodigalScoreThresh = 15;
 my $prodigalshortbin = qq(prodigal-short);
@@ -566,6 +567,7 @@ open(PRD, "<", $prdfn);
 my @prdl;
 while(my $line = readline(PRD)) {
 if($line=~m/^\s*\#/ or $line=~m/^\s*$/ or $line !~ m/^\d/) {next;}
+chomp($line);
 my @ll=split(/\t/, $line);
 push(@prdl, [@ll]);
 }
@@ -698,14 +700,23 @@ my $prft = Bio::SeqFeature::Generic->new(
 # $teSubEnd: End of the TE in the subsequence.
 # $teStrand: Strand of the TE.
 # filename, organism, PPsequence, PPstrand, TEstrand.
-
+my $aaseq;
+if($prdlCnt < $ppFeatAddLimit) {
 $subgbk->add_SeqFeature($prft);
-my $aaseq = aaseq($prft);
+$aaseq = aaseq($prft);
 $aaseq =~ s/\*$//;
 $aaseq =~ s/^[VL]/M/;
 $aaseq =~ s/^[vl]/m/;
 $prft->add_tag_value("translation", $aaseq);
-  $prdlCnt += 1;
+}
+
+$prdlCnt += 1;
+
+
+# $ppFeatAddLimit
+# Prodigal features are added upto 20 features. More than that
+# are added only if their prodigal score > 0.
+# if($score <= 0 and $prdlCnt >= $ppFeatAddLimit) { last; }
 
 
 =pod
@@ -719,7 +730,7 @@ derived from $taildir. See B<Genbank and fasta file names> above.
 
 # if within specified range of the TE, insert a record in SQL
 # table $conf{prepeptab}.
-if($distFromTE <= $maxDistFromTE and $prdlCnt < 20) {
+if($distFromTE <= $maxDistFromTE and $prdlCnt <= $ppFeatAddLimit) {
   unless(ref($seqout1)) {
     $seqout1=Bio::SeqIO->new(-file => ">$fastafn");
   }
