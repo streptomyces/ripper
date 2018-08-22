@@ -504,6 +504,7 @@ my ($teSubStart, $teSubEnd) = locateTE(tefn => $tefn, subfn => $subfn);
   tablistE($gbkfn, $minpos, $maxpos);
 
 my $subgbk = subgenbank(infile => $gbkfn, start => $minpos, end => $maxpos);
+my $subgbkFT = subgenbank(infile => $gbkfn, start => $minpos, end => $maxpos);
 my @subft = $subgbk->remove_SeqFeatures();
 
 =head3 @recoord
@@ -536,6 +537,7 @@ for my $subft (@subft) {
   }
   if($subft->primary_tag() ne 'gene') {
     $subgbk->add_SeqFeature($subft);
+    $subgbkFT->add_SeqFeature($subft);
   }
 }
 
@@ -700,6 +702,7 @@ my $prft = Bio::SeqFeature::Generic->new(
 # $teSubEnd: End of the TE in the subsequence.
 # $teStrand: Strand of the TE.
 # filename, organism, PPsequence, PPstrand, TEstrand.
+$subgbkFT->add_SeqFeature($prft);
 my $aaseq = aaseq($prft);
 $aaseq =~ s/\*$//;
 $aaseq =~ s/^[VL]/M/;
