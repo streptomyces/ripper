@@ -12,6 +12,7 @@ use Bio::SeqIO;
 use Bio::Seq;
 use Bio::SeqFeature::Generic;
 use DBI;
+use Digest::SHA qw(sha1_hex);
 
 use XML::Simple;
 use LWP::Simple;
@@ -27,6 +28,7 @@ my $fofn;
 my $outex; # extension for the output filename when it is derived on infilename.
 my $conffile = qq(local.conf);
 my $colorThreshScore = 20;
+my $ppFeatAddLimit = 20;
 my $errfile;
 my $prodigalScoreThresh = 15;
 my $prodigalshortbin = qq(prodigal-short);
@@ -278,7 +280,7 @@ else {
 }
 #}}}
 
-# {{{ Cycle through all the infiles.
+# Cycle through all the infiles.
 for my $infile (@infiles) {
 my ($noex, $dir, $ext)= fileparse($infile, qr/\.[^.]*/);
 my $bn = $noex . $ext;
@@ -337,7 +339,7 @@ my $teProtId; # This is the $teProtAcc without the removal mentioned above.
 my $teNdx; # Index for the tailoring enzyme.
 my $lineCnt = 0;
 
-# {{{ read lines in the input file to assign to the variables above
+# read lines in the input file to assign to the variables above
 while(my $line = readline($ifh)) {
 chomp($line);
 if($line=~m/^\s*\#/ or $line=~m/^\s*$/
@@ -382,7 +384,6 @@ close($ifh);
 unless($lineCnt) {
   croak("Only a header line in $infile.\nStopping"); # main_co_occur.csv
 }
-# }}}
 
 # TEcoordsByProtId (gbkfile => filename, protid => proteinid);
 unless(defined($teNdx)) {
@@ -473,7 +474,7 @@ elsif($maxpos > $seqlen) {
   $minpos = $maxpos - ($flankLen * 2 - 1);
 }
 
-# {{{ The output sequence object.
+# The output sequence object.
 my $subseq = $seqobj->subseq($minpos, $maxpos);
 my $teNtseq = $seqobj->subseq($teStart, $teEnd);
 
@@ -503,6 +504,7 @@ my ($teSubStart, $teSubEnd) = locateTE(tefn => $tefn, subfn => $subfn);
   tablistE($gbkfn, $minpos, $maxpos);
 
 my $subgbk = subgenbank(infile => $gbkfn, start => $minpos, end => $maxpos);
+my $subgbkFT = subgenbank(infile => $gbkfn, start => $minpos, end => $maxpos);
 my @subft = $subgbk->remove_SeqFeatures();
 
 =head3 @recoord
@@ -527,7 +529,7 @@ for my $subft (@subft) {
     unless ($protlen >= $minPPlen and $protlen <= $maxPPlen) {
       push(@recoord, [$st, $en, $str]);
     }
-    # if($st == $teSubStart and $en == $teSubEnd) {
+    # if($st == $teSubStart and $en == $teSubEnd)
     if(abs($st - $teSubStart) <= 2 and
       abs($en - $teSubEnd) <= 2) {
       $subft->add_tag_value("color", "0 255 0");
@@ -537,7 +539,6 @@ for my $subft (@subft) {
     $subgbk->add_SeqFeature($subft);
   }
 }
-# }}}
 
 =head3 Prodigal
 
@@ -562,48 +563,39 @@ close($prdfh);
 my $xstr = qq($prodigalshortbin -p meta -f gff -i $subfn -s $prdfn);
 my $discard = qx($xstr); # Only interested in the output in file $prdfn.
 
-# {{{ Read prodigal output and populate @prdl.
+# Read prodigal output and populate @prdl.
 open(PRD, "<", $prdfn);
 my @prdl;
 while(my $line = readline(PRD)) {
 if($line=~m/^\s*\#/ or $line=~m/^\s*$/ or $line !~ m/^\d/) {next;}
+chomp($line);
 my @ll=split(/\t/, $line);
 push(@prdl, [@ll]);
 }
 close(PRD);
-# }}}
 
-=head3 Same strand reward
-
-For loop below applies the same strand reward to all
-prodigal output records.
-
-=cut
+# Same strand reward
+# For loop below applies the same strand reward to all
+# prodigal output records.
 
 for my $lr (@prdl) {
   my $prdStrand = $lr->[2] eq '+' ? 1 : -1;
   if($prdStrand == $teStrand) {
     $lr->[3] += $sameStrandReward;
   }
+  $lr->[2] = $prdStrand;
+  my $shadig = sha1_hex(join("_", $lr->[0], $lr->[1], $lr->[2]));
+  push(@{$lr}, $shadig);
 }
 
-=pod
 
-Then we sort the prodigal output records by score.
-This gives us @sprdl.
-
-=cut
+# Then we sort the prodigal output records by score.
+# This gives us @sprdl.
 
 my @sprdl = sort {$b->[3] <=> $a->[3]} @prdl;
 
-# {{{ Go through all the prodigal lines in @sprdl
 
-=head3 Loop through @sprdl
-
-Loop through the sorted (by score) prodigal output
-
-=cut
-
+# Loop through the sorted (by score) prodigal output
 # Columns in the output of Prodigal are
 # 
 #  0. Start position
@@ -613,50 +605,34 @@ Loop through the sorted (by score) prodigal output
 
 my $prdlCnt = 0;
 my $ppFastaOutputCnt = 1; # Init to one because of later sql insertion.
+my $allFastaOutputCnt = 9001; # Init to one because of later sql insertion.
 my @terpos; # To hold the positions of the last nucleotide of genes.
 my $seqout1;
+
 SPRDL: for my $lr (@sprdl) { # @sprdl: sorted (by score) prodigal results.
 my @ll = @{$lr}; 
-my ($start, $end, $temp) = @ll[0,1,2];
+my ($start, $end, $strand) = @ll[0,1,2];
 my $score = $ll[3];
 my $peplen = (($end - $start) + 1) / 3; $peplen -= 1;
-my $strand = $temp eq '+' ? 1 : -1;
+# my $strand = $temp eq '+' ? 1 : -1;
 splice(@ll, 2, 1, $strand);
 my $terpos;
 if($strand == 1) { $terpos = $end; }
 elsif($strand == -1) { $terpos = $start; }
 
-=pod
+# Proceed only for a range of peptide lengths. Otherwise look at
+# the next prodigal record.
+# 
+# $ll[3] is the total prodigal score.
+unless ($peplen >= $minPPlen and $peplen <= $maxPPlen) { next SPRDL; }
 
-If an end position ($terpos) has been seen before, skip it.
-
-=cut
-
+# If an end position ($terpos) has been seen before, skip it.
 if(grep {$_ == $terpos} @terpos) { next SPRDL; }
 
 else {
-
-=pod
-
-Proceed only for a range of peptide lengths. Otherwise look at
-the next prodigal record.
-
-$ll[3] is the total prodigal score.
-
-=cut
-
-unless ($peplen >= $minPPlen and $peplen <= $maxPPlen) { next SPRDL; }
-
+# Test for overlap with an annotated gene.
+# Basically we check for overlap with coordinates in @recoord. 
 my $inGene = 0; #flag
-
-=pod
-
-Test for overlap with an annotated gene.
-Basically we check for overlap with coordinates in @recoord. 
-
-=cut
-
-#  {{{ Test for overlap with an annotated gene.
 OUTER: for my $pos ($start, $end) {
   for my $cr (@recoord) {
     if($pos >= ($cr->[0] + $allowedInGene)
@@ -681,12 +657,12 @@ unless($inGene) {
     }
   }
 }
-# }}}
 
 if($inGene) { next SPRDL; }
+
 my @prodHead = qw(
 Beg End Std Total CodPot StrtSc Codon RBSMot
-Spacer RBSScr UpsScr TypeScr GCCont
+Spacer RBSScr UpsScr TypeScr GCCont ShaHex
 );
 
 my $dx = 0;
@@ -708,7 +684,7 @@ by prodigal rank, distance from TE and prodigal score.
 =cut
 
 
-# {{{ $prft. Bio::SeqFeature for prodigal record.
+# $prft. Bio::SeqFeature for prodigal record.
 my $color = prdcol($prdlCnt, $distFromTE, $score);
 my $prft = Bio::SeqFeature::Generic->new(
 -primary => 'CDS',
@@ -720,79 +696,89 @@ my $prft = Bio::SeqFeature::Generic->new(
   'note' => $prodStr
 }
 );
-# }}}
 
 # $teSubStart: Start of the TE in the subsequence.
 # $teSubEnd: End of the TE in the subsequence.
 # $teStrand: Strand of the TE.
 # filename, organism, PPsequence, PPstrand, TEstrand.
-
-$subgbk->add_SeqFeature($prft);
+$subgbkFT->add_SeqFeature($prft);
 my $aaseq = aaseq($prft);
 $aaseq =~ s/\*$//;
 $aaseq =~ s/^[VL]/M/;
 $aaseq =~ s/^[vl]/m/;
+
+if($prdlCnt < $ppFeatAddLimit) {
+$subgbk->add_SeqFeature($prft);
 $prft->add_tag_value("translation", $aaseq);
-  $prdlCnt += 1;
+}
+
+$prdlCnt += 1;
+
+
+# $ppFeatAddLimit
+# Prodigal features are added upto 20 features. More than that
+# are added only if their prodigal score > 0.
+# if($score <= 0 and $prdlCnt >= $ppFeatAddLimit) { last; }
+
 
 =pod
 
-Prodigal features are added upto 20 features. More than that
-are added only if their prodigal score > 0.
-
-=cut
-
-  if($ll[3] <= 0 and $prdlCnt >= 20) { last; } # $ll[3] is the prodigal score.
-
-
-=pod
-
-If within specified range of the TE, insert a record in SQL table $conf{prepeptab}.
-and also write the peptide sequences to the fasta filename $fastafn
+If within specified distance of the TE and score > 0 and count < 20
+insert a record in SQL table $conf{prepeptab}.
+Also write the peptide sequences to the fasta filename $fastafn
 derived from $taildir. See B<Genbank and fasta file names> above.
 
 =cut
 
-# {{{ if within specified range of the TE, insert a record in SQL
+# if within specified range of the TE, insert a record in SQL
 # table $conf{prepeptab}.
-if($distFromTE <= $maxDistFromTE) {
-  if($ppFastaOutputCnt == 1) {
+if($distFromTE <= $maxDistFromTE and $prdlCnt <= $ppFeatAddLimit) {
+  unless(ref($seqout1)) {
     $seqout1=Bio::SeqIO->new(-file => ">$fastafn");
   }
   my $strandReward = "0";
   if($strand == $teStrand) {
     $strandReward = 1;
   }
-  if($ppFastaOutputCnt <= $fastaOutputLimit or ($ll[3] >= $prodigalScoreThresh)) {
+  if($ppFastaOutputCnt <= $fastaOutputLimit or ($score >= $prodigalScoreThresh)) {
     my $aaobj = Bio::Seq->new(-seq => $aaseq);
     my $fastaid = $teProtAcc . "_" . $ppFastaOutputCnt;
     $aaobj->display_id($fastaid);
     $aaobj->description("SameStrand: $strandReward; " . $prodStr);
     $seqout1->write_seq($aaobj);
-# print(">$teProtAcc\n$aaseq\n");
     my $spbinom = $species->binomial("FULL");
     $spbinom =~ s/'//g;
-    my $instr = qq/insert or replace into $conf{prepeptab} values(/;
-        $instr .= $handle->quote($teProtAcc) . ", ";
-        $instr .= $handle->quote($spbinom) . ", ";
-        $instr .= $ppFastaOutputCnt . ", ";
-        $instr .= $handle->quote($fastaid) . ", ";
-        $instr .= $handle->quote($aaseq) . ", ";
-        $instr .= $strand . ", ";
-        $instr .= $teStrand . ", ";
-        $instr .= $distFromTE . ", ";
-        $instr .= $score . ")";
-        unless($handle->do($instr)) {
-        linelistE($instr);
-        }
-        $ppFastaOutputCnt += 1;
-        }
+    insertSQL($teProtAcc, $spbinom, $ppFastaOutputCnt, $fastaid, $aaseq,
+        $strand, $teStrand, $distFromTE, $score);
+    $ppFastaOutputCnt += 1;
+  }
 }
-# }}}
+# The else below is only to use a different series of fastaid postfix,
+# $allFastaOutputCnt. And in this case we don't care about how many have
+# already been reported.
+else {
+  unless(ref($seqout1)) {
+    $seqout1=Bio::SeqIO->new(-file => ">$fastafn");
+  }
+  my $strandReward = "0";
+  if($strand == $teStrand) {
+    $strandReward = 1;
+  }
+  my $aaobj = Bio::Seq->new(-seq => $aaseq);
+  my $fastaid = $teProtAcc . "_" . $allFastaOutputCnt;
+  $aaobj->display_id($fastaid);
+  $aaobj->description("SameStrand: $strandReward; " . $prodStr);
+  $seqout1->write_seq($aaobj);
+  my $spbinom = $species->binomial("FULL");
+  $spbinom =~ s/'//g;
+  insertSQL($teProtAcc, $spbinom, $allFastaOutputCnt, $fastaid, $aaseq,
+      $strand, $teStrand, $distFromTE, $score);
+  $allFastaOutputCnt += 1;
+}
   push(@terpos, $terpos);
-}
+} # End of else for the if which skips done terpos.
 
-}
+} # end of SPRDL: for my $lr (@sprdl)
 
 =pod
 
@@ -800,7 +786,6 @@ At this point we have gone through all the output from Prodigal.
 
 =cut
 
-# }}}
 
 =head3 Write the genbank output file.
 
@@ -821,7 +806,6 @@ $subout->write_seq($subgbk);
 
 unlink($gbkfn, $subfn, $prdfn, $tefn);
 }
-# }}}
 
 close($ofh);
 exit;
@@ -832,6 +816,27 @@ close(STDERR);
 close(ERRH);
 $handle->disconnect();
 }
+
+
+# {{{ sub insertSQL {
+sub insertSQL {
+  my ($teProtAcc, $spbinom, $ppFastaOutputCnt, $fastaid, $aaseq,
+      $strand, $teStrand, $distFromTE, $score) = @_;
+  my $instr = qq/insert or replace into $conf{prepeptab} values(/;
+      $instr .= $handle->quote($teProtAcc) . ", ";
+      $instr .= $handle->quote($spbinom) . ", ";
+      $instr .= $ppFastaOutputCnt . ", ";
+      $instr .= $handle->quote($fastaid) . ", ";
+      $instr .= $handle->quote($aaseq) . ", ";
+      $instr .= $strand . ", ";
+      $instr .= $teStrand . ", ";
+      $instr .= $distFromTE . ", ";
+      $instr .= $score . ")";
+      unless($handle->do($instr)) {
+      linelistE($instr);
+      }
+}
+# }}}
 
 # {{{ sub distTE.
 

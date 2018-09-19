@@ -15,7 +15,7 @@ ADD prodigal-short /usr/local/bin/
 WORKDIR /home/work
 RUN git clone https://github.com/streptomyces/ripper.git
 WORKDIR /home/work/ripper
-RUN git checkout master 
+RUN git checkout next 
 
 
 

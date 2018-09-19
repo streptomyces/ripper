@@ -31,6 +31,8 @@ pfamdir=/home/work/pfam
 # Tab delimited output file for results including pfam hits.
 outfile=/home/mnt/out.txt
 outfaa=/home/mnt/out.faa
+distfaa=/home/mnt/distant.faa
+distfile=/home/mnt/distant.txt
 
 # Rodeo output directory
 rodoutdir=/home/mnt/rodout;
@@ -52,8 +54,13 @@ pythonbin="python"
 
 
 # Make a couple of symlinks to keep rodeo_main.py happy.
+if [[ ! -L hmm_dir ]]; then
 ln -s $pfamdir ./hmm_dir
+fi
+
+if [[ ! -L confs ]]; then
 ln -s ${rodeodir}/confs ./
+fi
 
 # Make the various directories where output will be placed.
 for hcd in $rodoutdir $ripoutdir sqlite gbkcache $orgnamegbkdir $rodeohtmldir; do
@@ -61,6 +68,8 @@ if [[ ! -d $hcd ]]; then
   mkdir $hcd
 fi
 done
+
+rm sqlite/*
 
 ### Setup is now complete. Actual runs below. ###
 
@@ -76,7 +85,8 @@ done
 # Run the postprocessing scripts
 
 $perlbin ${ripperdir}/pfam_sqlite.pl
-$perlbin ${ripperdir}/mergeRidePfam.pl -out ${outfile} -faa ${outfaa}
+$perlbin ${ripperdir}/mergeRidePfam.pl -out ${outfile} -faa ${outfaa} \
+-distfile ${distfile} -distfaa ${distfaa} 
 $perlbin ${ripperdir}/gbkNameAppendOrg.pl -indir $ripoutdir
 $perlbin ${ripperdir}/collectFiles.pl ${rodoutdir} ${rodeohtmldir} '\.html$'
 

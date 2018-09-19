@@ -14,7 +14,9 @@ my $conffile = qq(local.conf);
 my $errfile;
 my $runfile;
 my $outfile = qq(out.txt);
+my $distfile = qq(distant.txt);
 my $outfaa = qq(out.faa);
+my $distfaa = qq(distant.faa);
 my $testCnt = 0;
 our $verbose;
 my $skip = 0;
@@ -22,6 +24,8 @@ my $help;
 GetOptions (
 "outfile=s" => \$outfile,
 "faafile=s" => \$outfaa,
+"distfaa=s" => \$distfaa,
+"distfile=s" => \$distfile,
 "conffile:s" => \$conffile,
 "errfile:s" => \$errfile,
 "runfile:s" => \$runfile,
@@ -75,17 +79,21 @@ else {
   open($ofh, ">&STDOUT");
 }
 select($ofh);
+open(my $dfh, ">", $distfile);
 # }}}
 
 
 my $dbfile=$conf{sqlite3fn};
 my $handle=DBI->connect("DBI:SQLite:dbname=$dbfile", '', '');
 open(my $faafh, ">", $outfaa);
-my $seqout = BiO::SeqIO->new(-fh => $faafh, -format => 'fasta');
+my $seqout = Bio::SeqIO->new(-fh => $faafh, -format => 'fasta');
+open(my $distfh, ">", $distfaa);
+my $seqdist = Bio::SeqIO->new(-fh => $distfh, -format => 'fasta');
 
 my @head = qw(Accession Organism PPSerial FastaID Sequence SameStrand
 PP_TE_Distance Prodigalscore hname signif hdesc);
 tablist(@head);
+tablistH($dfh, @head);
 my $qstr = qq/select * from $conf{prepeptab} order by species/;
 my $stmt = $handle->prepare($qstr);
 $stmt->execute();
@@ -107,20 +115,38 @@ push(@rr, $pr->{hname}, $pr->{signif}, $pr->{hdesc});
 else {
 push(@rr, "none", "none", "none");
 }
-tablist(@rr);
-my $outobj = Bio::Seq->new(-seq => $hr->{aaseq});
-$outobj->display_id("RiPP|" . $fid);
-$seqout->write_seq($outobj);
+
+
+if($fid =~ m/_9\d{3,}$/) {
+  if($rr[-3] ne "none") {
+    tablistH($dfh, @rr);
+  }
+}
+else {
+  tablist(@rr);
 }
 
 
+my $outobj = Bio::Seq->new(-seq => $hr->{aaseq});
+$outobj->display_id("RiPP|" . $fid);
+if($fid =~ m/_9\d{3,}$/) {
+  if($rr[-3] ne "none") {
+    $seqdist->write_seq($outobj);
+  }
+}
+else {
+$seqout->write_seq($outobj);
+}
+}
 
-close($faafh);
 
 exit;
 
 # Multiple END blocks run in reverse order of definition.
 END {
+close($faafh);
+close($distfh);
+close($dfh);
 close($ofh);
 close(STDERR);
 close(ERRH);
@@ -144,6 +170,13 @@ else { return 0; }
 
 # {{{ subroutines tablist, linelist, tabhash and their *E versions.
 # The E versions are for printing to STDERR.
+#
+
+sub tablistH {
+  my @in = @_;
+  my $fh = shift(@in);
+  print($fh join("\t", @in), "\n");
+}
 
 sub tablist {
   my @in = @_;
