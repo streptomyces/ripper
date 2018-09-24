@@ -8,6 +8,7 @@ use File::Spec;
 use Getopt::Long;
 my $dir = qq(/home/mnt/rodout);
 my $destdir = qq(/home/mnt/rodeohtml);
+my $conffile = qq(local.conf);
 my $pat = '\.html$';
 GetOptions (
 "indir|dir=s" => \$dir,
@@ -15,6 +16,31 @@ GetOptions (
 "pattern|regex:s" => \$pat
 );
 # }}}
+
+
+
+my %conf;
+if(-s $conffile ) {
+  open(my $cnfh, "<", $conffile);
+  my $keyCnt = 0;
+  while(my $line = readline($cnfh)) {
+    chomp($line);
+    if($line=~m/^\s*\#/ or $line=~m/^\s*$/) {next;}
+    my @ll=split(/\s+/, $line, 2);
+    $conf{$ll[0]} = $ll[1];
+    $keyCnt += 1;
+  }
+  close($cnfh);
+#  linelistE("$keyCnt keys placed in conf.");
+}
+
+if(exists($conf{rodeohtmldir})) {
+$destdir = $conf{rodeohtmldir};
+}
+
+# Above, value in the configuration file overwrites the value supplied
+# on the command line. This is _not_ what is usually done. I am doing
+# this here because this is what is written in the README.md file.
 
 my %ffoptions = (
 wanted => \&onfind,
