@@ -11,7 +11,7 @@ my $destdir = qq(/home/mnt/rodeohtml);
 my $pat = '\.html$';
 GetOptions (
 "indir|dir=s" => \$dir,
-"destdir=s" => \$destdir,
+"outdir|destdir=s" => \$destdir,
 "pattern|regex:s" => \$pat
 );
 # }}}
