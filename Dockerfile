@@ -4,6 +4,7 @@ MAINTAINER Govind Chandra <govind.chandra@jic.ac.uk>
 
 RUN apt-get update && apt-get install -yqq ncbi-blast+ hmmer unzip wget git
 RUN apt-get install -yqq sqlite3 build-essential python-dev python-pip
+RUN apt-get install -yqq bioperl
 RUN pip install -q biopython
 
 # The Pfam database
