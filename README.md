@@ -1,76 +1,17 @@
-# Docker image for ripper.pl
+# RiPPER Overview
 
-## Quick start
+RiPPER (RiPP Precursor Peptide Enhanced Recognition) is a customisable tool for the identification of genes encoding putative precursor peptides within RiPP (ribosomally synthesised and post-translationally modified peptide) gene clusters. RiPPER carries out the following things to do this:
 
-### Getting an image and running a container from it
+(1) Protein accession numbers for putative RiPP tailoring enzymes are used to retrieve gene clusters using [RODEO2](https://github.com/thedamlab/rodeo2)
+(2) These are then searched for likely precursor peptide coding regions using both a modified form of [Prodigal](https://github.com/hyattpd/Prodigal) (prodigal-short) and a HMM-based search for precursor peptides.
+(3) A Genbank file that highlights newly annotated short genes in the gene cluster is generated for visualisation in [Artemis](http://www.sanger.ac.uk/science/tools/artemis)
+(4) Top-scoring peptides are tabulated alongside associated attribute data from a batch input for further analysis, and a fasta file is provided for peptide network analysis using [EGN](http://evol-net.fr/index.php/en/downloads)
 
-~~~ {.sh}
-docker pull streptomyces/ripdock
-~~~
+We recommend that users work with a [Docker container of RiPPER](https://hub.docker.com/r/streptomyces/ripdock/). This is built from the latest version of RiPPER and includes all dependencies, so nothing needs installing apart from Docker and the RiPPER container. Details are provided below on using this in the **Docker** section, and a detailed technical description of the workflow is provided at the end of this page as **Description of RiPPER workflow**.
 
-The default is to pull the image tagged as *latest*.
+#Installation and usage
 
-~~~ {.sh}
-docker run -it -v "$PWD":/home/mnt streptomyces/ripdock
-~~~
-
-You could pull a different image if you have a tagname. See
-example below where *testing* is the tagname.
-
-~~~ {.sh}
-docker pull streptomyces/ripdock:testing
-~~~
-
-On Linux $PWD expands to the current directory. You can use a different
-directory name here, as long as it exists, as shown below.
-
-~~~ {.sh}
-docker run -it -v /home/sco/analysis/set1:/home/mnt \
-streptomyces/ripper:first
-~~~
-
-Do not change the `/home/mnt` part. Scripts in the container expect to
-find this directory. The host directory you mount on `/home/mnt` in the
-container is where the output directories and files are written. You
-can place your input list in the mounted host directory on the host
-side and access it in /home/mnt/ on the container side. See the
-example Run on your own list below.
-
-Analysis carried out in the running container
-
-Run a small test analysis
-
-
-~~~ {.sh}
-./ripper_run.sh
-~~~
-
-The above uses a small list of 3 accessions as input saved in a file
-named *minitest.txt*. Analyse your own list
-
-~~~ {.sh}
-./ripper_run.sh /home/mnt/te_accessions.txt
-~~~
-
-The filename given as argument to ripper_run.sh should contain protein
-(genpept) accession numbers, one on each line.
-
-
-
-## Detailed description
-
-RiPPER (RiPP Precursor Peptide Enhanced Recognition) identifies genes
-encoding putative precursor peptides within RiPP (ribosomally
-synthesised and post-translationally modified peptide) gene clusters.
-This retrieves putative gene clusters using RODEO2, searches for
-likely precursor peptide coding regions using a modified form of
-Prodigal (prodigal-short), provides an output Genbank file for
-visualisation in
-[Artemis](http://www.sanger.ac.uk/science/tools/artemis). Output
-peptides are analysed for Pfam domains and the results are then
-tabulated from a batch input for further analysis.
-
-### Pre-requisites
+## Dependencies
 
 1. Perl >= 5.14.0
 2. BioPerl modules installed for the Perl being used.
@@ -83,7 +24,111 @@ a specially built form of Prodigal which we call _prodigal-short_.
 The building of _prodigal-short_ is described later under the section
 **Building prodigal-short**.
 
-### Brief workflow
+## Input file
+
+The input for RiPPER is a .txt file that contains a list of NCBI accession numbers for proteins (one on each line) that the user wants to investigate for the presence of associated precursor peptide genes. Lists can be generated manually, or via multiple routes to retrieving a list of associated protein accessions, such as a BLAST search or [conserved domain retrieval]( https://www.ncbi.nlm.nih.gov/Structure/lexington/lexington.cgi).
+
+## Docker
+
+The simplest way to work with RiPPER is to use the Docker container, which includes all dependencies and can be run on Linux/MacOSX/Windows. This all follows installation of [Docker]( https://www.docker.com/get-started). 
+
+### Pulling and running a RiPPER container
+
+To install RiPPER:
+~~~ {.sh}
+docker pull streptomyces/ripdock
+~~~
+
+The default is to pull the image tagged as *latest*. You could pull a different image if you have a tag name. See example below where *testing* is the tag name:
+~~~ {.sh}
+docker pull streptomyces/ripdock:testing
+~~~
+
+Following installation, run the container using the following command, where your input accession list file is stored in `/home/analysis` (substitute your relevant directories in place of this):
+~~~ {.sh}
+docker run -it -v /home/analysis:/home/mnt \
+streptomyces/ripdock
+~~~
+
+Alternatively, the use of $PWD in Unix-like systems expands to the current working directory, where the input list should be stored:
+~~~ {.sh}
+docker run -it -v "$PWD":/home/mnt streptomyces/ripdock
+~~~
+
+Do not change the `/home/mnt` part. This refers to a directory in the container and scripts in the container expect to find this directory. The host directory you mount on `/home/mnt` in the container is where the output directories and files are written to. You can place your input list in the mounted host directory on the host side and access it in /home/mnt/ on the container side. See the example **Run on your own list** below.
+
+### Carrying out an analysis in the running container
+
+Following the docker run command above, to ensure RiPPER is working correctly, you can run a small test analysis on 3 accessions that are included in a test file named *minitest.txt*. Use the following command:
+~~~ {.sh}
+./ripper_run.sh
+~~~
+
+#### Run on your own list
+
+Use the following command to analyse your own list, substituting in a relevant filename for *te_accessions.txt*:
+~~~ {.sh}
+./ripper_run.sh /home/mnt/te_accessions.txt
+~~~
+
+## Analysis parameters
+
+Peptide scoring and retrieval relies on a number of parameters that can be modified and are defined in a configuration file (local.conf, see **Description of RiPPER workflow** for more details). By default, settings that worked well during testing across multiple RiPP classes are used:
+~~~ {.sh}
+flankLen                17500
+minPPlen                   20
+maxPPlen                  120
+maxDistFromTE            8000
+sameStrandReward            5
+fastaOutputLimit            3
+prodigalScoreThresh        7.5
+~~~
+
+*flankLen* refers to the size of the nucleotide region retrieved from either side of the search protein.
+
+*minPPlen* and *maxPPlen* refer to the minimum and maximum length of peptide (AA length) that will be searched for and retrieved by RiPPER.
+
+*maxDistFromTE* refers to the maximum distance from the search protein (the tailoring enzyme, TE) that will be considered for peptide retrieval. Short genes will be annotated on the Genbank file outside of this region, but not tabulated.
+
+*sameStrandReward* refers to a score boost if the peptide is encoded on the same strand as the tailoring enzyme.
+
+*fastaOutputLimit* refers to the number of peptides retrieved for analysis from the maxDistFromTE region. Peptides are chosen for retrieval according to their Prodigal score, and there is no lower limit.  
+
+*prodigalScoreThresh* is the score threshold where RiPPER will retrieve additional peptides if they are above this score and within the maxDistFromTE region.
+
+### Modification of analysis parameters
+
+Currently, *local.conf* needs to be directly modified to change the above parameters, although a future update will allow for parameters to be directly set in the command line. If Docker is used, the *local.conf* file is automatically present in the RiPPER container with the above defaults. To modify this, once the container is running, copy it into the host directory on your computer:
+~~~ {.sh}
+cp local.conf /home/mnt
+~~~
+
+Modify and save the file using a text editor and then use the following command to copy it back into the working directory for RiPPER:
+~~~ {.sh}
+cp /home/mnt/local.conf /home/work
+~~~
+
+## Output files
+
+The RiPPER output consists of a series of output files and folders:
+
+#### orgnamegbk
+A folder containing Genbank files for all retrieved gene clusters. These files are named by the host organism and the input accession number
+
+#### out.txt
+This is a tab-delimited file that reports peptide data for all peptides retrieved by RiPPER (as defined by the analysis parameters above) for all gene clusters. This includes various associated data for the peptides, including Pfam domains and distance from the TE.
+
+#### distant.txt
+This is a tab-delimited file that reports peptide data for all peptides retrieved by RiPPER via a precursor peptide HMM search across the full size of the retrieved gene cluster (i.e. ignores maxDistFromTE), and only reports peptides that were not identified in the original RiPPER search. Peptide identifiers are unique from *out.txt*, so these text files can be combined for downstream analysis.
+
+#### out.faa
+A fasta file for peptides reported in out.txt that is formatted as an input file for similarity networking using [EGN]( http://evol-net.fr/index.php/en/downloads). An equivalent *distant.faa* is also provided.
+
+#### rodeohtml
+A folder containing RODEO html output files for all retrieved gene clusters. Additional RODEO data is provided in a separate **rodout** folder
+
+
+# Description of RiPPER workflow
 
 A bash script (ripper_run.sh, further details below) runs a series of
 scripts to provide a full RiPPER analysis. This uses analysis settings
@@ -103,7 +148,7 @@ used as the search term.
 
 The genbank file is then fetched from GenBank and a smaller genbank
 file is generated from it whose length is twice the value of the
-variable *$flankLen* (default = 12500). This smaller genbank file,
+variable *$flankLen* (default = 17500). This smaller genbank file,
 hereafter referred to as the *sub-genbank* file, is centered around
 the centre of the tailoring enzyme.
 
@@ -154,7 +199,7 @@ it is included in the list to be output and also saved in a *Sqlite3*
 table. By default, ripper.pl includes 3 peptides per gene cluster
 (variable `$fastaOutputLimit`) within this specified distance, as well
 as any additional peptides whose prodigal-short scores are greater
-than variable `$prodigalScoreThresh` (default = 15).
+than variable `$prodigalScoreThresh` (default = 7.5).
 
 
 The proteins in this table are then searched for pfam domains using
@@ -289,7 +334,7 @@ A file named *local.conf* is included in the repository.
 
 *local.conf* is a two column (space delimited) text file which is read
 by *ripper.pl* and the postprocessing scripts in the pipeline. There
-should be no need to make changes to this file.
+should be no need to make changes to this file unless default parameters are being changed (as described above).
 
 ~~~ 
 # Lines beginning with # are comments.
@@ -343,17 +388,17 @@ orgnamegbkdir       /home/mnt/orgnamegbk
 
 # minPPlen                   20
 # maxPPlen                  120
-# prodigalScoreThresh        15
+# prodigalScoreThresh        7.5
 # maxDistFromTE            8000
 # fastaOutputLimit            3
 # sameStrandReward            5
-# flankLen                12500
+# flankLen                17500
 ~~~
 
 ### Building *prodigal-short*
 
 This is for documentation only. *prodigal-short* is provided in the
-docker version.
+Docker version.
 
 The following changes (shown as the output of the *git diff* command)
 were made to *prodigal* source files before building
@@ -478,4 +523,3 @@ perl collectFiles.pl -indir rodout -pat '\.html$' -outdir rodeohtml
 The options shown above are the defaults. *-outdir* may be specified
 in *local.conf* as *rodeohtmldir*. Value in the configuration file
 takes precedence.
-
