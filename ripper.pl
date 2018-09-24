@@ -30,9 +30,9 @@ my $conffile = qq(local.conf);
 my $colorThreshScore = 20;
 my $ppFeatAddLimit = 20;
 my $errfile;
-my $prodigalScoreThresh = 15;
+my $prodigalScoreThresh = 7.5;
 my $prodigalshortbin = qq(prodigal-short);
-my $flankLen = 12500;
+my $flankLen = 17500;
 my $allowedInGene = 20;
 my $minPPlen = 20; # Minimum precursor peptide length.
 my $maxPPlen = 120; # Maximum precursor peptide length.

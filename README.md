@@ -15,7 +15,7 @@ docker run -it -v "$PWD":/home/mnt streptomyces/ripdock
 ~~~
 
 You could pull a different image if you have a tagname. See
-eaxmple below where *testing* is the tagname.
+example below where *testing* is the tagname.
 
 ~~~ {.sh}
 docker pull streptomyces/ripdock:testing
