@@ -9,7 +9,7 @@ RiPPER (RiPP Precursor Peptide Enhanced Recognition) is a customisable tool for 
 
 We recommend that users work with a [Docker container of RiPPER](https://hub.docker.com/r/streptomyces/ripdock/). This is built from the latest version of RiPPER and includes all dependencies, so nothing needs installing apart from Docker and the RiPPER container. Details are provided below on using this in the **Docker** section, and a detailed technical description of the workflow is provided at the end of this page as **Description of RiPPER workflow**.
 
-#Installation and usage
+# Installation and usage
 
 ## Dependencies
 
