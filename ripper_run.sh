@@ -75,7 +75,8 @@ rm sqlite/*
 
 # rodeo run and ripper.pl run for each query in $queryfn
 
-for acc in $(cat $queryfn); do 
+for acc in $(${perlbin} ${ripperdir}/cat.pl $queryfn); do 
+# for acc in $(cat $queryfn); do 
   echo $pythonbin ${rodeodir}/rodeo_main.py -out ${rodoutdir}/${acc} ${acc}
   $pythonbin ${rodeodir}/rodeo_main.py -out ${rodoutdir}/${acc} ${acc}
   echo $perlbin ${ripperdir}/ripper.pl -outdir $ripoutdir -- ${rodoutdir}/${acc}/main_co_occur.csv
