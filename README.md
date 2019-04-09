@@ -48,7 +48,7 @@ docker pull streptomyces/ripdock:testing
 
 Following installation, run the container using the following command, where
 your input accession list file is stored in `/home/tom/rippwork` on Linux and
-MacOS systems or `C:/Users/top/rippwork` on a MS Windows system. (substitute your
+MacOS systems or `C:/Users/tom/rippwork` on a MS Windows system. (substitute your
 relevant directories in place of these):
 
 ~~~ {.sh}
