@@ -46,7 +46,7 @@ docker pull streptomyces/ripdock:testing
 
 Following installation, run the container using the following command, where your input accession list file is stored in `/home/analysis` (substitute your relevant directories in place of this):
 ~~~ {.sh}
-docker run -it -v /home/analysis:/home/mnt \
+docker run -it -v /home/tom/rippwork:/home/mnt \
 streptomyces/ripdock
 
 # Below, example usage on MS Windows.
@@ -54,12 +54,14 @@ docker run -it -v C:/Users/tom/rippwork:/home/mnt \
 streptomyces/ripdock
 ~~~
 
-Alternatively, the use of $PWD in Unix-like systems expands to the current working directory, where the input list should be stored:
+Alternatively, the use of $PWD in Unix-like systems expands to the current
+working directory, where the input list should be stored:
 ~~~ {.sh}
 docker run -it -v "$PWD":/home/mnt streptomyces/ripdock
-# ${PWD} does not mean anything on MS windows. So the above
-# line does not work.
 ~~~
+
+Note that `${PWD}` does not mean anything on MS Windows. So the above
+example line does not work on MS Windows.
 
 Do not change the `/home/mnt` part. This refers to a directory in the container and scripts in the container expect to find this directory. The host directory you mount on `/home/mnt` in the container is where the output directories and files are written to. You can place your input list in the mounted host directory on the host side and access it in /home/mnt/ on the container side. See the example **Run on your own list** below.
 
