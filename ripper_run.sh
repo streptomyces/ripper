@@ -12,9 +12,6 @@
 # Query file name defaults to minitest.txt.
 queryfn=$1;
 
-cp /home/work/ripper/minitest.txt ./
-cp /home/work/ripper/local.conf ./
-
 if [[ ${#queryfn} -lt 1 ]]; then
   queryfn="minitest.txt";
 fi
@@ -30,24 +27,25 @@ rodeodir=/home/work/rodeo2;
 pfamdir=/home/work/pfam
 
 
+
 # Tab delimited output file for results including pfam hits.
-outfile=$PWD/out.txt
-outfaa=$PWD/out.faa
-distfaa=$PWD/distant.faa
-distfile=$PWD/distant.txt
+outfile=/home/mnt/out.txt
+outfaa=/home/mnt/out.faa
+distfaa=/home/mnt/distant.faa
+distfile=/home/mnt/distant.txt
 
 # Rodeo output directory
-rodoutdir=$PWD/rodout;
+rodoutdir=/home/mnt/rodout;
 
 # ripper output directory. Contains gbk files.
-ripoutdir=$PWD/ripout;
+ripoutdir=/home/mnt/ripout;
 
 # ripper output directory. Contains gbk files where filenames
 # have the organism name prepended for convenience. 
-orgnamegbkdir=$PWD/orgnamegbk;
+orgnamegbkdir=/home/mnt/orgnamegbk;
 
 # The html file output by rodeo2 are here.
-rodeohtmldir=$PWD/rodeohtml;
+rodeohtmldir=/home/mnt/rodeohtml;
 
 # Below is legacy from the Linux installable version of this script.
 
@@ -87,9 +85,9 @@ done
 
 # Run the postprocessing scripts
 
-echo $perlbin ${ripperdir}/gbkNameAppendOrg.pl -indir $ripoutdir
+$perlbin ${ripperdir}/pfam_sqlite.pl
+$perlbin ${ripperdir}/mergeRidePfam.pl -out ${outfile} -faa ${outfaa} \
+-distfile ${distfile} -distfaa ${distfaa} 
 $perlbin ${ripperdir}/gbkNameAppendOrg.pl -indir $ripoutdir
-
-echo $perlbin ${ripperdir}/collectFiles.pl ${rodoutdir} ${rodeohtmldir} '\.html$'
 $perlbin ${ripperdir}/collectFiles.pl ${rodoutdir} ${rodeohtmldir} '\.html$'
 
