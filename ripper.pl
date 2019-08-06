@@ -32,7 +32,7 @@ my $ppFeatAddLimit = 20;
 my $errfile;
 my $prodigalScoreThresh = 7.5;
 my $prodigalshortbin = qq(prodigal-short);
-my $flankLen = 17500;
+my $flankLen = 20000;
 my $allowedInGene = 20;
 my $minPPlen = 20; # Minimum precursor peptide length.
 my $maxPPlen = 120; # Maximum precursor peptide length.
@@ -163,7 +163,6 @@ my $esummaryURL='http://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?';
 my $ftp=Net::FTP->new(Host => "ftp.ncbi.nih.gov", Passive => 1);
 # }}}
 
-
 # {{{ open the errfile
 if($errfile) {
 open(ERRH, ">", $errfile);
@@ -172,7 +171,6 @@ close(STDERR);
 open(STDERR, ">&ERRH"); 
 }
 # }}}
-
 
 # {{{ Populate %conf if a configuration file 
 my %conf;
@@ -213,7 +211,6 @@ if(exists($conf{"prodigalshortbin"})) {
 
 
 # }}}
-
 
 # {{{ gbkcache and sqlite initialisation
 my $gbkcache = qq(gbkcache);
@@ -539,31 +536,6 @@ for my $subft (@subft) {
     $subgbk->add_SeqFeature($subft);
   }
 }
-
-=head3 Prodigal
-
-Run Prodigal and parse the output file to populate @prdl
-with listrefs for each line in the prodigal output.
-
-Columns in the output of Prodigal are
-
- 0. Start position
- 1. End position
- 2. Strand as + or -
- 3. Prodigal score
-
-There are more columns but these are the ones we are
-concerned with.
-
-=cut
-
-
-=pod
-
-At this point we have gone through all the output from Prodigal.
-
-=cut
-
 
 =head3 Write the genbank output file.
 

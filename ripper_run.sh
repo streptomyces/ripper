@@ -13,7 +13,7 @@
 queryfn=$1;
 
 cp /home/work/ripper/minitest.txt ./
-cp /home/work/ripper/local.conf /home/work/ripper/postprocess.sh ./
+cp /home/work/ripper/local.conf ./
 
 if [[ ${#queryfn} -lt 1 ]]; then
   queryfn="minitest.txt";
@@ -87,13 +87,13 @@ done
 
 # Run the postprocessing scripts
 
-echo $perlbin ${ripperdir}/pfam_sqlite.pl
-$perlbin ${ripperdir}/pfam_sqlite.pl
-
-echo $perlbin ${ripperdir}/mergeRidePfam.pl -out ${outfile} -faa ${outfaa} \
--distfile ${distfile} -distfaa ${distfaa} 
-$perlbin ${ripperdir}/mergeRidePfam.pl -out ${outfile} -faa ${outfaa} \
--distfile ${distfile} -distfaa ${distfaa} 
+# echo $perlbin ${ripperdir}/pfam_sqlite.pl
+# $perlbin ${ripperdir}/pfam_sqlite.pl
+# 
+# echo $perlbin ${ripperdir}/mergeRidePfam.pl -out ${outfile} -faa ${outfaa} \
+# -distfile ${distfile} -distfaa ${distfaa} 
+# $perlbin ${ripperdir}/mergeRidePfam.pl -out ${outfile} -faa ${outfaa} \
+# -distfile ${distfile} -distfaa ${distfaa} 
 
 echo $perlbin ${ripperdir}/gbkNameAppendOrg.pl -indir $ripoutdir
 $perlbin ${ripperdir}/gbkNameAppendOrg.pl -indir $ripoutdir
