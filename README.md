@@ -66,7 +66,7 @@ Do not change the `/home/mnt` part. This refers to a directory in the container 
 Following the docker run command above, to ensure RiPPER is working correctly, you can run a small test analysis on 3 accessions that are included in a test file named *minitest.txt*. Use the following command:
 
 ~~~ {.sh}
-./ripper_run.sh
+./nopep.sh
 ~~~
 
 #### Run on your own list
@@ -74,7 +74,7 @@ Following the docker run command above, to ensure RiPPER is working correctly, y
 Use the following command to analyse your own list, substituting in a relevant filename for *te_accessions.txt*:
 
 ~~~ {.sh}
-./ripper_run.sh /home/mnt/te_accessions.txt
+./nopep.sh /home/mnt/te_accessions.txt
 ~~~
 
 ## Analysis parameters
@@ -139,7 +139,7 @@ A folder containing RODEO html output files for all retrieved gene clusters. Add
 
 # Description of RiPPER workflow
 
-A bash script (ripper_run.sh, further details below) runs a series of
+A bash script (nopep.sh, further details below) runs a series of
 scripts to provide a full RiPPER analysis. This uses analysis settings
 defined in an associated configuration file (local.conf). Where
 relevant, variables defined in local.conf are described below.
@@ -246,7 +246,7 @@ tailoring enzymes. In the example below this file is named
 *minitest.txt*. The input file should contain a list of tailoring
 enzyme accessions.
 
-Contents of *ripper_run.sh* are listed below. There is no need to make
+Contents of *nopep.sh* are listed below. There is no need to make
 any changes to it.
 
 ~~~ {.sh}
@@ -262,7 +262,7 @@ any changes to it.
 # This file should be in the directory from where it
 # will be run as
 #
-#  ./ripper_run.sh <inputfilename>
+#  ./nopep.sh <inputfilename>
 #
 #
 
@@ -350,12 +350,12 @@ should be no need to make changes to this file unless default parameters are bei
 # All names are case sensitive.
 
 # Downloaded genbank files are cached here.
-# ripper_run.sh automatically generates a gbkcache
+# nopep.sh automatically generates a gbkcache
 # directory in the directory it is run from.
 gbkcache            gbkcache
 
 # Filename for the SQLite3 database.
-# ripper_run.sh automatically generates a sqlite
+# nopep.sh automatically generates a sqlite
 # directory in the directory it is run from.
 sqlite3fn           sqlite/ripp.sqlite3
 
@@ -366,7 +366,7 @@ sqlite3fn           sqlite/ripp.sqlite3
 # hmmscanbin          /usr/local/bin/hmmscan
 
 # Directory containing the Pfam database files.
-# Should be the same as pfamdir in the ripper_run.sh file.
+# Should be the same as pfamdir in the nopep.sh file.
 hmmdir              pfam
 
 # Name of the Pfam database to use.
@@ -387,7 +387,7 @@ prepeptab           ripper
 # Directory where output genbank files are stored.
 # Organism names are prefixed to the file names for
 # ease of identification.
-# ripper_run.sh automatically generates an orgnamegbk directory in the
+# nopep.sh automatically generates an orgnamegbk directory in the
 # directory it is run from.
 orgnamegbkdir       /home/mnt/orgnamegbk
 
