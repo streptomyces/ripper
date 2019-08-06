@@ -13,7 +13,7 @@
 queryfn=$1;
 
 if [[ ${#queryfn} -lt 1 ]]; then
-  queryfn="minitest.txt";
+  queryfn="nopep_test.list";
 fi
 
 if [[ ! -s ${queryfn} || ! -e ${queryfn} ]]; then
