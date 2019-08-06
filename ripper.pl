@@ -11,7 +11,6 @@ use File::Copy;
 use Bio::SeqIO;
 use Bio::Seq;
 use Bio::SeqFeature::Generic;
-use DBI;
 use Digest::SHA qw(sha1_hex);
 
 use XML::Simple;
@@ -30,8 +29,6 @@ my $conffile = qq(local.conf);
 my $colorThreshScore = 20;
 my $ppFeatAddLimit = 20;
 my $errfile;
-my $prodigalScoreThresh = 7.5;
-my $prodigalshortbin = qq(prodigal-short);
 my $flankLen = 20000;
 my $allowedInGene = 20;
 my $minPPlen = 20; # Minimum precursor peptide length.
@@ -113,22 +110,6 @@ The index 1 column is a genbank gid which we use to fetch the genbank file.
 1. From the fetched genbank file we extract the region spanned by the output in
 *arch.csv (column index 5 and 6 of the first and last lines).
 
-2. Prodigal is run on the nucleotide sequence obtained in step 1.
-
-3. Peptides less than 30 amino acids or more than 120 amino acids are discarded.
-
-4. Results of Prodigal are sorted by the total score reported by Prodigal
-
-5. The top 20 peptides (or as many as have a total prodigal score of more then 0)
-are kept.
-
-6. Peptides kept in step 5 are added to the annotation in the genbank file as
-CDSs.
-
-7. The top 3 peptides are coloured reddish brown, the next 9 are coloured green
-and the remainder are coloured yellowish brown. For these features, the note
-tag contains the output from Prodigal for each particular peptide.
-
 =head2 Input files
 
 These are F<outarch.csv> files resulting from running RODEO. This is a messy
@@ -193,9 +174,6 @@ linelistE("Specified configuration file $conffile not found.");
 if(exists($conf{minPPlen})) { $minPPlen = $conf{minPPlen}; }
 if(exists($conf{maxPPlen})) { $maxPPlen = $conf{maxPPlen}; }
 if(exists($conf{maxDistFromTE})) { $maxDistFromTE = $conf{maxDistFromTE}; }
-if(exists($conf{prodigalScoreThresh})) {
-  $prodigalScoreThresh = $conf{prodigalScoreThresh};
-}
 if(exists($conf{fastaOutputLimit})) {
   $fastaOutputLimit = $conf{fastaOutputLimit};
 }
@@ -205,37 +183,13 @@ if(exists($conf{sameStrandReward})) {
 if(exists($conf{flankLen})) {
   $flankLen = $conf{flankLen};
 }
-if(exists($conf{"prodigalshortbin"})) {
-  $prodigalshortbin = $conf{prodigalshortbin};
-}
 
 
 # }}}
 
-# {{{ gbkcache and sqlite initialisation
+# {{{ gbkcache initialisation
 my $gbkcache = qq(gbkcache);
 if(exists($conf{gbkcache})) { $gbkcache = $conf{gbkcache}; }
-
-
-my $dbfile=$conf{sqlite3fn};
-my $handle=DBI->connect("DBI:SQLite:dbname=$dbfile", '', '');
-
-my $create_table_str = <<"CTS";
-create table if not exists $conf{prepeptab} (
-acc       text,
-species   text,
-ppser     integer,
-fastaid   text,
-aaseq     text,
-ppstrand  integer,
-testrand  integer,
-pptedist  integer,
-score     float,
-unique(acc, ppser)
-);
-CTS
-# $handle->do("drop table if exists $conf{prepeptab}");
-$handle->do($create_table_str);
 # }}}
 
 # {{{ populate @infiles
@@ -552,7 +506,6 @@ $subout->write_seq($subgbk);
 
 #copy($gbkfn, $gbkgi . ".gbk");
 #copy($subfn, "sub.fna");
-#copy($prdfn, $gbkgi . ".prodigal");
 unlink($gbkfn, $subfn, $tefn);
 }
 
@@ -563,83 +516,8 @@ exit;
 END {
 close(STDERR);
 close(ERRH);
-$handle->disconnect();
 }
 
-
-# {{{ sub insertSQL {
-sub insertSQL {
-  my ($teProtAcc, $spbinom, $ppFastaOutputCnt, $fastaid, $aaseq,
-      $strand, $teStrand, $distFromTE, $score) = @_;
-  my $instr = qq/insert or replace into $conf{prepeptab} values(/;
-      $instr .= $handle->quote($teProtAcc) . ", ";
-      $instr .= $handle->quote($spbinom) . ", ";
-      $instr .= $ppFastaOutputCnt . ", ";
-      $instr .= $handle->quote($fastaid) . ", ";
-      $instr .= $handle->quote($aaseq) . ", ";
-      $instr .= $strand . ", ";
-      $instr .= $teStrand . ", ";
-      $instr .= $distFromTE . ", ";
-      $instr .= $score . ")";
-      unless($handle->do($instr)) {
-      linelistE($instr);
-      }
-}
-# }}}
-
-# {{{ sub distTE.
-
-=head3 sub distTE
-
-Gets two pairs of numbers
-
-prodigal peptide start and end
-
-TE start and end
-
-Returns the minimum distance between the two.
-
-=cut
-
-
-sub distTE {
-  my $prse = shift(@_);
-  my $tese = shift(@_);
-  my $mindist = 99999999;
-  for my $prpos (@{$prse}) {
-    for my $tepos (@{$tese}) {
-      my $dist = abs($prpos - $tepos);
-      $mindist = $mindist < $dist ? $mindist : $dist; 
-    }
-  }
-  return($mindist);
-}
-# }}}
-
-# {{{ sub prodigal2aa listref, fastafilename. Not used.
-
-sub prodigal2aa {
-  my $lr = shift(@_);
-  my $subfn = shift(@_);
-
-  my $seqio = Bio::SeqIO->new(-file => $subfn, -format => "fasta");
-  my $seqobj = $seqio->next_seq();
-
-  my ($start, $end, $strand) = @{$lr}[0, 1, 2];
-
-  my $cds;
-  if($strand == 1) {
-    $cds = $seqobj->trunc($start, $end);
-  }
-  else {
-    $cds = $seqobj->trunc($start, $end)->revcom();
-  }
-  my $aaobj = $cds->translate();
-  $aaobj->display_id($start);
-  $aaobj->description("$end, $strand");
-  return($aaobj);
-}
-# }}}
 
 # {{{ sub seqobj2print $aaobj. Not used.
 sub seqobj2print {
@@ -660,35 +538,6 @@ my $ft = shift(@_);
 my $fseq = $ft->spliced_seq(-nosort => 1);
 my $aaobj = $fseq->translate();
 return($aaobj->seq());
-}
-# }}}
-
-# {{{ sub prdcol
-
-=head3 sub prdcol
-
-The colour in which a precursor peptide feature will get rendered
-in Artemis gets decided here.
-
-=cut
-
-
-sub prdcol {
-my $prdlCnt = shift(@_);
-my $dte = shift(@_);
-my $score = shift(@_);
-if($dte <= $maxDistFromTE and $score >= $colorThreshScore) {
-return("255 0 160");
-}
-elsif($prdlCnt < 3) {
-return("255 0 0");
-}
-elsif($prdlCnt < 12) {
-return("255 110 110");
-}
-else {
-return("255 188 188");
-}
 }
 # }}}
 
@@ -825,8 +674,6 @@ sub TEcoordsByProtId {
 return();
 }
 # }}}
-
-
 
 # {{{ subroutines tablist, linelist, tabhash and their *E versions.
 # The E versions are for printing to STDERR.

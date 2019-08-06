@@ -87,14 +87,6 @@ done
 
 # Run the postprocessing scripts
 
-# echo $perlbin ${ripperdir}/pfam_sqlite.pl
-# $perlbin ${ripperdir}/pfam_sqlite.pl
-# 
-# echo $perlbin ${ripperdir}/mergeRidePfam.pl -out ${outfile} -faa ${outfaa} \
-# -distfile ${distfile} -distfaa ${distfaa} 
-# $perlbin ${ripperdir}/mergeRidePfam.pl -out ${outfile} -faa ${outfaa} \
-# -distfile ${distfile} -distfaa ${distfaa} 
-
 echo $perlbin ${ripperdir}/gbkNameAppendOrg.pl -indir $ripoutdir
 $perlbin ${ripperdir}/gbkNameAppendOrg.pl -indir $ripoutdir
 
