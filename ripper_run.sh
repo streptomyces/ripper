@@ -13,7 +13,7 @@
 queryfn=$1;
 
 cp /home/work/ripper/minitest.txt ./
-cp local.conf postprocess.sh ./
+cp /home/work/ripper/local.conf /home/work/ripper/postprocess.sh ./
 
 if [[ ${#queryfn} -lt 1 ]]; then
   queryfn="minitest.txt";
