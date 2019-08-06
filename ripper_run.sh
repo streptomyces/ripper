@@ -12,6 +12,9 @@
 # Query file name defaults to minitest.txt.
 queryfn=$1;
 
+cp /home/work/ripper/minitest.txt ./
+cp local.conf postprocess.sh ./
+
 if [[ ${#queryfn} -lt 1 ]]; then
   queryfn="minitest.txt";
 fi
@@ -27,25 +30,24 @@ rodeodir=/home/work/rodeo2;
 pfamdir=/home/work/pfam
 
 
-
 # Tab delimited output file for results including pfam hits.
-outfile=/home/mnt/out.txt
-outfaa=/home/mnt/out.faa
-distfaa=/home/mnt/distant.faa
-distfile=/home/mnt/distant.txt
+outfile=$PWD/out.txt
+outfaa=$PWD/out.faa
+distfaa=$PWD/distant.faa
+distfile=$PWD/distant.txt
 
 # Rodeo output directory
-rodoutdir=/home/mnt/rodout;
+rodoutdir=$PWD/rodout;
 
 # ripper output directory. Contains gbk files.
-ripoutdir=/home/mnt/ripout;
+ripoutdir=$PWD/ripout;
 
 # ripper output directory. Contains gbk files where filenames
 # have the organism name prepended for convenience. 
-orgnamegbkdir=/home/mnt/orgnamegbk;
+orgnamegbkdir=$PWD/orgnamegbk;
 
 # The html file output by rodeo2 are here.
-rodeohtmldir=/home/mnt/rodeohtml;
+rodeohtmldir=$PWD/rodeohtml;
 
 # Below is legacy from the Linux installable version of this script.
 
