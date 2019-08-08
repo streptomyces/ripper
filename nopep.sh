@@ -69,7 +69,7 @@ if [[ ! -d $hcd ]]; then
 fi
 done
 
-rm sqlite/*
+# rm sqlite/*
 
 ### Setup is now complete. Actual runs below. ###
 

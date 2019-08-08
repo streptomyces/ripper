@@ -29,7 +29,7 @@ my $conffile = qq(local.conf);
 my $colorThreshScore = 20;
 my $ppFeatAddLimit = 20;
 my $errfile;
-my $flankLen = 20000;
+my $flankLen = 40000;
 my $allowedInGene = 20;
 my $minPPlen = 20; # Minimum precursor peptide length.
 my $maxPPlen = 120; # Maximum precursor peptide length.
