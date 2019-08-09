@@ -7,6 +7,8 @@ while(<IN>) {
 my $line = $_;
 chomp($line);
 $line =~ s/\r$//;
+unless($line =~ m/^\s*#/) {
 print("$line\n");
+}
 }
 
