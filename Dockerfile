@@ -55,7 +55,7 @@ RUN hmmpress ripp.hmm
 WORKDIR /home/work
 RUN git clone https://github.com/streptomyces/ripper.git
 WORKDIR /home/work/ripper
-RUN git checkout nopepdock
+RUN git checkout master
 
 WORKDIR /home/work
 RUN git clone https://github.com/the-mitchell-lab/rodeo2.git
@@ -65,7 +65,7 @@ RUN mkdir -p /home/work/pfamscan
 RUN cp ripper/ripper_run.sh ripper/minitest.txt ripper/local.conf ./
 RUN cp ripper/postprocess.sh ./
 
-RUN apt-get install -yqq vim
+# RUN apt-get install -yqq vim
 
 RUN rm meme*.gz
 WORKDIR /home/work
