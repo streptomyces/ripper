@@ -50,7 +50,7 @@ rodeohtmldir=/home/mnt/rodeohtml;
 # Below is legacy from the Linux installable version of this script.
 
 perlbin="perl"
-pythonbin="python"
+pythonbin="python3"
 
 
 # Make a couple of symlinks to keep rodeo_main.py happy.
