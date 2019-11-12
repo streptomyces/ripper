@@ -67,6 +67,6 @@ RUN cp ripper/postprocess.sh ./
 
 RUN apt-get install vim
 
-rm meme*.gz
+RUN rm meme*.gz
 WORKDIR /home/work
 
