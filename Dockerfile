@@ -65,7 +65,7 @@ RUN mkdir -p /home/work/pfamscan
 RUN cp ripper/nopep.sh ripper/nopep_test.list ripper/local.conf ./
 RUN cp ripper/postprocess.sh ./
 
-RUN apt-get install vim
+RUN apt-get install -yqq vim
 
 RUN rm meme*.gz
 WORKDIR /home/work
