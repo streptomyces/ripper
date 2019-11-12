@@ -21,12 +21,13 @@
 # Within one level of precedence, the last matching pattern decides
 # the outcome.
 
-*
-!Dockerfile
-!.gitignore
-# !*.p[lm]
-# !*.bash
-# !*.sh
-# !*.pod
-# !*.[rR]
-
+.*sw[op]
+check*.pl
+test*.pl
+test*.sh
+commitmesg
+*.doc
+*.docx
+*comment*
+pfam_lengths.pl
+ignore/
