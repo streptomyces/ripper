@@ -67,5 +67,5 @@ RUN cp ripper/ripper_run.sh ripper/minitest.txt ripper/local.conf ./
 RUN cp ripper/postprocess.sh ripper/rodconf.pl ./
 
 RUN rm meme*.gz
-WORKDIR /home/work
+RUN ln -s rodeo2/confs ./
 
