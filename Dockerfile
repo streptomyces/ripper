@@ -65,7 +65,6 @@ RUN mkdir -p /home/work/pfamscan
 
 RUN cp ripper/nopep.sh ripper/nopep_test.list ripper/local.conf ./
 RUN cp ripper/postprocess.sh ripper/rodconf.pl ./
-
 RUN rm meme*.gz
-WORKDIR /home/work
+RUN ln -s rodeo2/confs ./
 
