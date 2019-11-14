@@ -2,6 +2,7 @@ FROM ubuntu:bionic
 # FROM bioperl/bioperl
 MAINTAINER Govind Chandra <govind.chandra@jic.ac.uk>
 # ENV DEBIAN_FRONTEND noninteractive
+# ripdock
 
 RUN apt-get update && apt-get install -yqq apt-utils \
 sqlite3 build-essential python-dev python-pip \
@@ -63,9 +64,7 @@ RUN mkdir -p /home/work/sqlite
 RUN mkdir -p /home/work/pfamscan
 
 RUN cp ripper/ripper_run.sh ripper/minitest.txt ripper/local.conf ./
-RUN cp ripper/postprocess.sh ./
-
-# RUN apt-get install -yqq vim
+RUN cp ripper/postprocess.sh ripper/rodconf.pl ./
 
 RUN rm meme*.gz
 WORKDIR /home/work
