@@ -68,4 +68,8 @@ RUN cp ripper/postprocess.sh ripper/rodconf.pl ./
 
 RUN rm meme*.gz
 RUN ln -s rodeo2/confs ./
+ENV PATH="/usr/local/libexec/meme-5.1.0:${PATH}"
+
+# docker build -t "streptomyces/ripdock-egn" .
+# docker push streptomyces/ripdock:latest
 
