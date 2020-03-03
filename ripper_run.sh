@@ -91,3 +91,19 @@ $perlbin ${ripperdir}/mergeRidePfam.pl -out ${outfile} -faa ${outfaa} \
 $perlbin ${ripperdir}/gbkNameAppendOrg.pl -indir $ripoutdir
 $perlbin ${ripperdir}/collectFiles.pl ${rodoutdir} ${rodeohtmldir} '\.html$'
 
+# Peptide Network Analysis
+
+pnadir="/home/mnt/pna";
+mkdir $pnadir
+cp ${outfaa} $pnadir
+
+cytoattribfn=${pnadir}/cytoscape_attib.txt;
+$perlbin ${ripperdir}/make_cytoscape_attribute_file.pl \
+-outfile ${cytoattribfn} -- ${outfile}
+
+$perlbin ${ripperdir}/egn_ni.pl -task all
+
+
+
+
+
