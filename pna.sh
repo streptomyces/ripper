@@ -32,14 +32,20 @@ pnadir="/home/mnt/pna";
 if [[ ! -d $pnadir ]]; then
 mkdir $pnadir
 fi
-cp ${outfaa} $pnadir
+cp ${outfaa} ${distfaa} $pnadir
 
-cytoattribfn=${pnadir}/cytoscape_attib.txt;
+ocyat=${pnadir}/out_cytoattrib.txt;
 $perlbin ${ripperdir}/make_cytoscape_attribute_file.pl \
--outfile ${cytoattribfn} -- ${outfile}
+-outfile ${ocyat} -- ${outfile}
 
+dcyat=${pnadir}/dist_cytoattrib.txt;
+$perlbin ${ripperdir}/make_cytoscape_attribute_file.pl \
+-outfile ${dcyat} -- ${distfile}
 
 pushd $pnadir;
+for gd in $(ls -d --color=never GENENET*); do
+  rm -rf $gd
+done
 $perlbin ${ripperdir}/egn_ni.pl -task all
 pushd
 
