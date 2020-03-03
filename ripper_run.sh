@@ -74,13 +74,15 @@ rm sqlite/*
 ### Setup is now complete. Actual runs below. ###
 
 # rodeo run and ripper.pl run for each query in $queryfn
-
+pcnt=0;
 for acc in $(${perlbin} ${ripperdir}/cat.pl $queryfn); do 
 # for acc in $(cat $queryfn); do 
   echo $pythonbin ${rodeodir}/rodeo_main.py -out ${rodoutdir}/${acc} ${acc}
   $pythonbin ${rodeodir}/rodeo_main.py -out ${rodoutdir}/${acc} ${acc}
   echo $perlbin ${ripperdir}/ripper.pl -outdir $ripoutdir -- ${rodoutdir}/${acc}/main_co_occur.csv
   $perlbin ${ripperdir}/ripper.pl -outdir $ripoutdir -- ${rodoutdir}/${acc}/main_co_occur.csv
+  :pcnt=$(( $pcnt + 1 ))
+  echo; echo Done $pcnt; echo;
 done
 
 # Run the postprocessing scripts
@@ -94,15 +96,18 @@ $perlbin ${ripperdir}/collectFiles.pl ${rodoutdir} ${rodeohtmldir} '\.html$'
 # Peptide Network Analysis
 
 pnadir="/home/mnt/pna";
+if [[ ! -d $pnadir ]]; then
 mkdir $pnadir
+fi
 cp ${outfaa} $pnadir
 
 cytoattribfn=${pnadir}/cytoscape_attib.txt;
 $perlbin ${ripperdir}/make_cytoscape_attribute_file.pl \
 -outfile ${cytoattribfn} -- ${outfile}
 
+pushd $pnadir
 $perlbin ${ripperdir}/egn_ni.pl -task all
-
+pushd
 
 
 
