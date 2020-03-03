@@ -30,7 +30,7 @@ The input for RiPPER is a .txt file that contains a list of NCBI accession numbe
 
 ## Docker
 
-The simplest way to work with RiPPER is to use the Docker container, which includes all dependencies and can be run on Linux/MacOSX/Windows. This all follows installation of [Docker]( https://www.docker.com/get-started). 
+The simplest way to work with RiPPER is to use the Docker container, which includes all dependencies and can be run on Linux/MacOSX/Windows. This all follows installation of [Docker]( https://www.docker.com/get-started).
 
 ### Pulling and running a RiPPER container
 
@@ -99,7 +99,7 @@ prodigalScoreThresh        7.5
 
 *sameStrandReward* refers to a score boost if the peptide is encoded on the same strand as the tailoring enzyme.
 
-*fastaOutputLimit* refers to the number of peptides retrieved for analysis from the maxDistFromTE region. Peptides are chosen for retrieval according to their Prodigal score, and there is no lower limit.  
+*fastaOutputLimit* refers to the number of peptides retrieved for analysis from the maxDistFromTE region. Peptides are chosen for retrieval according to their Prodigal score, and there is no lower limit.
 
 *prodigalScoreThresh* is the score threshold where RiPPER will retrieve additional peptides if they are above this score and within the maxDistFromTE region.
 
@@ -184,7 +184,7 @@ nucleotides in the default build.
 For all the genes found by *prodigal-short* the following is done.
 
 1. The prodigal score is enhanced by a reward if the gene is on the
-same strand as the tailoring enzyme and its score before reward is 
+same strand as the tailoring enzyme and its score before reward is
 more than negative of the reward number.(variable `$sameStrandReward`,
 default = 5).
 
@@ -274,7 +274,7 @@ if [[ ${#queryfn} -lt 1 ]]; then
 fi
 
 if [[ ! -s ${queryfn} || ! -e ${queryfn} ]]; then
-echo "Either $queryfn does not exists or is zero in size. Aborting."; 
+echo "Either $queryfn does not exists or is zero in size. Aborting.";
 exit 1;
 fi
 
@@ -295,7 +295,7 @@ rodoutdir=/home/mnt/rodout;
 ripoutdir=/home/mnt/ripout;
 
 # ripper output directory. Contains gbk files where filenames
-# have the organism name prepended for convenience. 
+# have the organism name prepended for convenience.
 orgnamegbkdir=/home/mnt/orgnamegbk;
 
 # The html file output by rodeo2 are here.
@@ -322,7 +322,7 @@ done
 
 # rodeo run and ripper.pl run for each query in $queryfn
 
-for acc in $(cat $queryfn); do 
+for acc in $(cat $queryfn); do
   echo $pythonbin ${rodeodir}/rodeo_main.py -out ${rodoutdir}/${acc} ${acc}
   $pythonbin ${rodeodir}/rodeo_main.py -out ${rodoutdir}/${acc} ${acc}
   echo $perlbin ${ripperdir}/ripper.pl -outdir $ripoutdir -- ${rodoutdir}/${acc}/main_co_occur.csv

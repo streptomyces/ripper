@@ -81,7 +81,7 @@ for acc in $(${perlbin} ${ripperdir}/cat.pl $queryfn); do
   $pythonbin ${rodeodir}/rodeo_main.py -out ${rodoutdir}/${acc} ${acc}
   echo $perlbin ${ripperdir}/ripper.pl -outdir $ripoutdir -- ${rodoutdir}/${acc}/main_co_occur.csv
   $perlbin ${ripperdir}/ripper.pl -outdir $ripoutdir -- ${rodoutdir}/${acc}/main_co_occur.csv
-  :pcnt=$(( $pcnt + 1 ))
+  : $(( ++pcnt ))
   echo; echo Done $pcnt; echo;
 done
 
