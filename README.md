@@ -532,3 +532,17 @@ perl collectFiles.pl -indir rodout -pat '\.html$' -outdir rodeohtml
 The options shown above are the defaults. *-outdir* may be specified
 in *local.conf* as *rodeohtmldir*. Value in the configuration file
 takes precedence.
+
+### Peptide Network Analysis
+
+If it does not already exists, a directory named `pna` is made and the
+files `out.faa`, `distance.faa`, `out.txt` and `distance.txt` are
+copied to it.
+
+The Perl script `make_cytoscape_attribute_file.pl` is used to make
+`out_cytoattrib.txt` and `dist_cytoattrib.txt` from the two txt files.
+
+After changing to the `pna` directory EGN is run. When it is done we
+change back to the `/home/work` directory. This is because EGN need to
+be run from the directory where the input fasta files are.
+

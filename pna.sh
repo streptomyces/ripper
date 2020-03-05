@@ -34,13 +34,13 @@ mkdir $pnadir
 fi
 cp ${outfaa} ${distfaa} $pnadir
 
-ocyat=${pnadir}/out_cytoattrib.txt;
+cyat=${pnadir}/cytoattrib.txt;
 $perlbin ${ripperdir}/make_cytoscape_attribute_file.pl \
--outfile ${ocyat} -- ${outfile}
+-outfile ${cyat} -- ${outfile}
 
-dcyat=${pnadir}/dist_cytoattrib.txt;
 $perlbin ${ripperdir}/make_cytoscape_attribute_file.pl \
--outfile ${dcyat} -- ${distfile}
+-outfile ${cyat} -append -- ${distfile}
+
 
 pushd $pnadir;
 for gd in $(ls -d --color=never GENENET*); do
