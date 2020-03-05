@@ -101,17 +101,18 @@ mkdir $pnadir
 fi
 cp ${outfaa} ${distfaa} $pnadir
 
-cyat=${pnadir}/cytoattrib.txt;
-$perlbin ${ripperdir}/make_cytoscape_attribute_file.pl \
--outfile ${cyat} -- ${outfile}
-
-$perlbin ${ripperdir}/make_cytoscape_attribute_file.pl \
--outfile ${cyat} -append -- ${distfile}
-
+# Note change in working directory below.
 pushd $pnadir;
 for gd in $(ls -d --color=never GENENET*); do
   rm -rf $gd
 done
 $perlbin ${ripperdir}/egn_ni.pl -task all
+
+pnafasdir=$(find . -type d -name 'FASTA')
+
+cyat="cytoattrib.txt";
+$perlbin ${ripperdir}/make_cytoscape_attribute_file.pl \
+-outfile ${cyat} -pnafasdir $pnafasdir -- ${outfile} ${distfile}
+
 pushd
 

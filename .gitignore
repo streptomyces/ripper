@@ -30,4 +30,5 @@ commitmesg
 *.docx
 *comment*
 pfam_lengths.pl
+commands.md
 ignore/
