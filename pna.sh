@@ -69,7 +69,8 @@ pnafasdir=$(find . -type d -name 'FASTA')
 
 cyat="cytoattrib.txt";
 $perlbin ${ripperdir}/make_cytoscape_attribute_file.pl \
--outfile ${cyat} -pnafasdir $pnafasdir -- ${outfile} ${distfile}
+-outfile ${cyat} -pnafasdir $pnafasdir \
+-ecp $ecp -- ${outfile} ${distfile}
 
 pushd
 
