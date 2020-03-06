@@ -63,14 +63,13 @@ pushd $pnadir;
 for gd in $(ls -d --color=never GENENET*); do
   rm -rf $gd
 done
-$perlbin ${ripperdir}/egn_ni.pl -task all
+$perlbin ${ripperdir}/egn_ni.pl -ecp $ecp -task all
 
 pnafasdir=$(find . -type d -name 'FASTA')
 
 cyat="cytoattrib.txt";
 $perlbin ${ripperdir}/make_cytoscape_attribute_file.pl \
--outfile ${cyat} -pnafasdir $pnafasdir \
--ecp $ecp -- ${outfile} ${distfile}
+-outfile ${cyat} -pnafasdir $pnafasdir -- ${outfile} ${distfile}
 
 pushd
 
