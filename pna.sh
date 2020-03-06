@@ -1,4 +1,26 @@
 #!/bin/bash
+dir="pna";
+ecp="10,40,40,14,5,50";
+
+while getopts "e:d:" opts; do
+case ${opts} in
+  e)
+   ecp=${OPTARG}
+   ;;
+  d)
+   dir=${OPTARG}
+   ;;
+esac
+done
+
+
+if [[ $dir == "" ]]; then
+  echo "Option -d (directory) is required".
+  exit;
+fi
+
+echo  $dir$'\t'$ecp
+
 ripperdir=/home/work/ripper;
 rodeodir=/home/work/rodeo2;
 pfamdir=/home/work/pfam
@@ -27,25 +49,28 @@ rodeohtmldir=/home/mnt/rodeohtml;
 perlbin="perl"
 pythonbin="python3"
 
+
 # Peptide Network Analysis
-pnadir="/home/mnt/pna";
+
+pnadir=$dir;
 if [[ ! -d $pnadir ]]; then
 mkdir $pnadir
 fi
 cp ${outfaa} ${distfaa} $pnadir
 
-cyat=${pnadir}/cytoattrib.txt;
-$perlbin ${ripperdir}/make_cytoscape_attribute_file.pl \
--outfile ${cyat} -- ${outfile}
-
-$perlbin ${ripperdir}/make_cytoscape_attribute_file.pl \
--outfile ${cyat} -append -- ${distfile}
-
-
+# Note change in working directory below.
 pushd $pnadir;
 for gd in $(ls -d --color=never GENENET*); do
   rm -rf $gd
 done
 $perlbin ${ripperdir}/egn_ni.pl -task all
+
+pnafasdir=$(find . -type d -name 'FASTA')
+
+cyat="cytoattrib.txt";
+$perlbin ${ripperdir}/make_cytoscape_attribute_file.pl \
+-outfile ${cyat} -pnafasdir $pnafasdir -- ${outfile} ${distfile}
+
 pushd
+
 
