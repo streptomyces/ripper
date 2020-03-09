@@ -376,7 +376,6 @@ sub pdx {
   }
   return(@pdx);
 }
-}
 # }}}
 
 # End of subs called by sub richcolors }}}
