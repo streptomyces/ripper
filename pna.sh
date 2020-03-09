@@ -60,7 +60,7 @@ cp ${outfaa} ${distfaa} $pnadir
 
 # Note change in working directory below.
 pushd $pnadir;
-for gd in $(ls -d --color=never GENENET*); do
+for gd in $(ls -d --color=never GENENET* 2> /dev/null); do
   rm -rf $gd
 done
 $perlbin ${ripperdir}/egn_ni.pl -ecp $ecp -task all

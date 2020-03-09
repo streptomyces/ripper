@@ -203,7 +203,8 @@ sub richcolors {
   my @greens = rgb(greens(@ex));
   my @blues = rgb(blues(@ex));
   my @colour = colour(\@reds, \@greens, \@blues);
-  return(@colour);
+  my @repicked = repick(@colour);
+  return(@repicked);
 }
 # }}}
 
@@ -326,6 +327,55 @@ sub cdf {
   } else {
     return pdf( $z )*$y;
   }
+}
+# }}}
+
+# {{{ sub repick
+sub repick {
+  my @dx = @_;
+  my $div = 3;
+  my @rdx = ($dx[0],$dx[$#dx]);
+  my $sectlen = int($#dx / $div);
+  my $onedone = 0;
+  while($sectlen >= 1) {
+    my @pdx = pdx($sectlen, $#dx);
+    if($sectlen == 1) {
+      $onedone = 1;
+# @pdx = reverse @pdx;
+    }
+    for my $temp (@dx[@pdx]) {
+      unless( any {$_ eq $temp} @rdx ) {
+        push(@rdx, $temp);
+      }
+    }
+    if($onedone) { last; }
+    $div += 2;
+    $sectlen = int($#dx / $div);
+  }
+  return(@rdx);
+}
+# }}}
+
+
+
+# {{{ sub pdx called by repick
+sub pdx {
+  my $sectlen = shift(@_);
+  my $lastdx = shift(@_);
+  my @pdx;
+# =======
+# ===========================================
+  my $sectmult = 1;
+  while(1) {
+    my $dx = $sectlen * $sectmult;
+    $sectmult += 1;
+    if($dx > $lastdx) { last; }
+    else {
+      push(@pdx, $dx);
+    }
+  }
+  return(@pdx);
+}
 }
 # }}}
 

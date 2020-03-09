@@ -52,24 +52,29 @@ RUN cat ripp.hmm >> Pfam-A.hmm
 RUN hmmpress Pfam-A.hmm
 RUN hmmpress ripp.hmm
 
+# RODEO
+WORKDIR /home/work
+RUN git clone https://github.com/the-mitchell-lab/rodeo2.git
+RUN mkdir -p /home/work/sqlite
+RUN mkdir -p /home/work/pfamscan
 
+# RiPPER
 WORKDIR /home/work
 RUN git clone https://github.com/streptomyces/ripper.git
 WORKDIR /home/work/ripper
 RUN git checkout master
 
 WORKDIR /home/work
-RUN git clone https://github.com/the-mitchell-lab/rodeo2.git
-RUN mkdir -p /home/work/sqlite
-RUN mkdir -p /home/work/pfamscan
-
 RUN cp ripper/ripper_run.sh ripper/minitest.txt ripper/local.conf ./
-RUN cp ripper/postprocess.sh ripper/rodconf.pl ./
+RUN cp ripper/postprocess.sh ripper/rodconf.pl ripper/pna.sh ./
 
 RUN rm meme*.gz
 RUN ln -s rodeo2/confs ./
 ENV PATH="/usr/local/libexec/meme-5.1.0:${PATH}"
 
 # docker build -t "streptomyces/ripdock-egn" .
-# docker push streptomyces/ripdock:latest
+# docker build --no-cache -t "streptomyces/ripdock-egn" .
+# docker push streptomyces/ripdock-egn:latest
+
+#################################################################
 

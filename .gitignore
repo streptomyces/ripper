@@ -31,4 +31,5 @@ commitmesg
 *comment*
 pfam_lengths.pl
 commands.md
+repick.pl
 ignore/
