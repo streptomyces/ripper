@@ -117,8 +117,11 @@ for my $faa (@fasfiles) {
   close(FAA);
 }
 
-my @clusters = uniqstr(values(%membership));
+my @temp = uniqstr(values(%membership));
+my @clusters = sort {lc($a) cmp lc($b)} @temp;
+tablistE(@clusters);
 my @colours = precolor(scalar(@clusters));
+tablistE(@colours);
 my %colours;
 for my $dx (0..$#clusters) {
   $colours{$clusters[$dx]} = $colours[$dx];
