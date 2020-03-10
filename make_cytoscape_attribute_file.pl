@@ -118,7 +118,7 @@ for my $faa (@fasfiles) {
 }
 
 my @temp = uniqstr(values(%membership));
-my @clusters = sort {lc($a) cmp lc($b)} @temp;
+my @clusters = sort sorter @temp;
 tablistE(@clusters);
 my @colours = precolor(scalar(@clusters));
 tablistE(@colours);
@@ -164,6 +164,25 @@ close(STDERR);
 close(ERRH);
 # $handle->disconnect();
 }
+
+# {{{ sub sorter
+sub sorter {
+  my $alpha = $a;
+  my $beta = $b;
+  my ($astr) = $alpha =~ m/^(\D+)/;
+  my ($bstr) = $beta =~ m/^(\D+)/;
+  my ($anum) = $alpha =~ m/(\d+)$/;
+  my ($bnum) = $beta =~ m/(\d+)$/;
+  tablistE($astr, $bstr, $anum, $bnum);
+  if($astr eq $bstr) {
+    return($anum <=> $bnum);
+  }
+  else {
+    return(lc($astr) cmp lc($bstr));
+  }
+}
+# }}}
+
 
 # {{{ sub precolor
 sub precolor {

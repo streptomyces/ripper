@@ -23,7 +23,7 @@ RUN cp ripper/pna.sh ./
 
 # RUN rm meme*.gz
 RUN ln -sf rodeo2/confs ./
-ENV PATH="/usr/local/libexec/meme-5.1.0:${PATH}"
+# ENV PATH="/usr/local/libexec/meme-5.1.0:${PATH}"
 
 # docker rmi 25905b3b863c
 # docker build --no-cache -f df2 -t streptomyces/ripdock-egn .
