@@ -1,5 +1,5 @@
 #!/bin/bash
-dir="pna";
+dir="../mnt/pna";
 ecp="10,40,40,14,5,50";
 
 while getopts "e:d:" opts; do

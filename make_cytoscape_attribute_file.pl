@@ -19,6 +19,7 @@ use Getopt::Long;
 my $errfile;
 my $outfile;
 my $pnafasdir;
+my $colourFile = qq(/home/work/ripper/colours.txt);
 our $verbose;
 my $help;
 GetOptions (
@@ -26,6 +27,7 @@ GetOptions (
 # "conffile:s" => \$conffile,
 "errfile:s" => \$errfile,
 "verbose" => \$verbose,
+"colourfile:s" => \$colourFile,
 "pnafasdir:s" => \$pnafasdir,
 "help" => \$help
 );
@@ -116,10 +118,10 @@ for my $faa (@fasfiles) {
 }
 
 my @clusters = uniqstr(values(%membership));
-my @colours = richcolors(scalar(@clusters));
+my @colours = precolor(scalar(@clusters));
 my %colours;
 for my $dx (0..$#clusters) {
-$colours{$clusters[$dx]} = $colours[$dx];
+  $colours{$clusters[$dx]} = $colours[$dx];
 }
 
 
@@ -159,6 +161,35 @@ close(STDERR);
 close(ERRH);
 # $handle->disconnect();
 }
+
+# {{{ sub precolor
+sub precolor {
+  my $num = shift(@_);
+  open(COLH, "<", $colourFile);
+  my @cols;
+  while(<COLH>) {
+    my $line = $_; chomp($line);
+    push(@cols, $line);
+  }
+  close(COLH);
+  my $ncol = scalar(@cols);
+  if($num <= $ncol) {
+    return(@cols[0..($num-1)]);
+  }
+  else {
+    my $times = int($num / $ncol);
+    my $mod = $num % $ncol;
+    my @retlist;
+    for(1..$times) {
+      push(@retlist, @cols);
+    }
+    if($mod) {
+      push(@retlist, @cols[0..($mod-1)]);
+    }
+  }
+}
+# }}}
+
 
 # {{{ subroutines tablist, linelist, tabhash and their *E versions.
 # The E versions are for printing to STDERR.
@@ -356,15 +387,11 @@ sub repick {
 }
 # }}}
 
-
-
 # {{{ sub pdx called by repick
 sub pdx {
   my $sectlen = shift(@_);
   my $lastdx = shift(@_);
   my @pdx;
-# =======
-# ===========================================
   my $sectmult = 1;
   while(1) {
     my $dx = $sectlen * $sectmult;
