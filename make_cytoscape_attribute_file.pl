@@ -173,7 +173,7 @@ sub sorter {
   my ($bstr) = $beta =~ m/^(\D+)/;
   my ($anum) = $alpha =~ m/(\d+)$/;
   my ($bnum) = $beta =~ m/(\d+)$/;
-  tablistE($astr, $bstr, $anum, $bnum);
+  # tablistE($astr, $bstr, $anum, $bnum);
   if($astr eq $bstr) {
     return($anum <=> $bnum);
   }
