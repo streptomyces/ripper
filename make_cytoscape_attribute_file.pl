@@ -186,6 +186,7 @@ sub precolor {
     if($mod) {
       push(@retlist, @cols[0..($mod-1)]);
     }
+    return(@retlist);
   }
 }
 # }}}
