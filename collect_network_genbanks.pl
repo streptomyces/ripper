@@ -18,19 +18,9 @@ use File::Copy;
 # {{{ Getopt::Long
 use Getopt::Long;
 # my $conffile = qq(local.conf); # %conf is not used.
-my $errfile;
-my $outfile;
-my $pnafasdir;
-my $colourFile = qq(/home/work/ripper/colours.txt);
-our $verbose;
 my $help;
 GetOptions (
-"outfile=s" => \$outfile,
 # "conffile:s" => \$conffile,
-"errfile:s" => \$errfile,
-"verbose" => \$verbose,
-"colourfile:s" => \$colourFile,
-"pnafasdir:s" => \$pnafasdir,
 "help" => \$help
 );
 # }}}
@@ -48,28 +38,12 @@ collect_network_genbanks.pl
  
  perl /home/sco/mnt/smoke/docker/ripper/collect_network_genbanks.pl
 
+=head2 Description
+
+Make sure you change to the directory pna before running.
+
 
 =cut
-
-# {{{ open the errfile
-if($errfile) {
-open(ERRH, ">", $errfile);
-print(ERRH "$0", "\n");
-close(STDERR);
-open(STDERR, ">&ERRH"); 
-}
-# }}}
-
-# {{{ Outdir and outfile business.
-my $ofh;
-if($outfile) {
-  open($ofh, ">", $outfile);
-}
-else {
-  open($ofh, ">&STDOUT");
-}
-select($ofh);
-# }}}
 
 my %ffoptions = (
 wanted => \&onfind,
@@ -97,10 +71,9 @@ for my $key (keys %netgbks) {
   }
 }
 
-
-
 exit;
 
+# {{{ sub onfind
 sub onfind {
   my $fp = $_;
   if(-d $fp) { return; }
@@ -114,8 +87,9 @@ sub onfind {
     }
   }
 }
+# }}}
 
-
+# {{{ sub gbknames
 sub gbknames {
   my $ifn = shift(@_);
   my @retlist;
@@ -131,17 +105,7 @@ sub gbknames {
   }
   return(@retlist);
 }
-
-
-
-
-# Multiple END blocks run in reverse order of definition.
-END {
-close($ofh);
-close(STDERR);
-close(ERRH);
-# $handle->disconnect();
-}
+# }}}
 
 # {{{ sub sorter
 sub sorter {
