@@ -114,5 +114,9 @@ cyat="cytoattrib.txt";
 $perlbin ${ripperdir}/make_cytoscape_attribute_file.pl \
 -outfile ${cyat} -pnafasdir $pnafasdir -- ${outfile} ${distfile}
 
+# Collect EGN networks files.
+
+$perlbin ${ripperdir}/collect_network_genbanks.pl
+
 pushd
 
