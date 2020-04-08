@@ -76,5 +76,7 @@ ENV PATH="/usr/local/libexec/meme-5.1.0:${PATH}"
 # docker build --no-cache -t "streptomyces/ripdock-egn" .
 # docker push streptomyces/ripdock-egn:latest
 
+# docker build --no-cache -t "streptomyces/rdegn" .
+
 #################################################################
 
