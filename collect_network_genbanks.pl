@@ -14,6 +14,7 @@ use List::Util qw(reduce any all none notall first
   );
 use File::Find;
 use File::Copy;
+use File::Path qw(make_path);
 
 # {{{ Getopt::Long
 use Getopt::Long;
@@ -57,8 +58,8 @@ find(\%ffoptions, ".");
 for my $key (keys %netgbks) {
   my @netlist = @{$netgbks{$key}};
   tablist($key, @netlist);
-  my $outdir = "../Network" . $key;
-  unless(-d $outdir) { mkdir $outdir; }
+  my $outdir = "../Networks/Network" . $key;
+  unless(-d $outdir) { make_path($outdir); }
   my $ogbkpath = "../orgnamegbk";
   opendir(OGBK, $ogbkpath);
   my @ogbks = readdir(OGBK);
