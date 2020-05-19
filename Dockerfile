@@ -57,6 +57,7 @@ WORKDIR /home/work
 RUN git clone https://github.com/the-mitchell-lab/rodeo2.git
 RUN mkdir -p /home/work/sqlite
 RUN mkdir -p /home/work/pfamscan
+RUN mkdir -p /home/work/blastdb
 
 # RiPPER
 WORKDIR /home/work
