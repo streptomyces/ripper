@@ -206,10 +206,7 @@ if(exists($conf{"prodigalshortbin"})) {
 # }}}
 
 
-# {{{ gbkcache and sqlite initialisation
-my $gbkcache = qq(gbkcache);
-if(exists($conf{gbkcache})) { $gbkcache = $conf{gbkcache}; }
-
+# {{{ sqlite initialisation
 
 my $dbfile=$conf{sqlite3fn};
 my $handle=DBI->connect("DBI:SQLite:dbname=$dbfile", '', '');
@@ -317,8 +314,12 @@ $fastafn = $noex . "_rip.faa";
 
 linelistE("Genbank output is $ofn. Fasta output is $fastafn");
 
-my $blastndb = genbank2blastnDB($infile);
-my $blastpdb = genbank2blastpDB($infile);
+my ($dispname, $dir, $ext)= fileparse($infile, qr/\..*/);
+my $dbname = File::Spec->catdir($conf{blastdbdir}, $dispname);
+my $title = $dispname;
+
+my $blastndb = genbank2blastnDB($infile, $dbname, $title);
+my $blastpdb = genbank2blastpDB($infile, $dbname, $title);
 
 
 my($bloutfh, $bloutfn)=tempfile($template, DIR => $tempdir, SUFFIX => '.gbk');
@@ -327,6 +328,7 @@ my $blxtr = qq(blastp -query $queryfn -db $blastpdb -out $bloutfn -evalue 1e-3);
 qx($blxtr);
 my %hh = tophit($bloutfn);
 unlink($bloutfn);
+unlink(glob("$dbname*"));
 my @hdesc = split(/\s+/, $hh{hdesc}, 4);
 my $start = $hdesc[0];
 my $end = $hdesc[1];
