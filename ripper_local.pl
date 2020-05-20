@@ -272,32 +272,9 @@ for my $infile (@infiles) {
 my ($noex, $dir, $ext)= fileparse($infile, qr/\.[^.]*/);
 my $bn = $noex . $ext;
 
-=head3 Genbank and fasta file names.
-
-These are derived from $taildir which is the immediate
-directory containing the input file (outarch.csv). The
-way this has been designed, $taildir is a protein
-accession number.
-
-=cut
-
-my @temp = split(/\//, $dir);
-
-my $taildir = pop(@temp);
-if($outdir) {
-  unless(-d $outdir) {
-    if(mkdir($outdir)) {
-    }
-    else {
-      croak("Failed to make $outdir");
-    }
-  }
-}
-
-
 =pod
 
-Make a genbank filename and a fasta filename. The are the
+Make a genbank filename and a fasta filename. They are the
 filenames output is written to.
 
 =cut
@@ -327,6 +304,7 @@ close($bloutfh);
 my $blxtr = qq(blastp -query $queryfn -db $blastpdb -out $bloutfn -evalue 1e-3);
 qx($blxtr);
 my %hh = tophit($bloutfn);
+if(scalar(keys %hh) < 1) { next; }
 unlink($bloutfn);
 unlink(glob("$dbname*"));
 my @hdesc = split(/\s+/, $hh{hdesc}, 4);
@@ -632,8 +610,7 @@ $prdlCnt += 1;
 
 If within specified distance of the TE and score > 0 and count < 20
 insert a record in SQL table $conf{prepeptab}.
-Also write the peptide sequences to the fasta filename $fastafn
-derived from $taildir. See B<Genbank and fasta file names> above.
+Also write the peptide sequences to the fasta filename $fastafn.
 
 =cut
 
@@ -696,8 +673,7 @@ At this point we have gone through all the output from Prodigal.
 
 =head3 Write the genbank output file.
 
-Below, the $subgbk object is written out to $ofn which is derived
-from $taildir. See B<Genbank and fasta file names> above.
+Below, the $subgbk object is written out to $ofn.
 
 =cut
 
