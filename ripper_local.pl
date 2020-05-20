@@ -9,48 +9,46 @@ use File::Spec;
 use File::Copy;
 # use Sco::Common qw(tablist tablistE linelistE);
 use Bio::SeqIO;
+use Bio::SearchIO;
 use Bio::Seq;
 use Bio::SeqFeature::Generic;
 use DBI;
 use Digest::SHA qw(sha1_hex);
-
 use XML::Simple;
 use LWP::Simple;
 use Net::FTP;
-
+use Getopt::Long;
 
 # {{{ Getopt::Long
-use Getopt::Long;
-my $maxDistFromTE = 8000; # From precursor peptide to the tailoring enzyme.
-my $outdir = qq(ripout);
-my $indir;
-my $fofn;
-my $queryfn; # TE faa file.
-my $outex; # extension for the output filename when it is derived on infilename.
-my $conffile = qq(local.conf);
+my $allowedInGene = 20;
 my $colorThreshScore = 20;
-my $ppFeatAddLimit = 20;
+my $conffile = qq(local.conf);
 my $errfile;
+my $fastaOutputLimit = 3;
+my $flankLen = 17500;
+my $fofn;
+my $help;
+my $indir;
+my $maxDistFromTE = 8000; # From precursor peptide to the tailoring enzyme.
+my $maxPPlen = 120; # Maximum precursor peptide length.
+my $minPPlen = 20; # Minimum precursor peptide length.
+my $outdir = qq(ripout);
+my $outfile;
+my $ppFeatAddLimit = 20;
 my $prodigalScoreThresh = 7.5;
 my $prodigalshortbin = qq(prodigal-short);
-my $flankLen = 17500;
-my $allowedInGene = 20;
-my $minPPlen = 20; # Minimum precursor peptide length.
-my $maxPPlen = 120; # Maximum precursor peptide length.
+my $queryfn; # TE faa file.
 my $sameStrandReward = 5;
-my $fastaOutputLimit = 3;
-my $outfile;
+my $skip = 0;
 my $testCnt = 0;
 our $verbose;
-my $skip = 0;
-my $help;
+
 GetOptions (
 "outfile:s" => \$outfile,
 "outdir:s" => \$outdir,
 "indir:s" => \$indir,
 "fofn:s" => \$fofn,
 "queryfn:s" => \$queryfn,
-"extension:s" => \$outex,
 "conffile:s" => \$conffile,
 "errfile:s" => \$errfile,
 "testcnt:i" => \$testCnt,
@@ -61,7 +59,7 @@ GetOptions (
 );
 # }}}
 
-# {{{ POD Example
+# {{{ POD
 
 =head1 Name
 
@@ -69,26 +67,19 @@ ripper.pl
 
 =head2 Example
 
- perl code/ripper.pl -outdir ripout
+A standalone test.
 
- export rwb=rodeowork
- export listfn=TfuA_Actino_Accessions_080217.txt
- export outdir=output_21_07_2017
- fp-rip () {
-   listbn=$(basenameNoex.pl $listfn);
-   ofn=${listbn}.csv
-     for iline in $(tail -n 1 $listfn); do
-       line=$(basenameNoex.pl $iline);
-       incsv=$rwb"/"${line}"/outarch.csv"
-       echo perl code/ripper.pl -outdir $outdir -- $incsv
-     done
- }
+ rm /home/mnt/ripout/*.{faa,gbk}
+ 
+ outdir=/home/mnt/ripout
+ queryfn=/home/mnt/faa/KND23925.1.faa
+ gbkfn=/home/mnt/gbk/KQ257788.1.gbk
 
- fp-rip | parallel
+ perl /home/work/ripper/ripper_local.pl -outdir $outdir \
+ -query $queryfn -- $gbkfn
 
-Below is a standalone test command.
 
- perl code/ripper.pl -outdir ripout -- rodout/main_co_occur.csv
+
 
 =cut
 
@@ -244,24 +235,23 @@ $handle->do($create_table_str);
 # {{{ populate @infiles
 my @infiles;
 if(-e $fofn and -s $fofn) {
-open(FH, "<", $fofn);
-while(my $line = readline(FH)) {
-chomp($line);
-if($line=~m/^\s*\#/ or $line=~m/^\s*$/) {next;}
-my $fn;
-if($indir) {
-$fn = File::Spec->catfile($indir, $line);
+  open(FH, "<", $fofn);
+  while(my $line = readline(FH)) {
+    chomp($line);
+    if($line=~m/^\s*\#/ or $line=~m/^\s*$/) {next;}
+    my $fn;
+    if($indir) {
+      $fn = File::Spec->catfile($indir, $line);
+    }
+    else {
+      $fn = $line;
+    }
+    push(@infiles, $fn);
+  }
+  close(FH);
 }
 else {
-$fn = $line;
-}
-
-push(@infiles, $fn);
-}
-close(FH);
-}
-else {
-@infiles = @ARGV;
+  @infiles = @ARGV;
 }
 
 # }}}
@@ -719,7 +709,7 @@ $subout->write_seq($subgbk);
 #copy($subfn, "sub.fna");
 #copy($prdfn, $gbkgi . ".prodigal");
 
-unlink($gbkfn, $subfn, $prdfn, $tefn);
+unlink($subfn, $prdfn, $tefn);
 }
 
 close($ofh);
