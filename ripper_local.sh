@@ -32,8 +32,6 @@ orgnamegbkdir=/home/mnt/orgnamegbk;
 perlbin="perl"
 pythonbin="python3"
 
-
-
 # Make the various directories where output will be placed.
 for hcd in $ripoutdir sqlite blastdb $orgnamegbkdir; do
 if [[ ! -d $hcd ]]; then
