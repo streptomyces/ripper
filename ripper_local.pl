@@ -342,7 +342,7 @@ my $seqio=Bio::SeqIO->new(-file => $gbkfn);
 my $seqout=Bio::SeqIO->new(-fh => $subfh, -format => 'fasta');
 my $seqobj=$seqio->next_seq();
 my $species = $seqobj->species();
-my @classification = $species->classification();
+# my @classification = $species->classification();
 my $seqlen = $seqobj->length();
 
 # Below, adjustments to keep $minpos and $maxpos
