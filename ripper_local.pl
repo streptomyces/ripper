@@ -342,7 +342,6 @@ my $seqio=Bio::SeqIO->new(-file => $gbkfn);
 my $seqout=Bio::SeqIO->new(-fh => $subfh, -format => 'fasta');
 my $seqobj=$seqio->next_seq();
 my $species = $seqobj->species();
-# my @classification = $species->classification();
 my $seqlen = $seqobj->length();
 
 # Below, adjustments to keep $minpos and $maxpos
@@ -630,7 +629,13 @@ if($distFromTE <= $maxDistFromTE and $prdlCnt <= $ppFeatAddLimit) {
     $aaobj->display_id($fastaid);
     $aaobj->description("SameStrand: $strandReward; " . $prodStr);
     $seqout1->write_seq($aaobj);
-    my $spbinom = $species->binomial("FULL");
+    my $spbinom;
+    if(ref($species)) {
+      $spbinom = $species->binomial("FULL");
+    }
+    else {
+      $spbinom = "No name";
+    }
     $spbinom =~ s/'//g;
     insertSQL($teProtAcc, $spbinom, $ppFastaOutputCnt, $fastaid, $aaseq,
         $strand, $teStrand, $distFromTE, $score);
@@ -653,7 +658,13 @@ else {
   $aaobj->display_id($fastaid);
   $aaobj->description("SameStrand: $strandReward; " . $prodStr);
   $seqout1->write_seq($aaobj);
-  my $spbinom = $species->binomial("FULL");
+  my $spbinom;
+  if(ref($species)) {
+    $spbinom = $species->binomial("FULL");
+  }
+  else {
+    $spbinom = "No name";
+  }
   $spbinom =~ s/'//g;
   insertSQL($teProtAcc, $spbinom, $allFastaOutputCnt, $fastaid, $aaseq,
       $strand, $teStrand, $distFromTE, $score);
@@ -680,7 +691,14 @@ Below, the $subgbk object is written out to $ofn.
 my $subout = Bio::SeqIO->new(-file => ">$ofn", -format => "genbank");
 $subgbk->display_id($teProtAcc . "_cluster");
 $subgbk->accession_number($teProtAcc . "_cluster");
-$subgbk->species($species);
+if(ref($species)) {
+  $subgbk->species($species);
+}
+else {
+  my @temp = qw(name No);
+  my $nosp = Bio::Species->new(-classification => \@temp);
+  $subgbk->species($nosp);
+}
 $subout->write_seq($subgbk);
 
 #copy($gbkfn, $gbkgi . ".gbk");
