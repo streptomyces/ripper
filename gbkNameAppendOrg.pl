@@ -6,6 +6,7 @@ use File::Basename;
 use File::Spec;
 use File::Path qw(make_path remove_tree);
 use File::Copy;
+use Bio::SeqIO;
 
 # {{{ Getopt::Long
 use Getopt::Long;
@@ -72,23 +73,24 @@ for my $infile (@infiles) {
   my ($noex, $dir, $ext)= fileparse($infile, qr/\.[^.]*/);
   my $bn = $noex . $ext;
   open(my $ifh, "<$infile") or croak("Could not open $infile");
+  my $seqio = Bio::SeqIO->new(-fh => $ifh);
+  my $seqobj = $seqio->next_seq();
+  my $species = $seqobj->species();
   my $org;
-  while(my $line = readline($ifh)) {
-    chomp($line);
-    if($line =~ m/^SOURCE/) {
-      my @ll=split(/\s+/, $line, 2);
-      $org = $ll[1];
-      $org =~ s/[().,]+/ /g;
-      $org =~ s/ {2,}/ /g;
-      $org =~ s/ /_/g;
-      $org =~ s/\//_/g;
-      last;
-    }
+  if(ref($species)) {
+    my $binom = $species->binomial("FULL");
+    $org = $binom;
+    $org =~ s/[().,]+/ /g;
+    $org =~ s/ {2,}/ /g;
+    $org =~ s/ /_/g;
+    $org =~ s/\//_/g;
   }
-  close($ifh);
-  unless($org) { $org = "no_org_name"; }
+  else {
+  $org = "no_org_name";
+  }
   my $newname = $org . "_" . $noex . ".gbk";
   my $newpath = File::Spec->catfile($outdir, $newname);
+  close($ifh);
   linelist("Copying $infile to $newpath");
   copy($infile, $newpath);
 }
