@@ -137,7 +137,7 @@ for my $infile(@infiles) {
   my @head = split(/\t/, $head);
   ($head[0], $head[3]) = ($head[3], $head[0]);
   $head[0] =~ s/^fasta//i;
-  push(@head, "Genus", "Network", "Colour");
+  push(@head, "Genus", "Network", "Color");
   unless($headflag) { tablist(@head); $headflag = 1; }
   while(my $line = readline($ifh)) {
     chomp($line);
