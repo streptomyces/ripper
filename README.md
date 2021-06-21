@@ -1,13 +1,20 @@
 # RiPPER Overview
 
-RiPPER (RiPP Precursor Peptide Enhanced Recognition) is a customisable tool for the identification of genes encoding putative precursor peptides within RiPP (ribosomally synthesised and post-translationally modified peptide) gene clusters. RiPPER carries out the following things to do this:
+RiPPER (RiPP Precursor Peptide Enhanced Recognition) is a customisable tool for the identification of genes encoding putative precursor peptides within RiPP (ribosomally synthesised and post-translationally modified peptide) gene clusters. This was first described in [Santos-Aberturas et al. Nucleic Acids Res., 2019, 47, 4624–4637](https://academic.oup.com/nar/article/47/9/4624/5420534). A new methods article (June 2021) provides a step-by-step workflow to how we search for BGCs using RiPPER 1.1 [Moffat et al., Methods Mol. Biol., 2021, 2296, 227–247](https://link.springer.com/protocol/10.1007%2F978-1-0716-1358-0_14).
+
+We strongly recommend that users work with a [Docker container of RiPPER](https://hub.docker.com/r/streptomyces/ripdock/). This is built from the latest version of RiPPER and includes all dependencies, so nothing needs installing apart from Docker and the RiPPER container. Details are provided below on using this in the **Docker** section below.
+
+The latest version of RiPPER (1.1) now includes automatic short peptide networking using using [EGN](http://evol-net.fr/index.php/en/downloads) built into the processing, which also provides associated output files for network analysis in [Cytoscape](https://cytoscape.org). The analysis and processing of this output is described in detail in Moffat et al. (Methods Mol. Biol., 2021, 2296, 227–247), which is free to access. This version is the latest version of RiPPER that is accessed as normal via Docker (described below). If a user prefers to use the original form of RiPPER (described in Santos-Aberturas et al.) then it can be accessed via Docker as a "legacy" version (use the following command to install this older legacy version:  docker pull streptomyces/ripdock:legacy).
+
+RiPPER identifies putative precursor peptides associated with a set of putative RiPP tailoring enzymes that are defined by the user. To do this, the following steps are taken:
 
 (1) Protein accession numbers for putative RiPP tailoring enzymes are used to retrieve gene clusters using [RODEO2](https://github.com/thedamlab/rodeo2)
 (2) These are then searched for likely precursor peptide coding regions using both a modified form of [Prodigal](https://github.com/hyattpd/Prodigal) (prodigal-short) and a HMM-based search for precursor peptides.
 (3) A Genbank file that highlights newly annotated short genes in the gene cluster is generated for visualisation in [Artemis](http://www.sanger.ac.uk/science/tools/artemis)
 (4) Top-scoring peptides are tabulated alongside associated attribute data from a batch input for further analysis, and a fasta file is provided for peptide network analysis using [EGN](http://evol-net.fr/index.php/en/downloads)
+(5) NEW FOR RiPPER 1.1. All tabulated peptides are networked based on sequence identity using [EGN](http://evol-net.fr/index.php/en/downloads), which provides network and attribute files for network analysis in [Cytoscape](https://cytoscape.org). The generation of networks enables the identification of families of related peptides.
 
-We recommend that users work with a [Docker container of RiPPER](https://hub.docker.com/r/streptomyces/ripdock/). This is built from the latest version of RiPPER and includes all dependencies, so nothing needs installing apart from Docker and the RiPPER container. Details are provided below on using this in the **Docker** section, and a detailed technical description of the workflow is provided at the end of this page as **Description of RiPPER workflow**.
+A detailed technical description of the workflow is provided at the end of this page as **Description of RiPPER workflow**.
 
 # Installation and usage
 
