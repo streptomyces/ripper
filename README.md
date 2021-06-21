@@ -8,11 +8,11 @@ The latest version of RiPPER (1.1) now includes automatic short peptide networki
 
 RiPPER identifies putative precursor peptides associated with a set of putative RiPP tailoring enzymes that are defined by the user. To do this, the following steps are taken:
 
-1) Protein accession numbers for putative RiPP tailoring enzymes are used to retrieve gene clusters using [RODEO2](https://github.com/thedamlab/rodeo2)
-2) These are then searched for likely precursor peptide coding regions using both a modified form of [Prodigal](https://github.com/hyattpd/Prodigal) (prodigal-short) and a HMM-based search for precursor peptides.
-3) A Genbank file that highlights newly annotated short genes in the gene cluster is generated for visualisation in [Artemis](http://www.sanger.ac.uk/science/tools/artemis)
-4) Top-scoring peptides are tabulated alongside associated attribute data from a batch input for further analysis, and a fasta file is provided for peptide network analysis using [EGN](http://evol-net.fr/index.php/en/downloads)
-5) NEW FOR RiPPER 1.1. All tabulated peptides are networked based on sequence identity using [EGN](http://evol-net.fr/index.php/en/downloads), which provides network and attribute files for network analysis in [Cytoscape](https://cytoscape.org). The generation of networks enables the identification of families of related peptides.
+1. Protein accession numbers for putative RiPP tailoring enzymes are used to retrieve gene clusters using [RODEO2](https://github.com/thedamlab/rodeo2)
+2. These are then searched for likely precursor peptide coding regions using both a modified form of [Prodigal](https://github.com/hyattpd/Prodigal) (prodigal-short) and a HMM-based search for precursor peptides.
+3. A Genbank file that highlights newly annotated short genes in the gene cluster is generated for visualisation in [Artemis](http://www.sanger.ac.uk/science/tools/artemis)
+4. Top-scoring peptides are tabulated alongside associated attribute data from a batch input for further analysis, and a fasta file is provided for peptide network analysis using [EGN](http://evol-net.fr/index.php/en/downloads)
+5. NEW FOR RiPPER 1.1. All tabulated peptides are networked based on sequence identity using [EGN](http://evol-net.fr/index.php/en/downloads), which provides network and attribute files for network analysis in [Cytoscape](https://cytoscape.org). The generation of networks enables the identification of families of related peptides.
 
 A detailed technical description of the workflow is provided at the end of this page as **Description of RiPPER workflow**.
 
@@ -47,10 +47,10 @@ To install RiPPER:
 docker pull streptomyces/ripdock
 ~~~
 
-The default is to pull the image tagged as *latest*. You could pull a different image if you have a tag name. See example below where *testing* is the tag name:
+The default is to pull the image tagged as *latest*. You could pull a different image if you have a tag name. See example below where *legacy* is the tag name:
 
 ~~~ {.sh}
-docker pull streptomyces/ripdock:testing
+docker pull streptomyces/ripdock:legacy
 ~~~
 
 Following installation, run the container using the following command, where
