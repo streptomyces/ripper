@@ -74,11 +74,13 @@ done
 ### Setup is now complete. Actual runs below. ###
 
 # rodeo run and ripper.pl run for each query in $queryfn
+# perl mkcooc.pl WP_236176819.1 checkdir/WP_236176819.1
 
 for acc in $(${perlbin} ${ripperdir}/cat.pl $queryfn); do 
 # for acc in $(cat $queryfn); do 
-  echo $pythonbin ${rodeodir}/rodeo_main.py -out ${rodoutdir}/${acc} ${acc}
-  $pythonbin ${rodeodir}/rodeo_main.py -out ${rodoutdir}/${acc} ${acc}
+  # echo $pythonbin ${rodeodir}/rodeo_main.py -out ${rodoutdir}/${acc} ${acc}
+  # $pythonbin ${rodeodir}/rodeo_main.py -out ${rodoutdir}/${acc} ${acc}
+  $perlbin ${ripperdir}/mkcooc.pl -outdir ${rodoutdir}/${acc} ${acc}
   echo $perlbin ${ripperdir}/ripper.pl -outdir $ripoutdir -- ${rodoutdir}/${acc}/main_co_occur.csv
   $perlbin ${ripperdir}/ripper.pl -outdir $ripoutdir -- ${rodoutdir}/${acc}/main_co_occur.csv
 done

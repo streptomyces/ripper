@@ -310,7 +310,7 @@ my $end = $ll[5];
 
 # For strand -1 the order in the file is end, start
 # Hence the if block below.
-if($strand == -1) {
+if($strand == -1 and ($start > $end)) {
 $start = $ll[5];
 $end = $ll[4];
 }
