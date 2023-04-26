@@ -97,9 +97,6 @@ my $gbkcache = qq(gbkcache);
 if(exists($conf{gbkcache})) { $gbkcache = $conf{gbkcache}; }
 # }}}
 
-
-
-
 unless(-d $outdir) {
   unless(make_path($outdir)) {
     croak("Failed to make $outdir.");
@@ -197,6 +194,10 @@ for my $feat ($seqobj->all_SeqFeatures()) {
 # }}}
 
 # {{{ for my $feat (@region). Print out main_co_occur.csv.
+my @header = qw(query organism accession protid
+                start end strand product);
+say($ofh (join(",", @header)));
+if($match_seen) {
 for my $feat (@region) {
   unless(ref($feat)) { next; }
   my $start = $feat->start();
@@ -217,6 +218,7 @@ for my $feat (@region) {
   my $anno = join(";", @anno);
   say($ofh ("$protid,$binom,$acc,$gprotid,$start,$end,$strand,$anno"));
   #last;
+}
 }
 # }}}
 

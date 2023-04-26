@@ -294,7 +294,7 @@ my $lineCnt = 0;
 while(my $line = readline($ifh)) {
 chomp($line);
 if($line=~m/^\s*\#/ or $line=~m/^\s*$/
-  or $line=~m/^query/ ) {next;}
+  or $line=~m/^query/i ) {next;}
 #Query,Genus/Species,Nucleotide_acc,Protein_acc,start,end,dir,PfamID1,Name1,Description1,E-value1,PfamID2,Name2,D
 #POF95626.1,Pseudomonas putida,MINE01000015.1,POF95618.1,459205,459898,+,PF12146,Hydrolase_4,"Serine aminopeptida
 
