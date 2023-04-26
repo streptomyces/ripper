@@ -111,6 +111,7 @@ my $query = $protid . "[accn]";
 # {{{ esearch to make @ids.
 my $factory = Bio::DB::EUtilities->new(-eutil => 'esearch',
                                        -db     => 'protein',
+                                       -api_key => '84850b3620b3db9ee4be8df7baee93ec1609',
                                        -term   => $query,
                                        -email  => 'govind.chandra@gmail.com',
                                        -retmax => 3
@@ -122,6 +123,7 @@ my @ids = $factory->get_ids;
 my $factory1 = Bio::DB::EUtilities->new(-eutil => 'elink',
                                        -email  => 'govind.chandra@gmail.com',
                                        -db     => 'nucleotide',
+                                       -api_key => '84850b3620b3db9ee4be8df7baee93ec1609',
                                        -dbfrom => 'protein',
                                        -id     => \@ids
                                      );
@@ -138,6 +140,7 @@ push(@ntids, $ds->get_ids);
 # {{{ efetch to get one nucleotide genbank file.
 my $factory2 = Bio::DB::EUtilities->new(-eutil => 'efetch',
                                        -db      => 'nucleotide',
+                                       -api_key => '84850b3620b3db9ee4be8df7baee93ec1609',
                                        -rettype => 'gbwithparts',
                                        -email   => 'govind.chandra@gmail.com',
                                        -id      => [$ntids[0]]
