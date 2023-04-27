@@ -67,7 +67,12 @@ RODEO fails to fetch nucleotide sequences for these.
 # }}} ###
 
 my $protid = $ARGV[0];
-
+my $apikey;
+my $email = 'andrew.truman@jic.ac.uk';
+if(exists $ENV{NCBI_API_KEY}) {
+  $apikey = $ENV{NCBI_API_KEY};
+}
+say(STDERR $apikey);
 
 
 # {{{ Populate %conf if a configuration file 
@@ -89,6 +94,12 @@ if(-s $conffile ) {
 elsif($conffile ne "local.conf") {
 linelistE("Specified configuration file $conffile not found.");
 }
+if(exists($conf{apikey})) {
+  $apikey = $conf{apikey};
+}
+if(exists($conf{email})) {
+  $email = $conf{email};
+}
 
 # }}}
 
@@ -109,42 +120,53 @@ open(my $ofh, ">", $ofn) or croak("Failed to open $ofn for writing.");
 my $query = $protid . "[accn]";
 
 # {{{ esearch to make @ids.
-my $factory = Bio::DB::EUtilities->new(-eutil => 'esearch',
-                                       -db     => 'protein',
-                                       -api_key => '84850b3620b3db9ee4be8df7baee93ec1609',
-                                       -term   => $query,
-                                       -email  => 'govind.chandra@gmail.com',
-                                       -retmax => 3
-                                     );
+my %esarg = (
+  -eutil => 'esearch',
+  -db     => 'protein',
+  -term   => $query,
+  -retmax => 3
+);
+if($apikey) {
+  $esarg{-api_key} = $apikey;
+}
+if($email) {
+  $esarg{-email} = $email;
+}
+my $factory = Bio::DB::EUtilities->new(%esarg);
 my @ids = $factory->get_ids;
 # }}}
 
 # {{{ elink to get @ntids.
-my $factory1 = Bio::DB::EUtilities->new(-eutil => 'elink',
-                                       -email  => 'govind.chandra@gmail.com',
-                                       -db     => 'nucleotide',
-                                       -api_key => '84850b3620b3db9ee4be8df7baee93ec1609',
-                                       -dbfrom => 'protein',
-                                       -id     => \@ids
-                                     );
+my %elarg = (
+  -eutil => 'elink',
+  -db     => 'nucleotide',
+  -dbfrom => 'protein',
+  -id     => \@ids
+);
+if($apikey) {
+  $elarg{-api_key} = $apikey;
+}
+if($email) {
+  $elarg{-email} = $email;
+}
+my $factory1 = Bio::DB::EUtilities->new(%elarg);
 my @ntids;
 while (my $ds = $factory1->next_LinkSet) {
-#    print "   Link name: ",$ds->get_link_name,"\n";
-#    print "Protein IDs: ",join(',',$ds->get_submitted_ids),"\n";
-#    print "    Nuc IDs: ",join(',',$ds->get_ids),"\n";
-
 push(@ntids, $ds->get_ids);
 }
 # }}}
 
 # {{{ efetch to get one nucleotide genbank file.
-my $factory2 = Bio::DB::EUtilities->new(-eutil => 'efetch',
-                                       -db      => 'nucleotide',
-                                       -api_key => '84850b3620b3db9ee4be8df7baee93ec1609',
-                                       -rettype => 'gbwithparts',
-                                       -email   => 'govind.chandra@gmail.com',
-                                       -id      => [$ntids[0]]
-                                     );
+my %efarg = (
+  -eutil => 'efetch',
+  -db      => 'nucleotide',
+  -rettype => 'gbwithparts',
+  -id      => [$ntids[0]]
+);
+if($email) {
+  $efarg{-email} = $email;
+}
+my $factory2 = Bio::DB::EUtilities->new(%efarg);
 
 my $template = "coocXXXXXX";
 my($tmpfh, $tmpfn)=tempfile($template, DIR => '.', SUFFIX => '.gbk');
