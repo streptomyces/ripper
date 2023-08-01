@@ -18,6 +18,7 @@ use XML::Simple;
 use LWP::Simple;
 use Net::FTP;
 
+$ENV{PATH} = $ENV{PATH} . ":/home/work/ripper";
 
 # {{{ Getopt::Long
 use Getopt::Long;
@@ -473,6 +474,9 @@ $subobj->description("$gbkgi $minpos $maxpos");
 $seqout->write_seq($subobj);
 close($subfh);
 
+### Debugging
+copy($subfn, "/home/mnt");
+
 # The sub called below uses blastn to locate the TE on the sub-genbank.
 my ($teSubStart, $teSubEnd) = locateTE(tefn => $tefn, subfn => $subfn);
 
@@ -536,6 +540,11 @@ concerned with.
 my($prdfh, $prdfn)=tempfile($template, DIR => $tempdir, SUFFIX => '.prodigal');
 close($prdfh);
 my $xstr = qq($prodigalshortbin -p meta -f gff -i $subfn -s $prdfn);
+
+### Debugging
+linelist("prodical output file: $prdfn");
+linelist($xstr);
+
 my $discard = qx($xstr); # Only interested in the output in file $prdfn.
 
 # Read prodigal output and populate @prdl.
@@ -568,6 +577,13 @@ for my $lr (@prdl) {
 # This gives us @sprdl.
 
 my @sprdl = sort {$b->[3] <=> $a->[3]} @prdl;
+
+### Debugging
+linelist("Something $prdfn");
+for my $dlr (@prdl) {
+  tablist(@{$dlr});
+}
+
 
 
 # Loop through the sorted (by score) prodigal output
