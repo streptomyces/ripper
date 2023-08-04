@@ -475,7 +475,7 @@ $seqout->write_seq($subobj);
 close($subfh);
 
 ### Debugging
-copy($subfn, "/home/mnt");
+# copy($subfn, "/home/mnt");
 
 # The sub called below uses blastn to locate the TE on the sub-genbank.
 my ($teSubStart, $teSubEnd) = locateTE(tefn => $tefn, subfn => $subfn);
@@ -542,8 +542,8 @@ close($prdfh);
 my $xstr = qq($prodigalshortbin -p meta -f gff -i $subfn -s $prdfn);
 
 ### Debugging
-linelist("prodical output file: $prdfn");
-linelist($xstr);
+# linelist("prodigal output file: $prdfn");
+# linelist($xstr);
 
 my $discard = qx($xstr); # Only interested in the output in file $prdfn.
 
@@ -579,10 +579,10 @@ for my $lr (@prdl) {
 my @sprdl = sort {$b->[3] <=> $a->[3]} @prdl;
 
 ### Debugging
-linelist("Something $prdfn");
-for my $dlr (@prdl) {
-  tablist(@{$dlr});
-}
+# linelist("Something $prdfn");
+# for my $dlr (@prdl) {
+#   tablist(@{$dlr});
+# }
 
 
 

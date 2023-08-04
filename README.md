@@ -13,6 +13,8 @@ relevant directories in place of these):
 
 ~~~ {.sh}
 # Example usage on Linux
+docker run -it -v ${PWD}:/home/mnt streptomyces/norodeo
+
 docker run -it -v /home/tom/rippwork:/home/mnt streptomyces/norodeo
 
 # Example usage on MS Windows.

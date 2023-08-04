@@ -23,8 +23,6 @@ fi
 
 
 ripperdir=/home/work/ripper;
-rodeodir=/home/work/rodeo2;
-pfamdir=/home/work/pfam
 
 
 
@@ -53,15 +51,6 @@ perlbin="perl"
 pythonbin="python3"
 
 
-# Make a couple of symlinks to keep rodeo_main.py happy.
-if [[ ! -L hmm_dir ]]; then
-ln -s $pfamdir ./hmm_dir
-fi
-
-if [[ ! -L confs ]]; then
-ln -s ${rodeodir}/confs ./
-fi
-
 # Make the various directories where output will be placed.
 for hcd in $rodoutdir $ripoutdir sqlite gbkcache $orgnamegbkdir $rodeohtmldir; do
 if [[ ! -d $hcd ]]; then
@@ -78,8 +67,6 @@ done
 
 for acc in $(${perlbin} ${ripperdir}/cat.pl $queryfn); do 
 # for acc in $(cat $queryfn); do 
-  # echo $pythonbin ${rodeodir}/rodeo_main.py -out ${rodoutdir}/${acc} ${acc}
-  # $pythonbin ${rodeodir}/rodeo_main.py -out ${rodoutdir}/${acc} ${acc}
   $perlbin ${ripperdir}/mkcooc.pl -outdir ${rodoutdir}/${acc} ${acc}
   echo $perlbin ${ripperdir}/ripper.pl -outdir $ripoutdir -- ${rodoutdir}/${acc}/main_co_occur.csv
   $perlbin ${ripperdir}/ripper.pl -outdir $ripoutdir -- ${rodoutdir}/${acc}/main_co_occur.csv
