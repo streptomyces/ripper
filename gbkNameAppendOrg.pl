@@ -6,13 +6,14 @@ use File::Basename;
 use File::Spec;
 use File::Path qw(make_path remove_tree);
 use File::Copy;
-use Bio::SeqIO;
 
 # {{{ Getopt::Long
 use Getopt::Long;
 my $conffile = qq(local.conf);
 my $indir = qq(ripout);
 my $errfile;
+my $runfile;
+my $testCnt = 0;
 our $verbose;
 my $skip = 0;
 my $help;
@@ -20,6 +21,8 @@ GetOptions (
 "conffile:s" => \$conffile,
 "indir:s" => \$indir,
 "errfile:s" => \$errfile,
+"runfile:s" => \$runfile,
+"testcnt:i" => \$testCnt,
 "skip:i" => \$skip,
 "verbose" => \$verbose,
 "help" => \$help
@@ -65,34 +68,42 @@ my @infiles = glob($indir . "/*gbk");
 my $outdir = $conf{orgnamegbkdir};
 make_path($outdir);
 unless( -d $outdir) {
-  croak("$outdir does not exist and could not be made");
+  croak("$outdir does not exist and could not be made either");
 }
 
 # {{{ Cycle through all the infiles.
 for my $infile (@infiles) {
-  my ($noex, $dir, $ext)= fileparse($infile, qr/\.[^.]*/);
-  my $bn = $noex . $ext;
-  open(my $ifh, "<$infile") or croak("Could not open $infile");
-  my $seqio = Bio::SeqIO->new(-fh => $ifh);
-  my $seqobj = $seqio->next_seq();
-  my $species = $seqobj->species();
-  my $org;
-  if(ref($species)) {
-    my $binom = $species->binomial("FULL");
-    $org = $binom;
-    $org =~ s/[().,]+/ /g;
-    $org =~ s/ {2,}/ /g;
-    $org =~ s/ /_/g;
-    $org =~ s/\//_/g;
-  }
-  else {
-  $org = "no_org_name";
-  }
+my ($noex, $dir, $ext)= fileparse($infile, qr/\.[^.]*/);
+my $bn = $noex . $ext;
+# tablistE($infile, $bn, $noex, $ext);
+
+open(my $ifh, "<$infile") or croak("Could not open $infile");
+my $lineCnt = 0;
+if($skip) {
+for (1..$skip) { my $discard = readline($ifh); }
+}
+# local $/ = ""; # For reading multiline records separated by blank lines.
+while(my $line = readline($ifh)) {
+chomp($line);
+if($line =~ m/^SOURCE/) {
+  my @ll=split(/\s+/, $line, 2);
+  my $org = $ll[1];
+  $org =~ s/[().,]+/ /g;
+  $org =~ s/ {2,}/ /g;
+  $org =~ s/ /_/g;
+  $org =~ s/\//_/g;
   my $newname = $org . "_" . $noex . ".gbk";
   my $newpath = File::Spec->catfile($outdir, $newname);
-  close($ifh);
   linelist("Copying $infile to $newpath");
   copy($infile, $newpath);
+  last;
+}
+
+$lineCnt += 1;
+if($testCnt and $lineCnt >= $testCnt) { last; }
+if($runfile and (not -e $runfile)) { last; }
+}
+close($ifh);
 }
 # }}}
 
