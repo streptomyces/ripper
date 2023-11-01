@@ -31,5 +31,14 @@ commitmesg
 *comment*
 pfam_lengths.pl
 commands.md
+*.vim
 repick.pl
 ignore/
+blast*/
+hhsuite/
+ncbi/
+psipred/
+rod2/
+rodeo2/
+RREFinder/
+*.gz
