@@ -1,4 +1,4 @@
-FROM ubuntu
+FROM streptomyces/stage004
 MAINTAINER Govind Chandra <govind.chandra@jic.ac.uk>
 ENV DEBIAN_FRONTEND noninteractive
 

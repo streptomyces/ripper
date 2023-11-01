@@ -1,4 +1,4 @@
-FROM streptomyces/ripdock001
+FROM streptomyces/stage001
 # FROM bioperl/bioperl
 MAINTAINER Govind Chandra <govind.chandra@jic.ac.uk>
 ENV DEBIAN_FRONTEND noninteractive
