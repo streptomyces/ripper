@@ -2,17 +2,11 @@ FROM streptomyces/stage004
 MAINTAINER Govind Chandra <govind.chandra@jic.ac.uk>
 ENV DEBIAN_FRONTEND noninteractive
 
-RUN apt-get update && apt-get install -yqq apt-utils
-RUN apt-get install -yqq build-essential wget \
-git curl zip unzip ghostscript gsfonts parallel
-
-RUN apt-get install -yqq sqlite3 bioperl ncbi-blast+
-
 # RiPPER
 WORKDIR /home/work
 RUN git clone https://github.com/streptomyces/ripper.git
 WORKDIR /home/work/ripper
-RUN git checkout norodeo
+RUN git checkout norodeodock
 
 WORKDIR /home/work
 # RUN ln -s rodeo2/hmm_dir ./pfam

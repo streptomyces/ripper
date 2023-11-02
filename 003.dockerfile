@@ -3,7 +3,7 @@ FROM streptomyces/stage002
 MAINTAINER Govind Chandra <govind.chandra@jic.ac.uk>
 ENV DEBIAN_FRONTEND noninteractive
 
-RUN apt install -yqq prodigal cmake csh
+RUN apt install -yqq cmake csh
 
 # ADD hhsuite-linux-sse2.tar.gz /usr/local/
 # ADD hhsuite.tar.gz /usr/local/
@@ -18,6 +18,10 @@ WORKDIR /usr/local/psipred/src
 RUN make
 RUN make install
 
+# legacy BLAST
+WORKDIR /usr/local
+RUN ./ncbi/make/makedis.csh
+
 # HHSuite
 WORKDIR /usr/local
 RUN git clone https://github.com/soedinglab/hh-suite.git
@@ -26,11 +30,6 @@ WORKDIR hh-suite/build
 RUN cmake -DCMAKE_INSTALL_PREFIX=. ..
 RUN make -j 4 && make install
 
-
-# legacy BLAST
-
-WORKDIR /usr/local
-RUN ./ncbi/make/makedis.csh
 
 ENV HHLIB="/usr/local/hh-suite"
 ENV PATH="/usr/local/hh-suite/build/bin:/usr/local/hh-suite/build/scripts:${PATH}"
