@@ -73,11 +73,13 @@ done
 # Run the postprocessing scripts
 
 $perlbin ${ripperdir}/pfam_sqlite.pl
+$perlbin ${ripperdir}/mergeRidePfam.pl -out ${outfile} -faa ${outfaa} \
+-distfile ${distfile} -distfaa ${distfaa} 
 $perlbin ${ripperdir}/gbkNameAppendOrg.pl -indir $ripoutdir
 # $perlbin ${ripperdir}/collectFiles.pl ${rodoutdir} ${rodeohtmldir} '\.html$'
 
 
-# # Run the postprocessing scripts
+###### Below is for reference only ######
 # 
 # $perlbin ${ripperdir}/pfam_sqlite.pl
 # $perlbin ${ripperdir}/mergeRidePfam.pl -out ${outfile} -faa ${outfaa} \

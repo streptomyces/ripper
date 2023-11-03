@@ -18,6 +18,8 @@ RUN cp ripper/postprocess.sh ripper/rodconf.pl ./
 
 RUN mkdir /home/work/pfam
 RUN cp /home/work/ripper/ripp.hmm /home/work/pfam/
+WORKDIR /home/work/pfam
+RUN hmmpress ripp.hmm
 
 WORKDIR /home/work
 
