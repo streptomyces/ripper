@@ -7,12 +7,11 @@ WORKDIR /home/work
 
 ADD RREFinder /home/work/RREFinder/
 RUN chmod a+x RREFinder/RRE.py
-RUN ln -s rodeo2/confs ./
-RUN ln -s rodeo2/hmm_dir ./
+# RUN ln -s rodeo2/confs ./
+# RUN ln -s rodeo2/hmm_dir ./
 RUN ln -s RREFinder/data ./
 
 ENV PATH="/home/work/RREFinder:${PATH}"
-# ENV BLASTMAT="/usr/local/blast-2.2.26/data"
 ENV BLASTMAT="/usr/local/ncbi/data"
 
 

@@ -11,7 +11,6 @@ WORKDIR /home/work/ripper
 RUN git checkout norodeodock
 
 WORKDIR /home/work
-# RUN ln -s rodeo2/hmm_dir ./pfam
 RUN cp ripper/norod.sh ripper/minitest.txt ripper/local.conf ./
 RUN cp ripper/microtest.txt ./
 RUN cp ripper/postprocess.sh ripper/rodconf.pl ./

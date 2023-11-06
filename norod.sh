@@ -76,45 +76,28 @@ $perlbin ${ripperdir}/pfam_sqlite.pl
 $perlbin ${ripperdir}/mergeRidePfam.pl -out ${outfile} -faa ${outfaa} \
 -distfile ${distfile} -distfaa ${distfaa} 
 $perlbin ${ripperdir}/gbkNameAppendOrg.pl -indir $ripoutdir
-# $perlbin ${ripperdir}/collectFiles.pl ${rodoutdir} ${rodeohtmldir} '\.html$'
+pnadir="/home/mnt/pna";
+if [[ ! -d $pnadir ]]; then
+mkdir $pnadir
+fi
+cp ${outfaa} ${distfaa} $pnadir
 
+# Note change in working directory below.
+pushd $pnadir;
+for gd in $(ls -d --color=never GENENET* 2> /dev/null); do
+  rm -rf $gd
+done
+$perlbin ${ripperdir}/egn_ni.pl -task all
 
-###### Below is for reference only ######
-# 
-# $perlbin ${ripperdir}/pfam_sqlite.pl
-# $perlbin ${ripperdir}/mergeRidePfam.pl -out ${outfile} -faa ${outfaa} \
-# -distfile ${distfile} -distfaa ${distfaa} 
-# $perlbin ${ripperdir}/gbkNameAppendOrg.pl -indir $ripoutdir
-# $perlbin ${ripperdir}/collectFiles.pl ${rodoutdir} ${rodeohtmldir} '\.html$'
-# 
-# # Peptide Network Analysis
-# 
-# pnadir="/home/mnt/pna";
-# if [[ ! -d $pnadir ]]; then
-# mkdir $pnadir
-# fi
-# cp ${outfaa} ${distfaa} $pnadir
-# 
-# # Note change in working directory below.
-# pushd $pnadir;
-# for gd in $(ls -d --color=never GENENET* 2> /dev/null); do
-#   rm -rf $gd
-# done
-# $perlbin ${ripperdir}/egn_ni.pl -task all
-# 
-# pnafasdir=$(find . -type d -name 'FASTA')
-# 
-# cyat="cytoattrib.txt";
-# $perlbin ${ripperdir}/make_cytoscape_attribute_file.pl \
-# -outfile ${cyat} -pnafasdir $pnafasdir -- ${outfile} ${distfile}
-# 
-# # Collect EGN networks files.
-# 
-# $perlbin ${ripperdir}/collect_network_genbanks.pl
-# 
-# pushd
+pnafasdir=$(find . -type d -name 'FASTA')
 
+cyat="cytoattrib.txt";
+$perlbin ${ripperdir}/make_cytoscape_attribute_file.pl \
+-outfile ${cyat} -pnafasdir $pnafasdir -- ${outfile} ${distfile}
 
+# Collect EGN networks files.
 
+$perlbin ${ripperdir}/collect_network_genbanks.pl
 
+pushd
 
