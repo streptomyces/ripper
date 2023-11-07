@@ -1,12 +1,16 @@
 #!/bin/bash
-# This file is the bash script that provides a full RiPPER analysis
-# that encompasses a number of related Perl scripts. Final outputs
-# are found in orgnamegbk (GenBank files featuring RiPPER annotations),
-# out.txt (tab-delimited table containing retrieved peptides and
-# associated data) and rodeohtml (RODEO2 html output).
-# This file should be in the directory from where it
-# will be run. The local.conf file (featuring any parameter
-# modifications) should also be placed in this directory
+#
+# This file is the bash script that provides a full RiPPER analysis that
+# encompasses a number of related Perl scripts. Final outputs are found in
+# orgnamegbk (GenBank files featuring RiPPER annotations), out.txt
+# (tab-delimited table containing retrieved peptides and associated data).
+#
+# This script should be in the directory from where it will be run. The
+# local.conf file (featuring any parameter modifications) should also be placed
+# in this directory.
+#
+# Protein network analysis results are in placed in /home/mnt/pna/.
+
 
 
 # Query file name defaults to minitest.txt.
