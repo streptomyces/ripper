@@ -119,8 +119,8 @@ docker login
 Clone from Github and checkout the `norodeodock` branch.
 
 ~~~ 
-git clone https://github.com/streptomyces/ripper.git
-cd ripper
+git clone https://github.com/streptomyces/ripper.git norodeodock
+cd norodeodock
 git checkout norodeodock
 ~~~
 
