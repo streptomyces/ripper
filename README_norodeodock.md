@@ -99,17 +99,29 @@ should be one genbank file for each protein accession for which a
 genbank file was successfully retrieved from Genbank. The output of
 `egn_ni.pl` is in the folder named `pna`. 
 
-## Build commands (For Govind only. Others please ignore.)
+### Build commands (For Govind only. Others please ignore.)
+
+If you don't already have a buildx builder then make one.
 
 ~~~ 
-docker login
-docker buildx ls
 docker buildx create --name strepbuilder
 docker buildx use strepbuilder
 docker buildx inspect --bootstrap
-# Create a new repository in dockerhub e.g. streptomyces/norodeodock
-docker buildx build --platform linux/amd64,linux/arm64 \
--f norodeo.dockerfile -t streptomyces/norodeodock:latest --push .
+docker buildx ls
 ~~~
 
+If you are not already logged into Docker hub then login.
 
+~~~ 
+docker login
+~~~
+
+Clone from Github and checkout the `norodeodock` branch.
+
+~~~ 
+git clone https://github.com/streptomyces/ripper.git
+cd ripper
+git checkout norodeodock
+~~~
+
+Finally step through the commands in `builds.sh`.
