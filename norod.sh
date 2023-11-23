@@ -17,7 +17,7 @@
 queryfn=$1;
 
 if [[ ${#queryfn} -lt 1 ]]; then
-  queryfn="nopep_test.list";
+  queryfn="minitest.txt";
 fi
 
 if [[ ! -s ${queryfn} || ! -e ${queryfn} ]]; then
@@ -35,6 +35,7 @@ distfaa=/home/mnt/distant.faa
 distfile=/home/mnt/distant.txt
 
 # Rodeo output directory
+# dev: Change the directory name below.
 rodoutdir=/home/mnt/rodout;
 
 # ripper output directory. Contains gbk files.
