@@ -25,6 +25,7 @@ use Getopt::Long;
 my $maxDistFromTE = 8000; # From precursor peptide to the tailoring enzyme.
 my $outdir = qq(ripout);
 my $indir;
+my $inlist;
 my $fofn;
 my $outex; # extension for the output filename when it is derived on infilename.
 my $conffile = qq(local.conf);
@@ -49,6 +50,7 @@ GetOptions (
 "outfile:s" => \$outfile,
 "outdir:s" => \$outdir,
 "indir:s" => \$indir,
+"inlist:s" => \$inlist,
 "fofn:s" => \$fofn,
 "extension:s" => \$outex,
 "conffile:s" => \$conffile,
@@ -256,22 +258,27 @@ else {
 }
 #}}}
 
+open(INLIST, "<", $inlist);
+my @inlist = <INLIST>;
+close(INLIST);
+@inlist = map(chomp, @inlist);
+
+my $coocdir = "cooc";
+
 # Cycle through all the infiles.
-for my $infile (@infiles) {
-my ($noex, $dir, $ext)= fileparse($infile, qr/\.[^.]*/);
-my $bn = $noex . $ext;
+for my $inl (@inlist) {
+  my @ill = split(/\s+/, $inl);
+  my $infile = File::Spec->catfile($coocdir, $ill[0]);
+  my ($noex, $dir, $ext)= fileparse($infile, qr/\.[^.]*/);
 
 =head3 Genbank and fasta file names.
 
-These are derived from $taildir which is the immediate
-directory containing the input file (outarch.csv). The
-way this has been designed, $taildir is a protein
-accession number.
+These are derived from $noex
+The way this has been designed,
+$noex is a protein accession number.
 
 =cut
 
-my @temp = split(/\//, $dir);
-my $taildir = pop(@temp);
 if($outdir) {
   unless(-d $outdir) {
     if(mkdir($outdir)) {
@@ -292,18 +299,18 @@ filenames output is written to.
 
 my ($ofn, $fastafn);
 if($outdir) {
-$ofn = File::Spec->catfile($outdir, $taildir . ".gbk"); 
-$fastafn = File::Spec->catfile($outdir, $taildir . ".faa"); 
+$ofn = File::Spec->catfile($outdir, $noex . ".gbk");
+$fastafn = File::Spec->catfile($outdir, $noex . ".faa");
 }
 else {
-$ofn = $taildir . ".gbk"; 
-$fastafn = $taildir . ".faa"; 
+$ofn = $noex . ".gbk";
+$fastafn = $noex . ".faa";
 }
 
 linelistE("Genbank output is $ofn. Fasta output is $fastafn");
 
 
-open(my $ifh, "<$infile") or croak("Could not open $infile"); # main_co_occur.csv
+open(my $ifh, "<$infile") or croak("Could not open $infile"); # csv written by mkcooc.pl.
 $skip = 1; # There is a header.
 if($skip) {
 for (1..$skip) { my $discard = readline($ifh); }
@@ -343,7 +350,7 @@ push(@coords, [$start, $end, $strand]);
 
 =head3 Getting the index for the tailoring enzyme used in the RODEO search.
 
-This relies on the fact that in outarch.csv, column 0 and
+This relies on the fact that in the mkcooc.pl output, column 0 and
 column 3 will be the same for this protein.
 
 =cut
@@ -717,7 +724,7 @@ $prdlCnt += 1;
 If within specified distance of the TE and score > 0 and count < 20
 insert a record in SQL table $conf{prepeptab}.
 Also write the peptide sequences to the fasta filename $fastafn
-derived from $taildir. See B<Genbank and fasta file names> above.
+derived from $noex. See B<Genbank and fasta file names> above.
 
 =cut
 
@@ -780,7 +787,7 @@ At this point we have gone through all the output from Prodigal.
 =head3 Write the genbank output file.
 
 Below, the $subgbk object is written out to $ofn which is derived
-from $taildir. See B<Genbank and fasta file names> above.
+from $noex. See B<Genbank and fasta file names> above.
 
 =cut
 
