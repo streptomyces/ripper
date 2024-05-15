@@ -6,7 +6,8 @@ ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get update && apt-get upgrade -y
 RUN apt-get install -yqq apt-utils
 RUN apt-get install -yqq build-essential wget \
-git curl zip unzip ghostscript gsfonts parallel
+git curl zip unzip ghostscript gsfonts parallel \
+cmake csh vim
 
 RUN apt-get install -yqq sqlite3 bioperl ncbi-blast+
 # RUN apt-get install -yqq hmmer

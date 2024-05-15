@@ -315,6 +315,11 @@ sub process {
   return(1);
 }
 
+sub checkgbk {
+  my $gbkfh = shift(@_);
+  seek($gbkfh, 0, 0);
+}
+
 
 exit;
 

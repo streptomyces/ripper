@@ -3,8 +3,6 @@ FROM streptomyces/stage002
 MAINTAINER Govind Chandra <govind.chandra@jic.ac.uk>
 ENV DEBIAN_FRONTEND noninteractive
 
-RUN apt install -yqq cmake csh
-
 # ADD hhsuite-linux-sse2.tar.gz /usr/local/
 # ADD hhsuite.tar.gz /usr/local/
 ADD psipred.4.02.tar.gz /usr/local/

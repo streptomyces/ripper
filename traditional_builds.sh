@@ -4,9 +4,9 @@
 # arch="linux/arm64,linux/amd64";
 arch="linux/amd64";
 stagepre="stage";
-buildcmd="docker buildx build"
-# nc="--no-cache"
-nc=""
+buildcmd="docker build"
+nc="--no-cache"
+# nc=""
 lorp="--load"; # load or push
 
 
@@ -23,19 +23,20 @@ sts=$(date +%s);
 $buildcmd $nc --platform $arch \
 -t streptomyces/${stagepre}001 $lorp -f 001.dockerfile .
 
-sleep 10
+sleep 3
 $buildcmd $nc --platform $arch \
 -t streptomyces/${stagepre}002 $lorp -f 002.dockerfile .
 
-sleep 10
+
+sleep 3
 $buildcmd $nc --platform $arch \
 -t streptomyces/${stagepre}003 $lorp -f 003.dockerfile .
 
-sleep 10
+sleep 3
 $buildcmd $nc --platform $arch \
 -t streptomyces/${stagepre}004 $lorp -f 004.dockerfile .
 
-sleep 10
+sleep 3
 $buildcmd $nc --platform $arch \
 -t streptomyces/norodeodock $lorp -f norodeo.dockerfile .
 
