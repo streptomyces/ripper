@@ -75,5 +75,4 @@ done
 # Run the postprocessing scripts
 
 $perlbin ${ripperdir}/gbkNameAppendOrg.pl -indir $ripoutdir
-# $perlbin ${ripperdir}/collectFiles.pl ${rodoutdir} ${rodeohtmldir} '\.html$'
 
