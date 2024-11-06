@@ -22,11 +22,9 @@ use Bio::DB::EUtilities;
 # {{{ Getopt::Long
 use Getopt::Long;
 my $outdir;
-my $protlist;
 my $conffile = qq(local.conf);
 GetOptions (
 "outdir:s" => \$outdir,
-"protlist:s" => \$protlist,
 "conffile:s" => \$conffile
 );
 # }}}
@@ -68,6 +66,7 @@ RODEO fails to fetch nucleotide sequences for these.
 
 # }}} ###
 
+my $protid = $ARGV[0];
 my $apikey;
 my $email = 'andrew.truman@jic.ac.uk';
 if(exists $ENV{NCBI_API_KEY}) {
@@ -114,213 +113,145 @@ unless(-d $outdir) {
     croak("Failed to make $outdir.");
   }
 }
+my $ofn = File::Spec->catfile($outdir, "main_co_occur.csv");
+open(my $ofh, ">", $ofn) or croak("Failed to open $ofn for writing.");
 
-my %coocdone; # protein_id => gbkfilename
-my $coocdonefn = File::Spec->catfile($gbkcache, "cooc.done");
-if(-f $coocdonefn and -s $coocdonefn) {
-  open(DONE, "<", $coocdonefn);
-  while(<DONE>) {
-    chomp($_);
-    my @ll = split(/\s+/, $_);
-    $coocdone{$ll[0]} = $ll[1];
-  }
-  close(DONE);
+# say($protid);
+my $query = $protid . "[accn]";
+
+# {{{ esearch to make @ids.
+my %esarg = (
+  -eutil => 'esearch',
+  -db     => 'protein',
+  -term   => $query,
+  -retmax => 3
+);
+if($apikey) {
+  $esarg{-api_key} = $apikey;
 }
-
-
-open(ACC, "<", $protlist);
-my @protid = <ACC>;
-close(ACC);
-for my $protid (@protid) {
-  chomp($protid);
-  my $ofn = File::Spec->catfile($outdir, $protid . ".csv");
-  my $gbkfn = File::Spec->catfile($gbkcache, $coocdone{$protid});
-  if(exists($coocdone{$protid}) and -e $gbkfn and -e $ofn) {
-    say(STDERR "$protid ($coocdone{$protid}) already exists");
-    next;
-  }
-  else {
-    process($protid);
-  }
+if($email) {
+  $esarg{-email} = $email;
 }
+my $factory = Bio::DB::EUtilities->new(%esarg);
+my @ids = $factory->get_ids;
+# }}}
 
-open(DONE, ">", $coocdonefn);
-for my $protid (keys %coocdone) {
-  say(DONE "$protid   $coocdone{$protid}");
+# {{{ elink to get @ntids.
+my %elarg = (
+  -eutil => 'elink',
+  -db     => 'nucleotide',
+  -dbfrom => 'protein',
+  -id     => \@ids
+);
+if($apikey) {
+  $elarg{-api_key} = $apikey;
 }
-close(DONE);
+if($email) {
+  $elarg{-email} = $email;
+}
+my $factory1 = Bio::DB::EUtilities->new(%elarg);
+my @ntids;
+while (my $ds = $factory1->next_LinkSet) {
+push(@ntids, $ds->get_ids);
+}
+# }}}
 
+# {{{ efetch to get one nucleotide genbank file.
+my %efarg = (
+  -eutil => 'efetch',
+  -db      => 'nucleotide',
+  -rettype => 'gbwithparts',
+  -id      => [$ntids[0]]
+);
+if($email) {
+  $efarg{-email} = $email;
+}
+my $factory2 = Bio::DB::EUtilities->new(%efarg);
 
+my $template = "coocXXXXXX";
+my($tmpfh, $tmpfn)=tempfile($template, DIR => '.', SUFFIX => '.gbk');
 
-sub process {
-  my $protid = shift(@_);
-  my $ofn = File::Spec->catfile($outdir, $protid . ".csv");
-  open(my $ofh, ">", $ofn) or croak("Failed to open $ofn for writing.");
+# dump <HTTP::Response> content to a file (not retained in memory)
+$factory2->get_Response(-file => $tmpfn);
+# }}}
 
-  # say($protid);
-  my $query = $protid . "[accn]";
-  say(STDERR $query);
+seek($tmpfh, 0, 0); # jump to beginning of $tmpfh before SeqIO.
+my $seqio=Bio::SeqIO->new(-fh => $tmpfh);
 
-  # {{{ esearch to make @ids.
-  my %esarg = (
-    -eutil => 'esearch',
-    -db     => 'protein',
-    -term   => $query,
-    -retmax => 3
-  );
-  if($apikey) {
-    $esarg{-api_key} = $apikey;
-  }
-  if($email) {
-    $esarg{-email} = $email;
-  }
-  my $factory = Bio::DB::EUtilities->new(%esarg);
-  my @ids = $factory->get_ids;
-  unless(@ids) {
-    say(STDERR "$protid not found by esearch.");
-    return(0);
-  }
-  # say(STDERR @ids); # These are numeric UIDs. Usually only one in the list.
-  # }}}
+my $seqobj=$seqio->next_seq();
+my $binom = $seqobj->species()->binomial();
+# say $binom;
+my $acc = $seqobj->accession();
 
-  # {{{ elink to get @ntids.
-  my %elarg = (
-    -eutil => 'elink',
-    -db     => 'nucleotide',
-    -dbfrom => 'protein',
-    -id     => \@ids
-  );
-  if($apikey) {
-    $elarg{-api_key} = $apikey;
-  }
-  if($email) {
-    $elarg{-email} = $email;
-  }
-  my $factory1 = Bio::DB::EUtilities->new(%elarg);
-  my @ntids;
-  while (my $ds = $factory1->next_LinkSet) {
-    push(@ntids, $ds->get_ids);
-  }
-  # say(STDERR "@ntids"); # These are numeric UIDs. Usually more than one in the list.
-  # }}}
+# @region is list of 11 features in which the
+# TE is in the middle of the list.
+my @region;
+$region[4] = undef;
 
-  # {{{ efetch to get one nucleotide genbank file.
-  # We cycle through @ntids only till we get one genbank file.
-  my $template = "coocXXXXXX";
-  my $ntgbkflag = 0; # Whether we got a usable genbank file or not.
-  my($tmpfh, $tmpfn)=tempfile($template, DIR => '.', SUFFIX => '.gbk');
-  for my $ntid (@ntids) {
-  my %efarg = (
-    -eutil => 'efetch',
-    -db      => 'nucleotide',
-    -rettype => 'gbwithparts',
-    -id      => [$ntids[0]]
-  );
-  if($email) {
-    $efarg{-email} = $email;
-  }
-  my $factory2 = Bio::DB::EUtilities->new(%efarg);
-  my $response = $factory2->get_Response();
-  # <HTTP::Response> content to $tmpfh if is_success().
-  if($response->is_success()) {
-    print($tmpfh ($response->content()));
-    $ntgbkflag = 1;
-    last;
-  }
-  }
-  unless($ntgbkflag) {
-    unlink($tmpfn);
-    return(0);
-  }
-  # }}}
+my $match_seen = 0;
+my $cdsCnt = 0;
 
-  seek($tmpfh, 0, 0); # jump to beginning of $tmpfh before SeqIO.
-  my $seqio=Bio::SeqIO->new(-fh => $tmpfh);
-
-  my $seqobj=$seqio->next_seq();
-  my $binom = $seqobj->species()->binomial();
-  # say $binom;
-  my $acc = $seqobj->accession();
-
-  # @region is list of 11 features in which the
-  # TE is in the middle of the list.
-  my @region;
-  $region[4] = undef;
-
-  my $match_seen = 0;
-  my $cdsCnt = 0;
-
-  # {{{ for my $feat ($seqobj->all_SeqFeatures())
-  for my $feat ($seqobj->all_SeqFeatures()) {
-    if($feat->primary_tag() eq 'source') {
-      if($feat->has_tag("organism")) {
-        ($binom) = $feat->get_tag_values("organism");
-      }
+# {{{ for my $feat ($seqobj->all_SeqFeatures())
+for my $feat ($seqobj->all_SeqFeatures()) {
+  if($feat->primary_tag() eq 'source') {
+    if($feat->has_tag("organism")) {
+      ($binom) = $feat->get_tag_values("organism");
     }
-    if($feat->primary_tag() eq 'CDS') {
-      unless($feat->has_tag("protein_id")) { next; }
-      my ($gprotid) = $feat->get_tag_values("protein_id");
-      if($gprotid eq $protid) {
-        $match_seen = 1;
-      }
-      if(not $match_seen) {
-        my $discard = shift(@region);
-        push(@region, $feat);
-      }
-      if($match_seen) {
-        push(@region, $feat);
-        if(scalar(@region) >= 11) {
-          last;
-        }
+  }
+  if($feat->primary_tag() eq 'CDS') {
+    unless($feat->has_tag("protein_id")) { next; }
+    my ($gprotid) = $feat->get_tag_values("protein_id");
+    if($gprotid eq $protid) {
+      $match_seen = 1;
+    }
+    if(not $match_seen) {
+      my $discard = shift(@region);
+      push(@region, $feat);
+    }
+    if($match_seen) {
+      push(@region, $feat);
+      if(scalar(@region) >= 11) {
+        last;
       }
     }
   }
-  # }}}
-
-  # {{{ for my $feat (@region). Print out main_co_occur.csv.
-  my @header = qw(query organism accession protid
-  start end strand product);
-  say($ofh (join(",", @header)));
-  if($match_seen) {
-    for my $feat (@region) {
-      unless(ref($feat)) { next; }
-      my $start = $feat->start();
-      my $end = $feat->end();
-      my ($gprotid) = $feat->get_tag_values("protein_id");
-      my $strand = $feat->strand() == -1 ? "-" : "+";
-      my @anno;
-      if($feat->has_tag("gene")) {
-        my @temp = $feat->get_tag_values("gene");
-        my $temp = join(" ", @temp);
-        push(@anno, $temp);
-      }
-      if($feat->has_tag("product")) {
-        my @temp = $feat->get_tag_values("product");
-        my $temp = join(" ", @temp);
-        push(@anno, $temp);
-      }
-      my $anno = join(";", @anno);
-      say($ofh ("$protid,$binom,$acc,$gprotid,$start,$end,$strand,$anno"));
-      #last;
-    }
-  }
-  # }}}
-
-  if(-d $gbkcache) {
-    copy($tmpfn, File::Spec->catfile($gbkcache, $acc . ".gbk"));
-    $coocdone{$protid} = $acc . ".gbk";
-  }
-  unlink($tmpfn);
-  close($ofh);
-  return(1);
 }
+# }}}
 
-sub checkgbk {
-  my $gbkfh = shift(@_);
-  seek($gbkfh, 0, 0);
+# {{{ for my $feat (@region). Print out main_co_occur.csv.
+my @header = qw(query organism accession protid
+                start end strand product);
+say($ofh (join(",", @header)));
+if($match_seen) {
+for my $feat (@region) {
+  unless(ref($feat)) { next; }
+  my $start = $feat->start();
+  my $end = $feat->end();
+  my ($gprotid) = $feat->get_tag_values("protein_id");
+  my $strand = $feat->strand() == -1 ? "-" : "+";
+  my @anno;
+  if($feat->has_tag("gene")) {
+    my @temp = $feat->get_tag_values("gene");
+    my $temp = join(" ", @temp);
+    push(@anno, $temp);
+  }
+  if($feat->has_tag("product")) {
+    my @temp = $feat->get_tag_values("product");
+    my $temp = join(" ", @temp);
+    push(@anno, $temp);
+  }
+  my $anno = join(";", @anno);
+  say($ofh ("$protid,$binom,$acc,$gprotid,$start,$end,$strand,$anno"));
+  #last;
 }
+}
+# }}}
 
-
+if(-d $gbkcache) {
+copy($tmpfn, File::Spec->catfile($gbkcache, $acc . ".gbk"));
+}
+unlink($tmpfn);
+close($ofh);
 exit;
 
 

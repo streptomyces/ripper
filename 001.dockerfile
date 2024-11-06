@@ -29,15 +29,15 @@ libopenmpi-dev
 
 # MEME
 WORKDIR /home/work
-ADD meme-5.5.4.tar.gz /home/work/
-WORKDIR /home/work/meme-5.5.4
+ADD meme-5.5.5.tar.gz /home/work/
+WORKDIR /home/work/meme-5.5.5
 RUN ./configure --prefix=/usr/local --with-url="http://meme-suite.org"
 RUN make && make install
 ENV PATH="/usr/local/libexec/meme-5.5.4:${PATH}"
 
 # HMMER
 WORKDIR /home/work
-ADD hmmer.tar.gz /home/work/
+ADD hmmer-3.4.tar.gz /home/work/
 WORKDIR /home/work/hmmer-3.4
 RUN ./configure --prefix=/usr/local
 RUN make

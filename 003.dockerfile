@@ -6,6 +6,8 @@ ENV DEBIAN_FRONTEND noninteractive
 # ADD hhsuite-linux-sse2.tar.gz /usr/local/
 # ADD hhsuite.tar.gz /usr/local/
 ADD psipred.4.02.tar.gz /usr/local/
+# The two below are from
+# https://ftp.ncbi.nlm.nih.gov/blast/executables/legacy.NOTSUPPORTED/2.2.26/
 ADD blast-2.2.26-x64-linux.tar.gz /usr/local/
 ADD ncbi.tar.gz /usr/local/
 
