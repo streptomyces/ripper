@@ -1,37 +1,88 @@
 # RiPPER Overview
 
-RiPPER (RiPP Precursor Peptide Enhanced Recognition) is a customisable tool for
-the identification of genes encoding putative precursor peptides within RiPP
-(ribosomally synthesised and post-translationally modified peptide) gene
-clusters. This was first described in [Santos-Aberturas et al. (Nucleic Acids
-Res., 2019, 47,
-4624–4637)](https://academic.oup.com/nar/article/47/9/4624/5420534). A new
-methods article (June 2021) provides a step-by-step workflow to how we search
-for BGCs using RiPPER 1.1 [Moffat et al., (Methods Mol. Biol., 2021, 2296,
-  227–247)](https://link.springer.com/protocol/10.1007%2F978-1-0716-1358-0_14).
+RiPPER (RiPP Precursor Peptide Enhanced Recognition) is a customisable tool for the identification of genes encoding putative precursor peptides within RiPP (ribosomally synthesised and post-translationally modified peptide) gene clusters. This was first described in [Santos-Aberturas et al. (Nucleic Acids Res., 2019, 47, 4624–4637)](https://academic.oup.com/nar/article/47/9/4624/5420534). A new methods article (June 2021) provides a step-by-step workflow to how we search for BGCs using RiPPER 1.1 [Moffat et al., (Methods Mol. Biol., 2021, 2296, 227–247)](https://link.springer.com/protocol/10.1007%2F978-1-0716-1358-0_14).
 
-The only reliable way of using RiPPER now is through the use of [Docker image]
-(https://hub.docker.com/r/streptomyces/norodeodock).
+We strongly recommend that users work with a [Docker container of RiPPER](https://hub.docker.com/r/streptomyces/ripdock/). This is built from the latest version of RiPPER and includes all dependencies, so nothing needs installing apart from Docker and the RiPPER container. Details are provided below on using this in the **Docker** section below.
 
-This latest version of RiPPER now includes automatic short peptide
-networking using using [EGN](http://evol-net.fr/index.php/en/downloads) built
-into the processing, which also provides associated output files for network
-analysis in [Cytoscape](https://cytoscape.org). The analysis and processing of
-this output is described in detail in [Moffat et al., (Methods Mol. Biol.,
-2021, 2296,
-227–247)](https://link.springer.com/protocol/10.1007%2F978-1-0716-1358-0_14),
-which is free to access. This version is the latest version of RiPPER that is
-accessed as normal via Docker (described below).
+The latest version of RiPPER (1.1) now includes automatic short peptide networking using using [EGN](http://evol-net.fr/index.php/en/downloads) built into the processing, which also provides associated output files for network analysis in [Cytoscape](https://cytoscape.org). The analysis and processing of this output is described in detail in [Moffat et al., (Methods Mol. Biol., 2021, 2296, 227–247)](https://link.springer.com/protocol/10.1007%2F978-1-0716-1358-0_14), which is free to access. This version is the latest version of RiPPER that is accessed as normal via Docker (described below). If a user prefers to use the original form of RiPPER (described in Santos-Aberturas et al.) then it can be accessed via Docker as a "legacy" version (use the following command to install this older legacy version: `docker pull streptomyces/ripdock:legacy`).
 
 RiPPER identifies putative precursor peptides associated with a set of putative RiPP tailoring enzymes that are defined by the user. To do this, the following steps are taken:
 
-1. Protein accession numbers for putative RiPP tailoring enzymes are used to retrieve gene clusters.
+1. Protein accession numbers for putative RiPP tailoring enzymes are used to retrieve gene clusters using [RODEO2](https://github.com/thedamlab/rodeo2)
 2. These are then searched for likely precursor peptide coding regions using both a modified form of [Prodigal](https://github.com/hyattpd/Prodigal) (prodigal-short) and a HMM-based search for precursor peptides.
 3. A Genbank file that highlights newly annotated short genes in the gene cluster is generated for visualisation in [Artemis](http://www.sanger.ac.uk/science/tools/artemis)
 4. Top-scoring peptides are tabulated alongside associated attribute data from a batch input for further analysis, and a fasta file is provided for peptide network analysis using [EGN](http://evol-net.fr/index.php/en/downloads)
 5. NEW FOR RiPPER 1.1. All tabulated peptides are networked based on sequence identity using [EGN](http://evol-net.fr/index.php/en/downloads), which provides network and attribute files for network analysis in [Cytoscape](https://cytoscape.org). The generation of networks enables the identification of families of related peptides.
 
 A detailed technical description of the workflow is provided at the end of this page as **Description of RiPPER workflow**.
+
+# Installation and usage
+
+## Dependencies
+
+1. Perl >= 5.14.0
+2. BioPerl modules installed for the Perl being used.
+3. Python >= 2.7.0
+4. Biopython modules installed for the Python being used.
+5. Perl modules _DBI_ and _DBD::SQLite_.
+6. [HMMER](http://hmmer.org/).
+7. [Prodigal](https://github.com/hyattpd/Prodigal). We actually use
+a specially built form of Prodigal which we call _prodigal-short_.
+The building of _prodigal-short_ is described later under the section
+**Building prodigal-short**.
+
+## Input file
+
+The input for RiPPER is a .txt file that contains a list of NCBI accession numbers for proteins (one on each line) that the user wants to investigate for the presence of associated precursor peptide genes. Lists can be generated manually, or via multiple routes to retrieving a list of associated protein accessions, such as a BLAST search or [conserved domain retrieval]( https://www.ncbi.nlm.nih.gov/Structure/lexington/lexington.cgi).
+
+## Docker
+
+The simplest way to work with RiPPER is to use the Docker container, which includes all dependencies and can be run on Linux/MacOSX/Windows. This all follows installation of [Docker]( https://www.docker.com/get-started).
+
+### Pulling and running a RiPPER container
+
+To install RiPPER:
+
+~~~ {.sh}
+docker pull streptomyces/ripdock
+~~~
+
+The default is to pull the image tagged as *latest*. You could pull a different image if you have a tag name. See example below where *legacy* is the tag name:
+
+~~~ {.sh}
+docker pull streptomyces/ripdock:legacy
+~~~
+
+Following installation, run the container using the following command, where
+your input accession list file is stored in `/home/tom/rippwork` on Linux and
+MacOS systems or `C:/Users/tom/rippwork` on a MS Windows system. (substitute your
+relevant directories in place of these):
+
+~~~ {.sh}
+# Example usage on Linux
+docker run -it -v /home/tom/rippwork:/home/mnt streptomyces/ripdock
+
+# Example usage on MS Windows.
+docker run -it -v C:/Users/tom/rippwork:/home/mnt streptomyces/ripdock
+~~~
+
+Do not change the `/home/mnt` part. This refers to a directory in the container and scripts in the container expect to find this directory. The host directory you mount on `/home/mnt` in the container is where the output directories and files are written to. You can place your input list in the mounted host directory on the host side and access it in /home/mnt/ on the container side. See the example **Run on your own list** below.
+
+### Carrying out an analysis in the running container
+
+Following the docker run command above, to ensure RiPPER is working correctly, you can run a small test analysis on 3 accessions that are included in a test file named *minitest.txt*. Use the following command:
+
+~~~ {.sh}
+./ripper_run.sh
+~~~
+
+#### Run on your own list
+
+Use the following command to analyse your own list, substituting in a relevant filename for *te_accessions.txt*:
+
+~~~ {.sh}
+./ripper_run.sh /home/mnt/te_accessions.txt
+~~~
 
 ## Analysis parameters
 
@@ -87,17 +138,10 @@ This is a tab-delimited file that reports peptide data for all peptides retrieve
 This is a tab-delimited file that reports peptide data for all peptides retrieved by RiPPER via a precursor peptide HMM search across the full size of the retrieved gene cluster (i.e. ignores maxDistFromTE), and only reports peptides that were not identified in the original RiPPER search. Peptide identifiers are unique from *out.txt*, so these text files can be combined for downstream analysis.
 
 #### out.faa
-
-A fasta file for peptides reported in out.txt that is formatted as an
-input file for similarity networking using [EGN]
-(http://evol-net.fr/index.php/en/downloads). An equivalent
-*distant.faa* is also provided.
+A fasta file for peptides reported in out.txt that is formatted as an input file for similarity networking using [EGN]( http://evol-net.fr/index.php/en/downloads). An equivalent *distant.faa* is also provided.
 
 #### rodeohtml
-
-A folder containing RODEO html output files for all retrieved gene
-clusters. Additional RODEO data is provided in a separate **rodout**
-folder
+A folder containing RODEO html output files for all retrieved gene clusters. Additional RODEO data is provided in a separate **rodout** folder
 
 
 # Description of RiPPER workflow
@@ -107,13 +151,16 @@ scripts to provide a full RiPPER analysis. This uses analysis settings
 defined in an associated configuration file (local.conf). Where
 relevant, variables defined in local.conf are described below.
 
-A Perl script *mkcooc.pl* produces an output file named
-*main\_co\_occur.csv* that contains information about the annotated
-genes that flank the RiPP tailoring enzyme.
+Using an accession number for a predicted RiPP tailoring enzyme, the
+[rodeo2](https://github.com/thedamlab/rodeo2) Python script
+*rodeo\_main.py* produces and output file named *main\_co\_occur.csv*
+that contains information about the annotated genes that flank the
+RiPP tailoring enzyme.
 
 *ripper.pl* reads the *main\_co\_occur.csv* file produced by
-*mkcooc.pl* to determine the genbank accession to fetch and the
-coordinats of the tailoring enzyme that was used as the search term.
+the *rodeo2* script *rodeo\_main.py* to determine the genbank
+accession to fetch and the coordinats of the tailoring enzyme that was
+used as the search term.
 
 The genbank file is then fetched from GenBank and a smaller genbank
 file is generated from it whose length is twice the value of the
