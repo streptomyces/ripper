@@ -35,6 +35,7 @@ commands.md
 repick.pl
 ignore/
 blast*/
+hh-suite/
 hhsuite/
 ncbi/
 psipred/

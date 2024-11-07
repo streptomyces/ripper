@@ -3,37 +3,19 @@ FROM streptomyces/stage002
 MAINTAINER Govind Chandra <govind.chandra@jic.ac.uk>
 ENV DEBIAN_FRONTEND noninteractive
 
-# ADD hhsuite-linux-sse2.tar.gz /usr/local/
-# ADD hhsuite.tar.gz /usr/local/
-ADD psipred.4.02.tar.gz /usr/local/
-# The two below are from
-# https://ftp.ncbi.nlm.nih.gov/blast/executables/legacy.NOTSUPPORTED/2.2.26/
-ADD blast-2.2.26-x64-linux.tar.gz /usr/local/
-ADD ncbi.tar.gz /usr/local/
-
-# export PATH="$(pwd)/bin:$(pwd)/scripts:$PATH"
-
-# PSIPred
-WORKDIR /usr/local/psipred/src
-RUN make
-RUN make install
-
-# legacy BLAST
-WORKDIR /usr/local
-RUN ./ncbi/make/makedis.csh
-
 # HHSuite
 WORKDIR /usr/local
-RUN git clone https://github.com/soedinglab/hh-suite.git
+ADD hh-suite /usr/local/hh-suite/
+# RUN git clone https://github.com/soedinglab/hh-suite.git
 RUN mkdir -p hh-suite/build
 WORKDIR hh-suite/build
 RUN cmake -DCMAKE_INSTALL_PREFIX=. ..
-RUN make -j 4 && make install
+RUN make -j 1
+RUN make install
 
 
 ENV HHLIB="/usr/local/hh-suite"
 ENV PATH="/usr/local/hh-suite/build/bin:/usr/local/hh-suite/build/scripts:${PATH}"
-ENV PATH="/usr/local/psipred/bin:/usr/local/ncbi/bin:${PATH}"
 
 COPY HHPaths.pm /usr/local/hh-suite/scripts/
 

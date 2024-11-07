@@ -5,8 +5,8 @@
 arch="linux/amd64";
 stagepre="stage";
 buildcmd="docker buildx build"
-# nc="--no-cache"
-nc=""
+nc="--no-cache"
+# nc=""
 lorp="--load"; # load or push
 
 

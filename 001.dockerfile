@@ -17,9 +17,13 @@ RUN apt-get install -yqq python3-pip
 
 RUN ln -s /usr/bin/python3 /usr/bin/python
 
-RUN python -m pip install "wheel"
-RUN python -m pip install "biopython"
+# RUN apt-get install python3-wheel # already present.
+RUN apt-get install -yqq python3-biopython python3-zipp \
+python3-sklearn-lib
+# python3-zipp might provide pathlib.
+RUN pip3 install --break-system-packages pathlib
 
+#=======================================
 # Dependencies for MEME
 RUN apt-get update && apt-get install -yqq \
 libfile-which-perl libhtml-template-perl libjson-perl \
@@ -51,8 +55,13 @@ WORKDIR /home/work
 ADD Prodigal/ /home/work/Prodigal
 WORKDIR /home/work/Prodigal
 RUN make install
+#=======================================
 
 WORKDIR /home/work
+RUN mkdir -p /home/work/sqlite
+RUN mkdir -p /home/work/pfamscan
+RUN mkdir -p /home/work/blastdb
+
 
 ############################################################
 ############################################################
