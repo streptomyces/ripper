@@ -18,6 +18,7 @@ use XML::Simple;
 use LWP::Simple;
 use Net::FTP;
 
+$ENV{PATH} = $ENV{PATH} . ":/home/work/ripper";
 
 # {{{ Getopt::Long
 use Getopt::Long;
@@ -32,7 +33,7 @@ my $ppFeatAddLimit = 20;
 my $errfile;
 my $prodigalScoreThresh = 7.5;
 my $prodigalshortbin = qq(prodigal-short);
-my $flankLen = 17500;
+my $flankLen = 40000;
 my $allowedInGene = 20;
 my $minPPlen = 20; # Minimum precursor peptide length.
 my $maxPPlen = 120; # Maximum precursor peptide length.
@@ -113,22 +114,6 @@ The index 1 column is a genbank gid which we use to fetch the genbank file.
 1. From the fetched genbank file we extract the region spanned by the output in
 *arch.csv (column index 5 and 6 of the first and last lines).
 
-2. Prodigal is run on the nucleotide sequence obtained in step 1.
-
-3. Peptides less than 30 amino acids or more than 120 amino acids are discarded.
-
-4. Results of Prodigal are sorted by the total score reported by Prodigal
-
-5. The top 20 peptides (or as many as have a total prodigal score of more then 0)
-are kept.
-
-6. Peptides kept in step 5 are added to the annotation in the genbank file as
-CDSs.
-
-7. The top 3 peptides are coloured reddish brown, the next 9 are coloured green
-and the remainder are coloured yellowish brown. For these features, the note
-tag contains the output from Prodigal for each particular peptide.
-
 =head2 Input files
 
 These are F<outarch.csv> files resulting from running RODEO. This is a messy
@@ -163,7 +148,6 @@ my $esummaryURL='http://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?';
 my $ftp=Net::FTP->new(Host => "ftp.ncbi.nih.gov", Passive => 1);
 # }}}
 
-
 # {{{ open the errfile
 if($errfile) {
 open(ERRH, ">", $errfile);
@@ -172,7 +156,6 @@ close(STDERR);
 open(STDERR, ">&ERRH"); 
 }
 # }}}
-
 
 # {{{ Populate %conf if a configuration file 
 my %conf;
@@ -195,9 +178,6 @@ linelistE("Specified configuration file $conffile not found.");
 if(exists($conf{minPPlen})) { $minPPlen = $conf{minPPlen}; }
 if(exists($conf{maxPPlen})) { $maxPPlen = $conf{maxPPlen}; }
 if(exists($conf{maxDistFromTE})) { $maxDistFromTE = $conf{maxDistFromTE}; }
-if(exists($conf{prodigalScoreThresh})) {
-  $prodigalScoreThresh = $conf{prodigalScoreThresh};
-}
 if(exists($conf{fastaOutputLimit})) {
   $fastaOutputLimit = $conf{fastaOutputLimit};
 }
@@ -207,15 +187,11 @@ if(exists($conf{sameStrandReward})) {
 if(exists($conf{flankLen})) {
   $flankLen = $conf{flankLen};
 }
-if(exists($conf{"prodigalshortbin"})) {
-  $prodigalshortbin = $conf{prodigalshortbin};
-}
 
 
 # }}}
 
-
-# {{{ gbkcache and sqlite initialisation
+# {{{ gbkcache initialisation
 my $gbkcache = qq(gbkcache);
 if(exists($conf{gbkcache})) { $gbkcache = $conf{gbkcache}; }
 
@@ -343,7 +319,7 @@ my $lineCnt = 0;
 while(my $line = readline($ifh)) {
 chomp($line);
 if($line=~m/^\s*\#/ or $line=~m/^\s*$/
-  or $line=~m/^query/ ) {next;}
+  or $line=~m/^query/i ) {next;}
 #Query,Genus/Species,Nucleotide_acc,Protein_acc,start,end,dir,PfamID1,Name1,Description1,E-value1,PfamID2,Name2,D
 #POF95626.1,Pseudomonas putida,MINE01000015.1,POF95618.1,459205,459898,+,PF12146,Hydrolase_4,"Serine aminopeptida
 
@@ -359,7 +335,7 @@ my $end = $ll[5];
 
 # For strand -1 the order in the file is end, start
 # Hence the if block below.
-if($strand == -1) {
+if($strand == -1 and ($start > $end)) {
 $start = $ll[5];
 $end = $ll[4];
 }
@@ -498,6 +474,9 @@ $subobj->description("$gbkgi $minpos $maxpos");
 $seqout->write_seq($subobj);
 close($subfh);
 
+### Debugging
+# copy($subfn, "/home/mnt");
+
 # The sub called below uses blastn to locate the TE on the sub-genbank.
 my ($teSubStart, $teSubEnd) = locateTE(tefn => $tefn, subfn => $subfn);
 
@@ -561,6 +540,11 @@ concerned with.
 my($prdfh, $prdfn)=tempfile($template, DIR => $tempdir, SUFFIX => '.prodigal');
 close($prdfh);
 my $xstr = qq($prodigalshortbin -p meta -f gff -i $subfn -s $prdfn);
+
+### Debugging
+# linelist("prodigal output file: $prdfn");
+# linelist($xstr);
+
 my $discard = qx($xstr); # Only interested in the output in file $prdfn.
 
 # Read prodigal output and populate @prdl.
@@ -593,6 +577,13 @@ for my $lr (@prdl) {
 # This gives us @sprdl.
 
 my @sprdl = sort {$b->[3] <=> $a->[3]} @prdl;
+
+### Debugging
+# linelist("Something $prdfn");
+# for my $dlr (@prdl) {
+#   tablist(@{$dlr});
+# }
+
 
 
 # Loop through the sorted (by score) prodigal output
@@ -786,7 +777,6 @@ At this point we have gone through all the output from Prodigal.
 
 =cut
 
-
 =head3 Write the genbank output file.
 
 Below, the $subgbk object is written out to $ofn which is derived
@@ -802,9 +792,7 @@ $subout->write_seq($subgbk);
 
 #copy($gbkfn, $gbkgi . ".gbk");
 #copy($subfn, "sub.fna");
-#copy($prdfn, $gbkgi . ".prodigal");
-
-unlink($gbkfn, $subfn, $prdfn, $tefn);
+unlink($gbkfn, $subfn, $tefn);
 }
 
 close($ofh);
@@ -814,7 +802,6 @@ exit;
 END {
 close(STDERR);
 close(ERRH);
-$handle->disconnect();
 }
 
 
@@ -864,44 +851,6 @@ sub distTE {
     }
   }
   return($mindist);
-}
-# }}}
-
-# {{{ sub prodigal2aa listref, fastafilename. Not used.
-
-sub prodigal2aa {
-  my $lr = shift(@_);
-  my $subfn = shift(@_);
-
-  my $seqio = Bio::SeqIO->new(-file => $subfn, -format => "fasta");
-  my $seqobj = $seqio->next_seq();
-
-  my ($start, $end, $strand) = @{$lr}[0, 1, 2];
-
-  my $cds;
-  if($strand == 1) {
-    $cds = $seqobj->trunc($start, $end);
-  }
-  else {
-    $cds = $seqobj->trunc($start, $end)->revcom();
-  }
-  my $aaobj = $cds->translate();
-  $aaobj->display_id($start);
-  $aaobj->description("$end, $strand");
-  return($aaobj);
-}
-# }}}
-
-# {{{ sub seqobj2print $aaobj. Not used.
-sub seqobj2print {
-  my $aaobj = shift(@_);
-  my $memvar;
- open(my $memh, ">", \$memvar)
-     or die "Can't open memory file: $!";
- my $bout=Bio::SeqIO->new(-fh => $memh, -format => 'fasta');
-  $bout->write_seq($aaobj);
-  close($memh);
-  return($memvar);
 }
 # }}}
 

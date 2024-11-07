@@ -113,7 +113,7 @@ select($ofh);
 
 my %pfl = pflens();
 
-my $hmmdb = File::Spec->catfile($conf{hmmdir}, $conf{hmmdb});
+my $hmmdb = File::Spec->catfile($conf{pfamdir}, $conf{hmmdb});
 my $ripphmmdb = File::Spec->catfile($conf{hmmdir}, $conf{ripphmmdb});
 
 my $dbfile=$conf{sqlite3fn};
@@ -207,7 +207,7 @@ $handle->disconnect();
 
 # {{{ sub pflens
 sub pflens {
-  my $pfamhmmfn = File::Spec->catfile($conf{hmmdir}, $conf{hmmdb});
+  my $pfamhmmfn = File::Spec->catfile($conf{pfamdir}, $conf{hmmdb});
   open(PFT, "<", $pfamhmmfn) or croak "Failed to open $pfamhmmfn";
   my %rethash;
   local $/ = "\n//\n";
@@ -236,7 +236,7 @@ sub pflens {
 
 # {{{ sub pflens_old
 sub pflens_old {
-  my $pfamhmmdatfn = File::Spec->catfile($conf{hmmdir}, $conf{pfamhmmdatfn});
+  my $pfamhmmdatfn = File::Spec->catfile($conf{pfamdir}, $conf{pfamhmmdatfn});
   open(PFT, "<", $pfamhmmdatfn) or croak "Failed to open $pfamhmmdatfn";
   my %rethash;
   local $/ = "\n//\n";
