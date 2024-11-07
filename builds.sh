@@ -37,7 +37,7 @@ $buildcmd $nc --platform $arch \
 
 sleep 10
 $buildcmd $nc --platform $arch \
--t streptomyces/norodeodock $lorp -f norodeodock.dockerfile .
+-t streptomyces/rippertest $lorp -f ripper.dockerfile .
 
 ets=$(date +%s);
 

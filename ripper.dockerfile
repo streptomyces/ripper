@@ -8,7 +8,7 @@ RUN apt-get install -yqq libbio-searchio-hmmer-perl
 WORKDIR /home/work
 RUN git clone https://github.com/streptomyces/ripper.git
 WORKDIR /home/work/ripper
-RUN git checkout norodeodock
+RUN git checkout master
 
 WORKDIR /home/work
 RUN cp ripper/norod.sh ripper/minitest.txt ripper/local.conf ./
