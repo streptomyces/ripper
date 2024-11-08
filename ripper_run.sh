@@ -11,8 +11,6 @@
 #
 # Protein network analysis results are in placed in /home/mnt/pna/.
 
-
-
 # Query file name defaults to minitest.txt.
 queryfn=$1;
 
