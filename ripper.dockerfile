@@ -11,9 +11,9 @@ WORKDIR /home/work/ripper
 RUN git checkout master
 
 WORKDIR /home/work
-RUN cp ripper/norod.sh ripper/minitest.txt ripper/local.conf ./
+RUN cp ripper/ripper_run.sh ripper/minitest.txt ripper/local.conf ./
 RUN cp ripper/microtest.txt ./
-RUN cp ripper/postprocess.sh ripper/rodconf.pl ./
+RUN cp ripper/postprocess.sh ./
 
 RUN mkdir /home/work/pfam
 RUN cp /home/work/ripper/ripp.hmm /home/work/pfam/
