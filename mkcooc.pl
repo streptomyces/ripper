@@ -8,24 +8,22 @@ use File::Temp qw(tempfile tempdir);
 use File::Spec;
 use File::Path qw(make_path);
 use File::Copy;
-# use Sco::Common qw(tablist tablistE linelistE);
 use Bio::SeqIO;
-# use Bio::Seq;
-# use Bio::SeqFeature::Generic;
-# use Digest::SHA qw(sha1_hex);
-
-# use XML::Simple;
-# use LWP::Simple;
-# use Net::FTP;
+use Bio::Seq;
+use XML::LibXML;
+use List::Util qw(first max maxstr min minstr reduce shuffle sum
+    any all uniq uniqnum uniqstr);
 use Bio::DB::EUtilities;
 
 # {{{ Getopt::Long
 use Getopt::Long;
 my $outdir;
 my $conffile = qq(local.conf);
+my $verbose;
 GetOptions (
 "outdir:s" => \$outdir,
-"conffile:s" => \$conffile
+"conffile:s" => \$conffile,
+"verbose" => \$verbose
 );
 # }}}
 
@@ -39,10 +37,13 @@ mkcooc.pl
 
  perl -c mkcooc.pl
 
- rm -rf checkdir
- perl mkcooc.pl -outdir checkdir/WP_236176819.1 WP_236176819.1
+ perl mkcooc.pl -outdir ignore/WP_236176819.1 WP_236176819.1
 
- perl mkcooc.pl -outdir checkdir/WP_054914858.1 WP_054914858.1
+ perl mkcooc.pl -outdir ignore/WP_054914858.1 WP_054914858.1
+
+ perl mkcooc.pl -verbose -outdir ignore/WP_054914858.1 WP_054914858.1
+
+ perl mkcooc.pl -verbose -outdir ignore/WP_236176819.1 WP_236176819.1
 
 =head2 Bad ones
 
@@ -116,6 +117,11 @@ unless(-d $outdir) {
 my $ofn = File::Spec->catfile($outdir, "main_co_occur.csv");
 open(my $ofh, ">", $ofn) or croak("Failed to open $ofn for writing.");
 
+if($verbose) {
+  my $verbosefn = File::Spec->catfile($outdir, "verbose.txt");
+  open(VERB, ">", $verbosefn);
+}
+
 # say($protid);
 my $query = $protid . "[accn]";
 
@@ -154,6 +160,11 @@ my @ntids;
 while (my $ds = $factory1->next_LinkSet) {
 push(@ntids, $ds->get_ids);
 }
+if($verbose) {
+  say(VERB (join(" ", uniqstr(@ntids))));
+}
+my @by_ntlen = ntlen(uniqstr(@ntids));
+# for my $lr (@by_ntlen) { say(join("\t", @{$lr})); } # Debugging only
 # }}}
 
 # {{{ efetch to get one nucleotide genbank file.
@@ -161,7 +172,7 @@ my %efarg = (
   -eutil => 'efetch',
   -db      => 'nucleotide',
   -rettype => 'gbwithparts',
-  -id      => [$ntids[0]]
+  -id      => $by_ntlen[0]->[0]
 );
 if($email) {
   $efarg{-email} = $email;
@@ -251,7 +262,57 @@ if(-d $gbkcache) {
 copy($tmpfn, File::Spec->catfile($gbkcache, $acc . ".gbk"));
 }
 unlink($tmpfn);
-close($ofh);
+
 exit;
 
+# {{{ sub ntlen
+sub ntlen {
+  my @ntids = @_;
+  my @retlist;
+  for my $ntid (@ntids) {
+    my %efarg = (
+      -eutil => 'esummary',
+      -db      => 'nucleotide',
+      -rettype => 'docsum',
+      -id      => $ntid
+    );
+    if($email) {
+      $efarg{-email} = $email;
+    }
+    if($apikey) {
+      $efarg{-api_key} = $apikey;
+    }
+    my $factory = Bio::DB::EUtilities->new(%efarg);
+    # <HTTP::Response>
+    my $response = $factory->get_Response();
+    my $xml = $response->content();
+    my $dom = XML::LibXML->load_xml(string => $xml);
+    my @items = $dom->getElementsByTagName("Item");
+    for my $item (@items) {
+      my @attributes = $item->attributes();
+      if(any {$_ =~ m/Name="Length"/} @attributes) { 
+        # say(join("\t", @attributes));
+        my $ntlen = $item->textContent();
+        push(@retlist, [$ntid, $ntlen]);
+      }
+    }
+  }
+  my @sorted = sort sorter (@retlist);
+  return(@sorted);
+}
+# }}}
+
+# {{{ sub sorter 
+sub sorter {
+  return($b->[1] <=> $a->[1]);
+}
+# }}}
+
+# Multiple END blocks run in reverse order of definition.
+END {
+close($ofh);
+if($verbose) {
+  close(VERB);
+}
+}
 
