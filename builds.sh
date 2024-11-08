@@ -7,7 +7,8 @@ stagepre="stage";
 buildcmd="docker buildx build"
 nc="--no-cache"
 # nc=""
-lorp="--load"; # load or push
+# lorp="--load"; # load or push
+lorp="--push"; # load or push
 
 
 # {{{ Stage Zero for testing only.
