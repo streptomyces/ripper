@@ -6,9 +6,10 @@ use open ':encoding(UTF-8)'; # perldoc open.
 # encodings to be UTF-8.
 use Carp;
 use File::Basename;
+use File::Find;
 use Getopt::Long;
 use File::Spec;
-use File::Path qw(make_path);
+use File::Path qw(make_path remove_tree);
 use File::Temp qw(tempfile tempdir);
 my $command = join(" ", $0, @ARGV);
 
@@ -170,13 +171,14 @@ while(my $line = readline($ifh)) {
 close($ifh);
 # }}}
 
-# {{{ The postprocessing scripts.
-
+# {{{ The postprocessing scripts. pfam_sqlite.pl, mergeRidePfam.pl, gbkNameAppendOrg.pl.
+# pfam_sqlite.pl
 my $cmd_pfam_sqlite = File::Spec->catfile($ripperdir, "pfam_sqlite.pl");
 if($dryrun) {
   spacelist($cmd_pfam_sqlite); linelist();
 }
 
+# mergeRidePfam.pl
 my $cmd_merge_pfam = File::Spec->catfile($ripperdir, "mergeRidePfam.pl");
 my @args_merge_pfam = ("-out", $outfile, "-faa", $outfaa, "-distfile",
   $distfile, "-distfaa", $distfaa);
@@ -184,15 +186,76 @@ if($dryrun) {
   spacelist($cmd_merge_pfam, @args_merge_pfam); linelist();
 }
 
+# gbkNameAppendOrg.pl
 my $cmd_gbkname_append = File::Spec->catfile($ripperdir, "gbkNameAppendOrg.pl");
 my @args_gbkname_append = ("-indir", $ripoutdir);
 if($dryrun) {
   spacelist($cmd_gbkname_append, @args_gbkname_append); linelist();
 }
+# }}}
+
+# {{{ Protein Network Analysis (PNA).
+copy($outfaa, $pnadir);
+copy($distfaa, $pnadir);
+
+opendir(my $pdh, $pnadir);
+while(readdir $pdh) {
+  my $fent = $_;
+  if($fent =~ m/^\./) { next; }
+  my $path = File::Spec->catfile($pnadir, $fent);
+  if(-d $path) {
+    if($fent =~ m/GENENET.+/) {
+      remove_tree($path);
+    }
+  }
+}
+closedir($pdh);
+
+chdir($pnadir);
+my $cmd_egn = File::Spec->catfile($ripperdir, "egn_ni.pl");
+my @args_egn = ("-task", "all");
+if($dryrun) {
+  spacelist($cmd_egn, @args_egn); linelist();
+}
+
+
+
+my %ffoptions = (
+wanted => \&onfind,
+no_chdir => 1
+); 
+
+
+find(\%ffoptions, $pnadir);
+
+
+
 
 # }}}
 
 exit;
+
+# {{{ sub onfind
+sub onfind {
+  my $fp=$_;
+# If the no_chdir option is set then this is the full path. Otherwise,
+# this is just the filename.
+# The full path is in $File::Find::name when no_chidir is unset.
+  if(-d $fp) {return;}  # skip directories.
+  else {
+# do something here #
+    my ($noex, $dir, $ext)= fileparse($fp, qr/\.[^.]*/);
+    my $fn = $noex . $ext;
+
+    if($fn eq 'outarch.csv') {
+      my @stat = stat($fn);
+      my ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,
+          $atime,$mtime,$ctime,$blksize,$blocks) = stat($fp);
+      push(@files, [$fp, $size]);
+    }
+  }
+}
+# }}}
 
 # {{{ subs tablist and linelist (and their E and H versions).
 # spacelist
