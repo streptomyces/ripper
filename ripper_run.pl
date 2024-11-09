@@ -1,0 +1,245 @@
+#!/usr/bin/perl
+use 5.14.0;
+use utf8;
+use open ':encoding(UTF-8)'; # perldoc open.
+# Above makes both input and output
+# encodings to be UTF-8.
+use Carp;
+use File::Basename;
+use Getopt::Long;
+use File::Spec;
+use File::Path qw(make_path);
+use File::Temp qw(tempfile tempdir);
+my $command = join(" ", $0, @ARGV);
+
+# {{{ Getopt::Long
+my $conffile = qq(local.conf);
+my $outfile;
+my $testCnt = 0;
+my $skip = 0;
+my $header = 0;
+my $dryrun;
+
+my $minPPlen  =                 20;
+my $maxPPlen  =                120;
+my $prodigalScoreThresh  =      15;
+my $maxDistFromTE  =          8000;
+my $fastaOutputLimit  =          3;
+my $sameStrandReward  =          5;
+my $flankLen  =              40000;
+
+
+my $help;
+GetOptions (
+"outfile:s" => \$outfile,
+"conffile:s" => \$conffile,
+"testcnt:i" => \$testCnt,
+"skip:i" => \$skip,
+"header:i" => \$header,
+"norun|dryrun|dry-run" => \$dryrun,
+"help" => \$help,
+
+"minPPlen"  =>  $minPPlen,
+"maxPPlen"  =>  $maxPPlen,
+"prodigalScoreThresh"  => $prodigalScoreThresh,
+"maxDistFromTE"  => $maxDistFromTE,
+"fastaOutputLimit"  => $fastaOutputLimit,
+"sameStrandReward"  => $sameStrandReward,
+"flankLen"  => $flankLen
+);
+# }}}
+
+# {{{ POD
+
+=head1 Name
+
+ripper_run.pl
+
+=head2 Examples
+
+ perl code/ripper_run.pl -- microtest.txt
+
+=head2 Description
+
+
+=cut
+
+# }}}
+
+if($help) {
+exec("perldoc $0");
+exit;
+}
+
+# {{{ Populate %conf if a configuration file 
+my %conf;
+if(-s $conffile ) {
+  open(my $cnfh, "<", $conffile);
+  my $keyCnt = 0;
+  while(my $line = readline($cnfh)) {
+    chomp($line);
+    if($line=~m/^\s*\#/ or $line=~m/^\s*$/) {next;}
+    my @ll=split(/\s+/, $line, 2);
+    $conf{$ll[0]} = $ll[1];
+    $keyCnt += 1;
+  }
+  close($cnfh);
+}
+elsif($conffile ne "local.conf") {
+linelistE("Specified configuration file $conffile not found.");
+}
+# }}}
+
+# {{{ Temporary directory and template.
+my $tempdir = qw(/tmp);
+my $template="ripperunXXXXX";
+if(exists($conf{template})) {
+  $template = $conf{template};
+}
+# my($tmpfh, $tmpfn)=tempfile($template, DIR => $tempdir, SUFFIX => '.tmp');
+# somewhere later you need to do this
+# unlink($tmpfn);
+# unlink(glob("$tmpfn*"));
+# }}}
+
+# {{{ Open outfile or STDOUT and select it.
+my $ofh;
+if($outfile) {
+  open($ofh, ">", $outfile);
+}
+else {
+  open($ofh, ">&STDOUT");
+}
+select($ofh);
+# }}}
+
+# populate @infiles
+my @infiles = @ARGV;
+my $infile = $infiles[0];
+unless($infile) { $infile = "microtest.tst"; }
+unless (-e $infile and -s $infile and -f $infile) {
+croak("$infile does not exist or is empty.");
+}
+
+my $ripperdir =   qq(/home/work/ripper);
+my $outfile   =   qq(/home/mnt/out.txt);
+my $distfile  =   qq(/home/mnt/distant.txt);
+my $outfaa    =   qq(/home/mnt/out.faa);
+my $distfaa   =   qq(/home/mnt/distant.faa);
+my $pnadir    =   qq(/home/mnt/pna);
+
+my $coocoutdir = qq(/home/mnt/coocout);
+my $ripoutdir = qq(/home/mnt/ripout);
+my $orgnamegbkdir = qq(/home/mnt/orgnamegbk);
+
+# for my $hcd ($coocoutdir, $ripoutdir, "sqlite", "gbkcache", $orgnamegbkdir, $pnadir) {
+#   unless(-d $hcd) {
+#     make_path($hcd);
+#   }
+# }
+
+my ($noex, $dir, $ext)= fileparse($infile, qr/\.[^.]*/);
+my $bn = $noex . $ext;
+open(my $ifh, "<", $infile) or croak("Could not open $infile");
+
+# {{{ Cycle through all the protein accessions in the input file.
+# mkcooc.pl and ripper.pl are run for each accession.
+my $lineCnt = 0;
+while(my $line = readline($ifh)) {
+  chomp($line);
+  if($line =~ m/^\s*\#/ or $line =~ m/^\s*$/) {next;}
+  $line =~ s/\r$//;
+  my $acc = $line;
+  my $cmd_cooc = File::Spec->catfile($ripperdir, "mkcooc.pl");
+  my @args_cooc = ("-outdir");
+  push(@args_cooc, File::Spec->catdir($coocoutdir, $acc), $acc);
+  if($dryrun) {
+    spacelist($cmd_cooc, @args_cooc); linelist();
+  }
+
+  my $cmd_ripper = File::Spec->catfile($ripperdir, "ripper.pl");
+  my @args_ripper = ("-outdir");
+  push(@args_ripper, $ripoutdir, File::Spec->catfile($coocoutdir, $acc, "main_co_occur.csv"));
+  if($dryrun) {
+    spacelist($cmd_ripper, @args_ripper); linelist();
+  }
+
+  $lineCnt += 1;
+  if($testCnt and $lineCnt >= $testCnt) { last; }
+}
+close($ifh);
+# }}}
+
+# {{{ The postprocessing scripts.
+
+my $cmd_pfam_sqlite = File::Spec->catfile($ripperdir, "pfam_sqlite.pl");
+if($dryrun) {
+  spacelist($cmd_pfam_sqlite); linelist();
+}
+
+my $cmd_merge_pfam = File::Spec->catfile($ripperdir, "mergeRidePfam.pl");
+my @args_merge_pfam = ("-out", $outfile, "-faa", $outfaa, "-distfile",
+  $distfile, "-distfaa", $distfaa);
+if($dryrun) {
+  spacelist($cmd_merge_pfam, @args_merge_pfam); linelist();
+}
+
+my $cmd_gbkname_append = File::Spec->catfile($ripperdir, "gbkNameAppendOrg.pl");
+my @args_gbkname_append = ("-indir", $ripoutdir);
+if($dryrun) {
+  spacelist($cmd_gbkname_append, @args_gbkname_append); linelist();
+}
+
+# }}}
+
+exit;
+
+# {{{ subs tablist and linelist (and their E and H versions).
+# spacelist
+sub spacelist {
+  say(join(" ", @_));
+}
+sub spacelistE {
+  say(STDERR (join(" ", @_)));
+}
+sub spacelistH {
+  my $fh = shift(@_);
+  say($fh (join(" ", @_)));
+}
+# tablist
+sub tablist {
+  say(join("\t", @_));
+}
+sub tablistE {
+  say(STDERR (join("\t", @_)));
+}
+sub tablistH {
+  my $fh = shift(@_);
+  say($fh (join("\t", @_)));
+}
+# linelist
+sub linelist {
+  say(join("\n", @_));
+}
+sub linelistE {
+  say(STDERR (join("\n", @_)));
+}
+sub linelistH {
+  my $fh = shift(@_);
+  say($fh (join("\n", @_)));
+}
+# }}}
+
+# Multiple END blocks run in reverse order of definition.
+END {
+close($ofh);
+# $handle->disconnect();
+}
+
+__END__
+
+Opening pipes:
+
+If MODE is |- , the filename is interpreted as a command
+to which output is to be piped, and if MODE is -| , the
+filename is interpreted as a command that pipes output to us.
