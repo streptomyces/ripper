@@ -225,9 +225,15 @@ wanted => \&onfind,
 no_chdir => 1
 ); 
 
-
+my $pnafasdir;
 find(\%ffoptions, $pnadir);
 
+my $cyat="cytoattrib.txt";
+my $cmd_make_cyat = File::Spec->catfile($ripperdir, "make_cytoscape_attribute_file.pl");
+my @args_make_cyat = ("-outfile", $cyat, "-pnafasdir", $pnafasdir, $outfile, $distfile);
+if($dryrun) {
+  spacelist($cmd_make_cyat, @args_make_cyat);
+}
 
 
 
@@ -238,21 +244,9 @@ exit;
 # {{{ sub onfind
 sub onfind {
   my $fp=$_;
-# If the no_chdir option is set then this is the full path. Otherwise,
-# this is just the filename.
 # The full path is in $File::Find::name when no_chidir is unset.
-  if(-d $fp) {return;}  # skip directories.
-  else {
-# do something here #
-    my ($noex, $dir, $ext)= fileparse($fp, qr/\.[^.]*/);
-    my $fn = $noex . $ext;
-
-    if($fn eq 'outarch.csv') {
-      my @stat = stat($fn);
-      my ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,
-          $atime,$mtime,$ctime,$blksize,$blocks) = stat($fp);
-      push(@files, [$fp, $size]);
-    }
+  if(-d $fp and $fp =~ m/FASTA$/) {
+    $pnafasdir = $fp;
   }
 }
 # }}}
