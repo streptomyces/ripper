@@ -74,7 +74,7 @@ GetOptions (
 
 "minPPlen:i" => \$minPPlen,
 "maxPPlen:i" => \$maxPPlen,
-"prodigalScoreThresh:i" => \$prodigalScoreThresh,
+"prodigalScoreThresh:f" => \$prodigalScoreThresh,
 "maxDistFromTE:i" => \$maxDistFromTE,
 "fastaOutputLimit:i" => \$fastaOutputLimit,
 "sameStrandReward:i" => \$sameStrandReward,
