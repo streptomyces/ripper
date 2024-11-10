@@ -41,13 +41,13 @@ GetOptions (
 "norun|dryrun|dry-run" => \$dryrun,
 "help" => \$help,
 
-"minPPlen"  =>  $minPPlen,
-"maxPPlen"  =>  $maxPPlen,
-"prodigalScoreThresh"  => $prodigalScoreThresh,
-"maxDistFromTE"  => $maxDistFromTE,
-"fastaOutputLimit"  => $fastaOutputLimit,
-"sameStrandReward"  => $sameStrandReward,
-"flankLen"  => $flankLen
+"minPPlen"  =>  \$minPPlen,
+"maxPPlen"  =>  \$maxPPlen,
+"prodigalScoreThresh"  => \$prodigalScoreThresh,
+"maxDistFromTE"  => \$maxDistFromTE,
+"fastaOutputLimit"  => \$fastaOutputLimit,
+"sameStrandReward"  => \$sameStrandReward,
+"flankLen"  => \$flankLen
 );
 # }}}
 
