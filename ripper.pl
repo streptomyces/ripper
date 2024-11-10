@@ -72,13 +72,13 @@ GetOptions (
 "verbose" => \$verbose,
 "help" => \$help,
 
-"minPPlen" => \$minPPlen,
-"maxPPlen" => \$maxPPlen,
-"prodigalScoreThresh" => \$prodigalScoreThresh,
-"maxDistFromTE" => \$maxDistFromTE,
-"fastaOutputLimit" => \$fastaOutputLimit,
-"sameStrandReward" => \$sameStrandReward,
-"flankLen" => \$flankLen
+"minPPlen:i" => \$minPPlen,
+"maxPPlen:i" => \$maxPPlen,
+"prodigalScoreThresh:i" => \$prodigalScoreThresh,
+"maxDistFromTE:i" => \$maxDistFromTE,
+"fastaOutputLimit:i" => \$fastaOutputLimit,
+"sameStrandReward:i" => \$sameStrandReward,
+"flankLen:i" => \$flankLen
 );
 # }}}
 
