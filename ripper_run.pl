@@ -118,7 +118,7 @@ select($ofh);
 # populate @infiles
 my @infiles = @ARGV;
 my $infile = $infiles[0];
-unless($infile) { $infile = "microtest.tst"; }
+unless($infile) { $infile = "microtest.txt"; }
 unless (-e $infile and -s $infile and -f $infile) {
 croak("$infile does not exist or is empty.");
 }
@@ -134,11 +134,11 @@ my $coocoutdir = qq(/home/mnt/coocout);
 my $ripoutdir = qq(/home/mnt/ripout);
 my $orgnamegbkdir = qq(/home/mnt/orgnamegbk);
 
-# for my $hcd ($coocoutdir, $ripoutdir, "sqlite", "gbkcache", $orgnamegbkdir, $pnadir) {
-#   unless(-d $hcd) {
-#     make_path($hcd);
-#   }
-# }
+for my $hcd ($coocoutdir, $ripoutdir, "sqlite", "gbkcache", $orgnamegbkdir, $pnadir) {
+  unless(-d $hcd) {
+    make_path($hcd);
+  }
+}
 
 my ($noex, $dir, $ext)= fileparse($infile, qr/\.[^.]*/);
 my $bn = $noex . $ext;
@@ -155,15 +155,17 @@ while(my $line = readline($ifh)) {
   my $cmd_cooc = File::Spec->catfile($ripperdir, "mkcooc.pl");
   my @args_cooc = ("-outdir");
   push(@args_cooc, File::Spec->catdir($coocoutdir, $acc), $acc);
-  if($dryrun) {
-    spacelist($cmd_cooc, @args_cooc); linelist();
+  spacelist($cmd_cooc, @args_cooc); linelist();
+  unless($dryrun) {
+    system($cmd_cooc, @args_cooc);
   }
 
   my $cmd_ripper = File::Spec->catfile($ripperdir, "ripper.pl");
   my @args_ripper = ("-outdir");
   push(@args_ripper, $ripoutdir, File::Spec->catfile($coocoutdir, $acc, "main_co_occur.csv"));
-  if($dryrun) {
-    spacelist($cmd_ripper, @args_ripper); linelist();
+  spacelist($cmd_ripper, @args_ripper); linelist();
+  unless($dryrun) {
+    system($cmd_ripper, @args_ripper);
   }
 
   $lineCnt += 1;
@@ -175,23 +177,26 @@ close($ifh);
 # {{{ The postprocessing scripts. pfam_sqlite.pl, mergeRidePfam.pl, gbkNameAppendOrg.pl.
 # pfam_sqlite.pl
 my $cmd_pfam_sqlite = File::Spec->catfile($ripperdir, "pfam_sqlite.pl");
-if($dryrun) {
-  spacelist($cmd_pfam_sqlite); linelist();
+spacelist($cmd_pfam_sqlite); linelist();
+unless($dryrun) {
+  system($cmd_pfam_sqlite);
 }
 
 # mergeRidePfam.pl
 my $cmd_merge_pfam = File::Spec->catfile($ripperdir, "mergeRidePfam.pl");
 my @args_merge_pfam = ("-out", $outfile, "-faa", $outfaa, "-distfile",
   $distfile, "-distfaa", $distfaa);
-if($dryrun) {
-  spacelist($cmd_merge_pfam, @args_merge_pfam); linelist();
+spacelist($cmd_merge_pfam, @args_merge_pfam); linelist();
+unless($dryrun) {
+  system($cmd_merge_pfam, @args_merge_pfam);
 }
 
 # gbkNameAppendOrg.pl
 my $cmd_gbkname_append = File::Spec->catfile($ripperdir, "gbkNameAppendOrg.pl");
 my @args_gbkname_append = ("-indir", $ripoutdir);
-if($dryrun) {
-  spacelist($cmd_gbkname_append, @args_gbkname_append); linelist();
+spacelist($cmd_gbkname_append, @args_gbkname_append); linelist();
+unless($dryrun) {
+  system($cmd_gbkname_append, @args_gbkname_append);
 }
 # }}}
 
@@ -206,7 +211,8 @@ while(readdir $pdh) {
   my $path = File::Spec->catfile($pnadir, $fent);
   if(-d $path) {
     if($fent =~ m/GENENET.+/) {
-      remove_tree($path);
+      # remove_tree($path);
+      say("remove_tree $path");
     }
   }
 }
@@ -215,8 +221,9 @@ closedir($pdh);
 chdir($pnadir);
 my $cmd_egn = File::Spec->catfile($ripperdir, "egn_ni.pl");
 my @args_egn = ("-task", "all");
-if($dryrun) {
-  spacelist($cmd_egn, @args_egn); linelist();
+spacelist($cmd_egn, @args_egn); linelist();
+unless($dryrun) {
+  system($cmd_egn, @args_egn);
 }
 
 
@@ -232,8 +239,9 @@ find(\%ffoptions, $pnadir);
 my $cyat="cytoattrib.txt";
 my $cmd_make_cyat = File::Spec->catfile($ripperdir, "make_cytoscape_attribute_file.pl");
 my @args_make_cyat = ("-outfile", $cyat, "-pnafasdir", $pnafasdir, $outfile, $distfile);
-if($dryrun) {
-  spacelist($cmd_make_cyat, @args_make_cyat);
+spacelist($cmd_make_cyat, @args_make_cyat); linelist();
+unless($dryrun) {
+  system($cmd_make_cyat, @args_make_cyat);
 }
 
 
