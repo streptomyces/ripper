@@ -11,7 +11,7 @@ WORKDIR /home/work/ripper
 RUN git checkout master
 
 WORKDIR /home/work
-RUN cp ripper/ripper_run.sh ripper/minitest.txt ripper/local.conf ./
+RUN cp ripper/ripper_run.sh ripper/ripper_run.pl ripper/minitest.txt ripper/local.conf ./
 RUN cp ripper/microtest.txt ./
 RUN cp ripper/postprocess.sh ./
 

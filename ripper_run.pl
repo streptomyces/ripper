@@ -9,6 +9,7 @@ use File::Basename;
 use File::Find;
 use Getopt::Long;
 use File::Spec;
+use File::Copy;
 use File::Path qw(make_path remove_tree);
 use File::Temp qw(tempfile tempdir);
 my $command = join(" ", $0, @ARGV);
