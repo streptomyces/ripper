@@ -160,8 +160,25 @@ while(my $line = readline($ifh)) {
     system($cmd_cooc, @args_cooc);
   }
 
+  # my $minPPlen  =                 20;
+  # my $maxPPlen  =                120;
+  # my $prodigalScoreThresh  =      15;
+  # my $maxDistFromTE  =          8000;
+  # my $fastaOutputLimit  =          3;
+  # my $sameStrandReward  =          5;
+  # my $flankLen  =              40000;
+
   my $cmd_ripper = File::Spec->catfile($ripperdir, "ripper.pl");
-  my @args_ripper = ("-outdir");
+  my @args_ripper = (
+    "-minPPlen", $minPPlen,
+    "-maxPPlen", $maxPPlen,
+    "-prodigalScoreThresh", $prodigalScoreThresh,
+    "-maxDistFromTE", $maxDistFromTE,
+    "-fastaOutputLimit", $fastaOutputLimit,
+    "-sameStrandReward", $sameStrandReward,
+    "-flankLen", $flankLen
+  );
+  push(@args_ripper,"-outdir");
   push(@args_ripper, $ripoutdir, File::Spec->catfile($coocoutdir, $acc, "main_co_occur.csv"));
   spacelist($cmd_ripper, @args_ripper); linelist();
   unless($dryrun) {
@@ -226,8 +243,6 @@ unless($dryrun) {
   system($cmd_egn, @args_egn);
 }
 
-
-
 my %ffoptions = (
 wanted => \&onfind,
 no_chdir => 1
@@ -243,8 +258,6 @@ spacelist($cmd_make_cyat, @args_make_cyat); linelist();
 unless($dryrun) {
   system($cmd_make_cyat, @args_make_cyat);
 }
-
-
 
 # }}}
 

@@ -20,9 +20,27 @@ use Net::FTP;
 
 $ENV{PATH} = $ENV{PATH} . ":/home/work/ripper";
 
+
+# my $minPPlen  =                 20;
+# my $maxPPlen  =                120;
+# my $prodigalScoreThresh  =      15;
+# my $maxDistFromTE  =          8000;
+# my $fastaOutputLimit  =          3;
+# my $sameStrandReward  =          5;
+# my $flankLen  =              40000;
+
+
+
 # {{{ Getopt::Long
 use Getopt::Long;
+my $minPPlen = 20; # Minimum precursor peptide length.
+my $maxPPlen = 120; # Maximum precursor peptide length.
+my $prodigalScoreThresh = 7.5;
 my $maxDistFromTE = 8000; # From precursor peptide to the tailoring enzyme.
+my $fastaOutputLimit = 3;
+my $sameStrandReward = 5;
+my $flankLen = 40000;
+
 my $outdir = qq(ripout);
 my $indir;
 my $fofn;
@@ -31,14 +49,8 @@ my $conffile = qq(local.conf);
 my $colorThreshScore = 20;
 my $ppFeatAddLimit = 20;
 my $errfile;
-my $prodigalScoreThresh = 7.5;
 my $prodigalshortbin = qq(prodigal-short);
-my $flankLen = 40000;
 my $allowedInGene = 20;
-my $minPPlen = 20; # Minimum precursor peptide length.
-my $maxPPlen = 120; # Maximum precursor peptide length.
-my $sameStrandReward = 5;
-my $fastaOutputLimit = 3;
 my $runfile;
 my $outfile;
 my $testCnt = 0;
@@ -58,7 +70,15 @@ GetOptions (
 "skip:i" => \$skip,
 "allowedingene:i" => \$allowedInGene,
 "verbose" => \$verbose,
-"help" => \$help
+"help" => \$help,
+
+"minPPlen" => \$minPPlen,
+"maxPPlen" => \$maxPPlen,
+"prodigalScoreThresh" => \$prodigalScoreThresh,
+"maxDistFromTE" => \$maxDistFromTE,
+"fastaOutputLimit" => \$fastaOutputLimit,
+"sameStrandReward" => \$sameStrandReward,
+"flankLen" => \$flankLen
 );
 # }}}
 
