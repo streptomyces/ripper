@@ -25,7 +25,7 @@ my $dryrun;
 
 my $minPPlen  =                 20;
 my $maxPPlen  =                120;
-my $prodigalScoreThresh  =      15;
+my $prodigalScoreThresh  =     7.5;
 my $maxDistFromTE  =          8000;
 my $fastaOutputLimit  =          3;
 my $sameStrandReward  =          5;
@@ -268,6 +268,8 @@ spacelist($cmd_collect_networks); linelist();
 unless($dryrun) {
   system($cmd_collect_networks);
 }
+
+chdir($before_pna_dir);
 
 # }}}
 

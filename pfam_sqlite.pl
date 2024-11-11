@@ -114,7 +114,7 @@ select($ofh);
 my %pfl = pflens();
 
 my $hmmdb = File::Spec->catfile($conf{pfamdir}, $conf{hmmdb});
-my $ripphmmdb = File::Spec->catfile($conf{hmmdir}, $conf{ripphmmdb});
+my $ripphmmdb = File::Spec->catfile($conf{ripphmmdir}, $conf{ripphmmdb});
 
 my $dbfile=$conf{sqlite3fn};
 my $handle=DBI->connect("DBI:SQLite:dbname=$dbfile", '', '');
@@ -143,6 +143,16 @@ croak($create_table_str);
 my $qstr="select fastaid, aaseq from $conf{prepeptab}";
 my $stmt=$handle->prepare($qstr);
 $stmt->execute();
+
+# fastaid in $prepeptab (ripper) look like this.
+# Those for $ripphmmdb end in _9nnn while those
+# for Pfam are end in _n.
+# WP_253094575_9014
+# WP_253094575_9015
+# WP_253094575_1
+# WP_253094575_9016
+# my $ppFastaOutputCnt = 1; # in ripper.pl
+# my $allFastaOutputCnt = 9001; # in ripper.pl
 
 while(my $hr=$stmt->fetchrow_hashref()) {
 my $id=$hr->{fastaid};
@@ -274,7 +284,7 @@ sub scan {
     $hmmdb = $args{hmmdb};
   }
   else {
-    $hmmdb = "/Users/sco/blast_databases/pfam/Pfam-A.hmm";
+    $hmmdb = "/mnt/pfam/Pfam-A.hmm";
   }
   my $aafile;
   my $deleteQuery = 1;
