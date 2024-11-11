@@ -9,6 +9,7 @@ use File::Basename;
 use File::Find;
 use Getopt::Long;
 use File::Spec;
+use Cwd; # Exports getcwd.
 use File::Copy;
 use File::Path qw(make_path remove_tree);
 use File::Temp qw(tempfile tempdir);
@@ -235,6 +236,7 @@ while(readdir $pdh) {
 }
 closedir($pdh);
 
+my $before_pna_dir = getcwd();
 chdir($pnadir);
 my $cmd_egn = File::Spec->catfile($ripperdir, "egn_ni.pl");
 my @args_egn = ("-task", "all");
@@ -257,6 +259,14 @@ my @args_make_cyat = ("-outfile", $cyat, "-pnafasdir", $pnafasdir, $outfile, $di
 spacelist($cmd_make_cyat, @args_make_cyat); linelist();
 unless($dryrun) {
   system($cmd_make_cyat, @args_make_cyat);
+}
+
+# Collect EGN networks files.
+my $cmd_collect_networks =
+File::Spec->catfile($ripperdir, "collect_network_genbanks.pl");
+spacelist($cmd_collect_networks); linelist();
+unless($dryrun) {
+  system($cmd_collect_networks);
 }
 
 # }}}
@@ -317,8 +327,4 @@ close($ofh);
 
 __END__
 
-Opening pipes:
 
-If MODE is |- , the filename is interpreted as a command
-to which output is to be piped, and if MODE is -| , the
-filename is interpreted as a command that pipes output to us.
