@@ -41,6 +41,37 @@ exec("perldoc $0");
 exit;
 }
 
+# {{{ ### POD ###
+
+=head1 Name
+
+mergeRidePfam.pl
+
+=head1 Description
+
+There are two tables in sqlite/ripp.sqlite3.
+
+=over 2
+
+=item 1. ripper $conf{prepeptab}
+
+which is populated by ripper.pl and contains the detected precursor peptides.
+
+=item 2. pfamscan $conf{pfamrestab}
+
+which is populated by pfam_sqlite.pl and  contains the results of hmmscan for
+the precursor peptides in the table ripper above.
+
+=back
+
+This script brings together information from both the tables
+writes the output text and fasta files. These are usually
+F<out.txt>, F<out.faa>, F<distant.txt> and, F<distant.faa>.
+
+=cut
+
+# }}} ###
+
 # {{{ open the errfile
 if($errfile) {
 open(ERRH, ">", $errfile);
@@ -98,45 +129,47 @@ my $qstr = qq/select * from $conf{prepeptab} order by species/;
 my $stmt = $handle->prepare($qstr);
 $stmt->execute();
 while(my $hr = $stmt->fetchrow_hashref()) {
-my $fid = $hr->{fastaid};
-my $samestrand = "no";
-if($hr->{ppstrand} == $hr->{testrand}) {
-$samestrand = "yes";
-}
-my @rr;
-push(@rr, $hr->{acc}, $hr->{species}, $hr->{ppser}, $hr->{fastaid}, 
-$hr->{aaseq}, $samestrand, $hr->{pptedist}, 
-$hr->{score});
-
-my $pr = pfs($fid);
-if(ref($pr)) {
-push(@rr, $pr->{hname}, $pr->{signif}, $pr->{hdesc});
-}
-else {
-push(@rr, "none", "none", "none");
-}
-
-
-if($fid =~ m/_9\d{3,}$/) {
-  if($rr[-3] ne "none") {
-    tablistH($dfh, @rr);
+  my $fid = $hr->{fastaid};
+  my $samestrand = "no";
+  if($hr->{ppstrand} == $hr->{testrand}) {
+    $samestrand = "yes";
   }
-}
-else {
-  tablist(@rr);
-}
+  my @rr;
+  push(@rr, $hr->{acc}, $hr->{species}, $hr->{ppser}, $hr->{fastaid},
+    $hr->{aaseq}, $samestrand, $hr->{pptedist},
+    $hr->{score});
 
-
-my $outobj = Bio::Seq->new(-seq => $hr->{aaseq});
-$outobj->display_id("RiPP|" . $fid);
-if($fid =~ m/_9\d{3,}$/) {
-  if($rr[-3] ne "none") {
-    $seqdist->write_seq($outobj);
+  # pfs() queries the $conf{pfamrestab} (pfamscan) table and returns
+  # a hashref.
+  my $pr = pfs($fid);
+  if(ref($pr)) {
+    push(@rr, $pr->{hname}, $pr->{signif}, $pr->{hdesc});
   }
-}
-else {
-$seqout->write_seq($outobj);
-}
+  else {
+    push(@rr, "none", "none", "none");
+  }
+
+
+  if($fid =~ m/_9\d{3,}$/) {
+    if($rr[-3] ne "none") {
+      tablistH($dfh, @rr);
+    }
+  }
+  else {
+    tablist(@rr);
+  }
+
+
+  my $outobj = Bio::Seq->new(-seq => $hr->{aaseq});
+  $outobj->display_id("RiPP|" . $fid);
+  if($fid =~ m/_9\d{3,}$/) {
+    if($rr[-3] ne "none") {
+      $seqdist->write_seq($outobj);
+    }
+  }
+  else {
+    $seqout->write_seq($outobj);
+  }
 }
 
 
@@ -154,19 +187,21 @@ close(ERRH);
 }
 
 
+# {{{ sub pfs
 sub pfs {
-my $fid = shift(@_);
-my $cntstr = qq/select count(*) from $conf{pfamrestab} where qname = '$fid'/;
-my ($count) = $handle->selectrow_array($cntstr);
-if($count) {
-my $qstr = qq/select * from $conf{pfamrestab} where qname = '$fid'/;
-my $stmt = $handle->prepare($qstr);
-$stmt->execute();
-my $hr = $stmt->fetchrow_hashref();
-return($hr);
+  my $fid = shift(@_);
+  my $cntstr = qq/select count(*) from $conf{pfamrestab} where qname = '$fid'/;
+  my ($count) = $handle->selectrow_array($cntstr);
+  if($count) {
+    my $qstr = qq/select * from $conf{pfamrestab} where qname = '$fid'/;
+    my $stmt = $handle->prepare($qstr);
+    $stmt->execute();
+    my $hr = $stmt->fetchrow_hashref();
+    return($hr);
+  }
+  else { return 0; }
 }
-else { return 0; }
-}
+# }}}
 
 # {{{ subroutines tablist, linelist, tabhash and their *E versions.
 # The E versions are for printing to STDERR.

@@ -568,6 +568,7 @@ my $xstr = qq($prodigalshortbin -p meta -f gff -i $subfn -s $prdfn);
 my $discard = qx($xstr); # Only interested in the output in file $prdfn.
 
 # Read prodigal output and populate @prdl.
+# @prdl is a list of lists where each list is one prodigal find.
 open(PRD, "<", $prdfn);
 my @prdl;
 while(my $line = readline(PRD)) {
@@ -581,7 +582,6 @@ close(PRD);
 # Same strand reward
 # For loop below applies the same strand reward to all
 # prodigal output records.
-
 for my $lr (@prdl) {
   my $prdStrand = $lr->[2] eq '+' ? 1 : -1;
   if($prdStrand == $teStrand) {
@@ -592,18 +592,8 @@ for my $lr (@prdl) {
   push(@{$lr}, $shadig);
 }
 
-
-# Then we sort the prodigal output records by score.
-# This gives us @sprdl.
-
+# @sprdl is prodigal results in @prdl sorted by score.
 my @sprdl = sort {$b->[3] <=> $a->[3]} @prdl;
-
-### Debugging
-# linelist("Something $prdfn");
-# for my $dlr (@prdl) {
-#   tablist(@{$dlr});
-# }
-
 
 
 # Loop through the sorted (by score) prodigal output
