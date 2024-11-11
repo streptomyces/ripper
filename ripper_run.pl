@@ -30,6 +30,7 @@ my $maxDistFromTE  =          8000;
 my $fastaOutputLimit  =          3;
 my $sameStrandReward  =          5;
 my $flankLen  =              40000;
+my $scan_signif_thresh =      0.05;
 
 
 my $help;
@@ -48,7 +49,8 @@ GetOptions (
 "maxDistFromTE:i"  => \$maxDistFromTE,
 "fastaOutputLimit:i"  => \$fastaOutputLimit,
 "sameStrandReward:i"  => \$sameStrandReward,
-"flankLen:i"  => \$flankLen
+"flankLen:i"  => \$flankLen,
+"scansignifthresh:f" => \$scan_signif_thresh
 );
 # }}}
 
@@ -195,9 +197,10 @@ close($ifh);
 # {{{ The postprocessing scripts. pfam_sqlite.pl, mergeRidePfam.pl, gbkNameAppendOrg.pl.
 # pfam_sqlite.pl
 my $cmd_pfam_sqlite = File::Spec->catfile($ripperdir, "pfam_sqlite.pl");
-spacelist($cmd_pfam_sqlite); linelist();
+my @args_pfam_sqlite = ("-scansignifthresh", $scan_signif_thresh);
+spacelist($cmd_pfam_sqlite, @args_pfam_sqlite); linelist();
 unless($dryrun) {
-  system($cmd_pfam_sqlite);
+  system($cmd_pfam_sqlite, @args_pfam_sqlite);
 }
 
 # mergeRidePfam.pl

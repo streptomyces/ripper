@@ -23,6 +23,7 @@ my $outex; # extension for the output filename when it is derived on infilename.
 my $conffile = qq(local.conf);
 my $errfile;
 my $hmmscanbin = qq(hmmscan);
+my $scan_signif_thresh = 0.05;
 my $runfile;
 my $outfile;
 my $testCnt = 0;
@@ -34,6 +35,7 @@ GetOptions (
 "outdir:s" => \$outdir,
 "indir:s" => \$indir,
 "fofn:s" => \$fofn,
+"scansignifthresh:f" => \$scan_signif_thresh,
 "extension:s" => \$outex,
 "conffile:s" => \$conffile,
 "errfile:s" => \$errfile,
@@ -169,7 +171,7 @@ $hmmoutfn = scan(aaseq => $aaseq, hmmdb => $hmmdb, name => $id);
 my $copyFlag = 0;
 my @hr = hspHashes($hmmoutfn);
 for my $hr (@hr) {
-  if(ref($hr) and $hr->{signif} <= 0.05) {
+  if(ref($hr) and $hr->{signif} <= $scan_signif_thresh) {
     my $acc = $hr->{hname};
     my $bacc = $acc; $bacc =~ s/\.\d+$//;
     my $hcov = sprintf("%.3f", $hr->{alnlen}/$pfl{$bacc});
