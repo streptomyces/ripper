@@ -21,6 +21,7 @@
 # Within one level of precedence, the last matching pattern decides
 # the outcome.
 
+files.md
 .*sw[op]
 check*.pl
 test*.pl

@@ -743,7 +743,7 @@ if($distFromTE <= $maxDistFromTE and $prdlCnt <= $ppFeatAddLimit) {
   }
   if($ppFastaOutputCnt <= $fastaOutputLimit or ($score >= $prodigalScoreThresh)) {
     my $aaobj = Bio::Seq->new(-seq => $aaseq);
-    my $fastaid = $teProtAcc . "_" . $ppFastaOutputCnt;
+    my $fastaid = $teProtAcc . "_" . $ppFastaOutputCnt; # Starting with 1.
     $aaobj->display_id($fastaid);
     $aaobj->description("SameStrand: $strandReward; " . $prodStr);
     $seqout1->write_seq($aaobj);
@@ -751,7 +751,7 @@ if($distFromTE <= $maxDistFromTE and $prdlCnt <= $ppFeatAddLimit) {
     $spbinom =~ s/'//g;
     insertSQL($teProtAcc, $spbinom, $ppFastaOutputCnt, $fastaid, $aaseq,
         $strand, $teStrand, $distFromTE, $score);
-    $ppFastaOutputCnt += 1;
+    $ppFastaOutputCnt += 1; # Value when initialized is 1.
   }
 }
 # The else below is only to use a different series of fastaid postfix,
@@ -766,7 +766,7 @@ else {
     $strandReward = 1;
   }
   my $aaobj = Bio::Seq->new(-seq => $aaseq);
-  my $fastaid = $teProtAcc . "_" . $allFastaOutputCnt;
+  my $fastaid = $teProtAcc . "_" . $allFastaOutputCnt; # Starting with 9001.
   $aaobj->display_id($fastaid);
   $aaobj->description("SameStrand: $strandReward; " . $prodStr);
   $seqout1->write_seq($aaobj);
@@ -774,7 +774,7 @@ else {
   $spbinom =~ s/'//g;
   insertSQL($teProtAcc, $spbinom, $allFastaOutputCnt, $fastaid, $aaseq,
       $strand, $teStrand, $distFromTE, $score);
-  $allFastaOutputCnt += 1;
+  $allFastaOutputCnt += 1; # Value when initialized is 9001.
 }
   push(@terpos, $terpos);
 } # End of else for the if which skips done terpos.
