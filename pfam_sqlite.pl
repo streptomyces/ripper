@@ -146,67 +146,84 @@ my $qstr="select fastaid, aaseq from $conf{prepeptab}";
 my $stmt=$handle->prepare($qstr);
 $stmt->execute();
 
-# fastaid in $prepeptab (ripper) look like this.
-# Those for $ripphmmdb end in _9nnn while those
-# for Pfam are end in _n.
-# WP_253094575_9014
-# WP_253094575_9015
-# WP_253094575_1
-# WP_253094575_9016
-# my $ppFastaOutputCnt = 1; # in ripper.pl
-# my $allFastaOutputCnt = 9001; # in ripper.pl
+=pod
+fastaid in $prepeptab (ripper) look like this.
+The distant ones end in _9nnn and are scanned against
+$ripphmmdb while those within $conf{maxDistFromTE} end
+in _n and are scanned against Pfam-A.
+
+ my $ppFastaOutputCnt = 1; # in ripper.pl
+ my $allFastaOutputCnt = 9001; # in ripper.pl
+
+ WP_253094575_9014
+ WP_253094575_9015
+ WP_253094575_1
+ WP_253094575_9016
+
+The close one are _1 onwards. The distant ones are _9001 onwards.
+=cut
 
 while(my $hr=$stmt->fetchrow_hashref()) {
-my $id=$hr->{fastaid};
-my $aaseq=$hr->{aaseq};
-my $hmmoutfn;
-if($id =~ m/_9\d{3,}$/) {
-$hmmoutfn = scan(aaseq => $aaseq, hmmdb => $ripphmmdb, name => $id);
-}
-else {
-$hmmoutfn = scan(aaseq => $aaseq, hmmdb => $hmmdb, name => $id);
-}
-
-# linelist($hmmoutfn);
-my $copyFlag = 0;
-my @hr = hspHashes($hmmoutfn);
-for my $hr (@hr) {
-  if(ref($hr) and $hr->{signif} <= $scan_signif_thresh) {
-    my $acc = $hr->{hname};
-    my $bacc = $acc; $bacc =~ s/\.\d+$//;
-    my $hcov = sprintf("%.3f", $hr->{alnlen}/$pfl{$bacc});
-
-    my $instr = qq/insert or replace into $conf{pfamrestab}/;
-    $instr .= qq/ (qname, qlen, hname, hlen, qstart, qend, qcov, hstart, hend,/;
-    $instr .= qq/ hcov, fracid, signif, hdesc)/;
-    $instr .= qq/ values(/;
-    $instr .= $handle->quote($hr->{qname}) . ", " ;
-    $instr .= $hr->{qlen} . ", ";
-    $instr .= $handle->quote($hr->{hname}) . ", " ;
-    $instr .= $pfl{$bacc} . ", ";
-    $instr .= $hr->{qstart} . ", ";
-    $instr .= $hr->{qend} . ", ";
-    $instr .= $hr->{qcov} . ", ";
-    $instr .= $hr->{hstart} . ", ";
-    $instr .= $hr->{hend} . ", ";
-    $instr .= $hcov . ", ";
-    $instr .= $hr->{fracid} . ", ";
-    $instr .= $hr->{signif} .", ";
-    $instr .= $handle->quote($hr->{hdesc});  
-    $instr .= qq/)/;
-    # linelist($instr);
-    unless($handle->do($instr)) {
-      linelistE($instr);
-    }
+  my $id=$hr->{fastaid};
+  my $aaseq=$hr->{aaseq};
+  # Below, for the close ones we search the Pfam-A database and
+  # for the distant ones we search ther ripps hmm database.
+  # There may be other ways of speeding this up.
+  if($id =~ m/_9\d{3,}$/) {
+    my $hmmoutfn = scan(aaseq => $aaseq, hmmdb => $ripphmmdb, name => $id);
+    hmmout_insert($hmmoutfn);
+    unlink($hmmoutfn);
   }
-}
-    if($copyFlag) {
-    copy($hmmoutfn, "scan.result");
-    }
-unlink($hmmoutfn);
+  else {
+    my $hmmoutfn = scan(aaseq => $aaseq, hmmdb => $hmmdb, name => $id);
+    hmmout_insert($hmmoutfn);
+    unlink($hmmoutfn);
+  }
 }
 
 exit;
+
+# {{{ sub hmmout_insert
+sub hmmout_insert {
+  my $hmmoutfn = shift(@_);
+  my $copyFlag = 0;
+  my @hr = hspHashes($hmmoutfn);
+  for my $hr (@hr) {
+    if(ref($hr) and $hr->{signif} <= $scan_signif_thresh) {
+      my $acc = $hr->{hname};
+      my $bacc = $acc; $bacc =~ s/\.\d+$//;
+      my $hcov = sprintf("%.3f", $hr->{alnlen}/$pfl{$bacc});
+
+      my $instr = qq/insert or replace into $conf{pfamrestab}/;
+      $instr .= qq/ (qname, qlen, hname, hlen, qstart, qend, qcov, hstart, hend,/;
+      $instr .= qq/ hcov, fracid, signif, hdesc)/;
+      $instr .= qq/ values(/;
+      $instr .= $handle->quote($hr->{qname}) . ", " ;
+      $instr .= $hr->{qlen} . ", ";
+      $instr .= $handle->quote($hr->{hname}) . ", " ;
+      $instr .= $pfl{$bacc} . ", ";
+      $instr .= $hr->{qstart} . ", ";
+      $instr .= $hr->{qend} . ", ";
+      $instr .= $hr->{qcov} . ", ";
+      $instr .= $hr->{hstart} . ", ";
+      $instr .= $hr->{hend} . ", ";
+      $instr .= $hcov . ", ";
+      $instr .= $hr->{fracid} . ", ";
+      $instr .= $hr->{signif} .", ";
+      $instr .= $handle->quote($hr->{hdesc});
+      $instr .= qq/)/;
+      # linelist($instr);
+      unless($handle->do($instr)) {
+        linelistE($instr);
+      }
+    }
+  }
+  if($copyFlag) {
+    copy($hmmoutfn, "scan.result");
+  }
+  return();
+}
+# }}}
 
 # Multiple END blocks run in reverse order of definition.
 END {
@@ -219,10 +236,11 @@ $handle->disconnect();
 
 # {{{ sub pflens
 sub pflens {
-  my $pfamhmmfn = File::Spec->catfile($conf{pfamdir}, $conf{hmmdb});
-  open(PFT, "<", $pfamhmmfn) or croak "Failed to open $pfamhmmfn";
   my %rethash;
-  local $/ = "\n//\n";
+  for my $pfamhmmfn(File::Spec->catfile($conf{pfamdir}, $conf{hmmdb}),
+    File::Spec->catfile($conf{ripphmmdir}, $conf{ripphmmdb})) {
+    open(PFT, "<", $pfamhmmfn) or croak "Failed to open $pfamhmmfn";
+    local $/ = "\n//\n";
     while(<PFT>) {
       my $record = $_;
       chomp($record);
@@ -240,7 +258,8 @@ sub pflens {
         $rethash{$acc} = $hmmrec{LENG};
       }
     }
-  close(PFT);
+    close(PFT);
+  }
   return(%rethash);
 }
 # }}}
@@ -281,12 +300,9 @@ sub scan {
 #  my $self = shift(@_);
   my %args = @_;
   my $aaseq = $args{aaseq};
-  my $hmmdb;
-  if(exists($args{hmmdb})) {
-    $hmmdb = $args{hmmdb};
-  }
-  else {
-    $hmmdb = "/mnt/pfam/Pfam-A.hmm";
+  my $hmmdb = $args{hmmdb};
+  unless(-e $hmmdb and -s $hmmdb) {
+    croak("HMM database $hmmdb not found.");
   }
   my $aafile;
   my $deleteQuery = 1;

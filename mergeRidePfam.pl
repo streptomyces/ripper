@@ -193,6 +193,7 @@ sub pfs {
   my $cntstr = qq/select count(*) from $conf{pfamrestab} where qname = '$fid'/;
   my ($count) = $handle->selectrow_array($cntstr);
   if($count) {
+    # We need an "order by signif" in the query below.
     my $qstr = qq/select * from $conf{pfamrestab} where qname = '$fid'/;
     my $stmt = $handle->prepare($qstr);
     $stmt->execute();
