@@ -20,9 +20,13 @@ use Getopt::Long;
 my $outdir;
 my $conffile = qq(local.conf);
 my $verbose;
+my $apikey;
+my $email;
 GetOptions (
 "outdir:s" => \$outdir,
 "conffile:s" => \$conffile,
+"ncbiapikey|apikey:s" => \$apikey,
+"email:s" => \$email,
 "verbose" => \$verbose
 );
 # }}}
@@ -68,12 +72,6 @@ RODEO fails to fetch nucleotide sequences for these.
 # }}} ###
 
 my $protid = $ARGV[0];
-my $apikey;
-my $email = 'andrew.truman@jic.ac.uk';
-if(exists $ENV{NCBI_API_KEY}) {
-  $apikey = $ENV{NCBI_API_KEY};
-}
-say(STDERR $apikey);
 
 
 # {{{ Populate %conf if a configuration file 
@@ -94,12 +92,6 @@ if(-s $conffile ) {
 }
 elsif($conffile ne "local.conf") {
 linelistE("Specified configuration file $conffile not found.");
-}
-if(exists($conf{apikey})) {
-  $apikey = $conf{apikey};
-}
-if(exists($conf{email})) {
-  $email = $conf{email};
 }
 
 # }}}

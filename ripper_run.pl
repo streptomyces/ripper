@@ -31,6 +31,8 @@ my $fastaOutputLimit  =          3;
 my $sameStrandReward  =          5;
 my $flankLen  =              40000;
 my $scan_signif_thresh =      0.05;
+my $apikey;
+my $email;
 
 
 my $help;
@@ -42,15 +44,17 @@ GetOptions (
 "header:i" => \$header,
 "norun|dryrun|dry-run" => \$dryrun,
 "help" => \$help,
+"ncbiapikey|apikey:s" => \$apikey,
+"email:s" => \$email,
 
-"minPPlen:i"  =>  \$minPPlen,
-"maxPPlen:i"  =>  \$maxPPlen,
-"prodigalScoreThresh:f"  => \$prodigalScoreThresh,
-"maxDistFromTE:i"  => \$maxDistFromTE,
-"fastaOutputLimit:i"  => \$fastaOutputLimit,
-"sameStrandReward:i"  => \$sameStrandReward,
-"flankLen:i"  => \$flankLen,
-"scansignifthresh:f" => \$scan_signif_thresh
+"minPPlen|minpplen:i"  =>  \$minPPlen,
+"maxPPlen|maxpplen:i"  =>  \$maxPPlen,
+"prodigalScoreThresh|prodigalscorethresh:f"  => \$prodigalScoreThresh,
+"maxDistFromTE|maxdistfromte:i"  => \$maxDistFromTE,
+"fastaOutputLimit|fastaoutputlimit:i"  => \$fastaOutputLimit,
+"sameStrandReward|samestrandreward:i"  => \$sameStrandReward,
+"flankLen|flanklen:i"  => \$flankLen,
+"scansignifthresh|scansignifthresh:f" => \$scan_signif_thresh
 );
 # }}}
 
@@ -158,18 +162,16 @@ while(my $line = readline($ifh)) {
   my $cmd_cooc = File::Spec->catfile($ripperdir, "mkcooc.pl");
   my @args_cooc = ("-outdir");
   push(@args_cooc, File::Spec->catdir($coocoutdir, $acc), $acc);
+  if($apikey) {
+    push(@args_cooc, "-apikey", $apikey);
+  }
+  if($email) {
+    push(@args_cooc, "-email", $email);
+  }
   spacelist($cmd_cooc, @args_cooc); linelist();
   unless($dryrun) {
     system($cmd_cooc, @args_cooc);
   }
-
-  # my $minPPlen  =                 20;
-  # my $maxPPlen  =                120;
-  # my $prodigalScoreThresh  =      15;
-  # my $maxDistFromTE  =          8000;
-  # my $fastaOutputLimit  =          3;
-  # my $sameStrandReward  =          5;
-  # my $flankLen  =              40000;
 
   my $cmd_ripper = File::Spec->catfile($ripperdir, "ripper.pl");
   my @args_ripper = (
