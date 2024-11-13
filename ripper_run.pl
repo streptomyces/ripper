@@ -80,6 +80,18 @@ exec("perldoc $0");
 exit;
 }
 
+unless($apikey) {
+  if($ENV{NCBI_API_KEY} =~ m/\w+/) {
+    $apikey = $ENV{NCBI_API_KEY};
+  }
+}
+unless($email) {
+  if($ENV{NCBI_API_EMAIL} =~ m/\w+/) {
+    $email = $ENV{NCBI_API_EMAIL};
+  }
+}
+
+
 # {{{ Populate %conf if a configuration file 
 my %conf;
 if(-s $conffile ) {
