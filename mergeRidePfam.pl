@@ -195,6 +195,7 @@ sub pfs {
   if($count) {
     # We need an "order by signif" in the query below.
     my $qstr = qq/select * from $conf{pfamrestab} where qname = '$fid'/;
+    $qstr .= qq/ order by signif/;
     my $stmt = $handle->prepare($qstr);
     $stmt->execute();
     my $hr = $stmt->fetchrow_hashref();
