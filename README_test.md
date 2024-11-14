@@ -1,4 +1,4 @@
-# norod.sh
+# RiPPer test version
 
 ## Pull the docker image
 
@@ -13,9 +13,16 @@ relevant directories in place of these):
 
 ## Get a container
 
+Below, the environment variable NCBI_API_KEY in the host environment
+is being added to the container environment and, NCBI_API_EMAIL is
+being explicitly set in the container environment to the email address
+specified.
+
 ~~~ {.sh}
 docker run --rm -it -v $PWD:/home/mnt \
 -v $HOME/databases/pfam:/mnt/pfam \
+--env NCBI_API_KEY
+--env NCBI_API_EMAIL=govind.chandra@jic.ac.uk \
 streptomyces/rippertest
 ~~~
 
@@ -102,10 +109,12 @@ capitalisation is significant. All lower-case form of the option
 should also work but wrong mixture of upper and lower case will not
 work.
 
-Two other options are `--ncbiapikey` and `--email` both of which are
-unset by default. If you provide these then the values are sent along
-with requests to NCBI and they use these for the analysis of the usage
-of their services.
+Two other options are `--ncbiapikey` and `--email` both of which are unset by
+default (unless provided as environment variables at the time of instantiating
+the container). If you provide these then the values are sent along with
+requests to NCBI and they use these for the analysis of the usage of their
+services. It is best to provide these as environment variables (see *Get a
+container* above) so you need not use these options.
 
 ## Output files
 

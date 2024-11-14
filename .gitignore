@@ -33,6 +33,7 @@ gitmess
 *comment*
 pfam_lengths.pl
 commands.md
+ripper.md
 *.vim
 repick.pl
 ignore/
