@@ -30,6 +30,7 @@ commitmesg
 gitmess
 *.doc
 *.docx
+*.gbk
 *comment*
 pfam_lengths.pl
 commands.md

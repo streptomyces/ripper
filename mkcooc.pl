@@ -41,15 +41,25 @@ mkcooc.pl
 
  perl -c mkcooc.pl
 
- perl mkcooc.pl -outdir ignore/WP_236176819.1 WP_236176819.1
+ perl mkcooc.pl -verbose -outdir ignore/one \
+ -email govind.chandra@gmail.com \
+ -- WP_236176819.1
 
- perl mkcooc.pl -outdir ignore/WP_054914858.1 WP_054914858.1
+ perl mkcooc.pl -verbose -outdir ignore/one \
+ -email govind.chandra@gmail.com \
+ -- WP_091117926.1
 
+<<<<<<< Updated upstream
  perl mkcooc.pl -verbose -outdir ignore/WP_054914858.1 WP_054914858.1
 
  perl mkcooc.pl -verbose -outdir ignore/two
  -email govind.chandra@jic.ac.uk
  -- WP_236176819.1
+=======
+ perl mkcooc.pl -verbose -outdir ignore/one \
+ -email govind.chandra@gmail.com \
+ -- TFI52254.1
+>>>>>>> Stashed changes
 
 =head2 Bad ones
 
@@ -68,6 +78,19 @@ RODEO fails to fetch nucleotide sequences for these.
  WP_104571963.1
  WP_078479507.1
  WP_123752854.1
+
+=head2 Thioamitide test list provided by Andy in Dec 2024.
+
+ WP_020634200.1
+ TFI52254.1
+ WP_091117926.1
+ WP_017595620.1
+ WP_106236741.1
+ WP_217209178.1
+ WP_184984772.1
+ BAN83919.1
+ KPC82023.1
+ WP_190061747.1
 
 =cut
 
@@ -116,7 +139,6 @@ if($verbose) {
   open(VERB, ">", $verbosefn);
 }
 
-# say($protid);
 my $query = $protid . "[accn]";
 
 # {{{ esearch to make @ids.
@@ -154,110 +176,208 @@ my @ntids;
 while (my $ds = $factory1->next_LinkSet) {
 push(@ntids, $ds->get_ids);
 }
-if($verbose) {
-  say(VERB (join(" ", uniqstr(@ntids))));
+
+my @by_ntlen;
+if(@ntids) {
+  my $noop = 1;
 }
-my @by_ntlen = ntlen(uniqstr(@ntids));
-# for my $lr (@by_ntlen) { say(join("\t", @{$lr})); } # Debugging only
+else {
+  say(STDERR ("No nucleotide ids for $protid from elinks."));
+  say(STDERR ("Trying the genpept file."));
+# say($protid);
+my $gpfn = efetch_genpept($protid); # debugging.
+my $dbs_accn = dbsource($gpfn);
+if($dbs_accn) {
+push(@ntids, $dbs_accn);
+}
+}
+
+if(@ntids) {
+  if($verbose) {
+    say(VERB (join(" ", uniqstr(@ntids))));
+    @by_ntlen = ntlen(uniqstr(@ntids));
+  }
+  # for my $lr (@by_ntlen) { say(join("\t", @{$lr})); } # Debugging only
+}
+
+say(STDERR ("Failed to get nucleotide genbank for $protid"));
+
 # }}}
 
-# {{{ efetch to get one nucleotide genbank file.
-my %efarg = (
-  -eutil => 'efetch',
-  -db      => 'nucleotide',
-  -rettype => 'gbwithparts',
-  -id      => $by_ntlen[0]->[0]
-);
-if($email) {
-  $efarg{-email} = $email;
-}
-my $factory2 = Bio::DB::EUtilities->new(%efarg);
+# # {{{ efetch one nucleotide genbank file. Replaced by call to efetch_ntgbk().
+# my %efarg = (
+#   -eutil => 'efetch',
+#   -db      => 'nucleotide',
+#   -rettype => 'gbwithparts',
+#   -id      => $by_ntlen[0]->[0]
+# );
+# if($email) {
+#   $efarg{-email} = $email;
+# }
+# my $factory2 = Bio::DB::EUtilities->new(%efarg);
+# 
+# my $template = "coocXXXXXX";
+# my($tmpfh, $tmpfn)=tempfile($template, DIR => '.', SUFFIX => '.gbk');
+# 
+# # dump <HTTP::Response> content to a file (not retained in memory)
+# $factory2->get_Response(-file => $tmpfn);
+# # }}}
 
-my $template = "coocXXXXXX";
-my($tmpfh, $tmpfn)=tempfile($template, DIR => '.', SUFFIX => '.gbk');
-
-# dump <HTTP::Response> content to a file (not retained in memory)
-$factory2->get_Response(-file => $tmpfn);
-# }}}
-
-seek($tmpfh, 0, 0); # jump to beginning of $tmpfh before SeqIO.
-my $seqio=Bio::SeqIO->new(-fh => $tmpfh);
-
-my $seqobj=$seqio->next_seq();
-my $binom = $seqobj->species()->binomial();
-# say $binom;
-my $acc = $seqobj->accession();
-
-# @region is list of 11 features in which the
-# TE is in the middle of the list.
-my @region;
-$region[4] = undef;
-
-my $match_seen = 0;
-my $cdsCnt = 0;
-
-# {{{ for my $feat ($seqobj->all_SeqFeatures())
-for my $feat ($seqobj->all_SeqFeatures()) {
-  if($feat->primary_tag() eq 'source') {
-    if($feat->has_tag("organism")) {
-      ($binom) = $feat->get_tag_values("organism");
-    }
-  }
-  if($feat->primary_tag() eq 'CDS') {
-    unless($feat->has_tag("protein_id")) { next; }
-    my ($gprotid) = $feat->get_tag_values("protein_id");
-    if($gprotid eq $protid) {
-      $match_seen = 1;
-    }
-    if(not $match_seen) {
-      my $discard = shift(@region);
-      push(@region, $feat);
-    }
-    if($match_seen) {
-      push(@region, $feat);
-      if(scalar(@region) >= 11) {
-        last;
-      }
-    }
-  }
-}
-# }}}
-
-# {{{ for my $feat (@region). Print out main_co_occur.csv.
-my @header = qw(query organism accession protid
-                start end strand product);
-say($ofh (join(",", @header)));
-if($match_seen) {
-for my $feat (@region) {
-  unless(ref($feat)) { next; }
-  my $start = $feat->start();
-  my $end = $feat->end();
-  my ($gprotid) = $feat->get_tag_values("protein_id");
-  my $strand = $feat->strand() == -1 ? "-" : "+";
-  my @anno;
-  if($feat->has_tag("gene")) {
-    my @temp = $feat->get_tag_values("gene");
-    my $temp = join(" ", @temp);
-    push(@anno, $temp);
-  }
-  if($feat->has_tag("product")) {
-    my @temp = $feat->get_tag_values("product");
-    my $temp = join(" ", @temp);
-    push(@anno, $temp);
-  }
-  my $anno = join(";", @anno);
-  say($ofh ("$protid,$binom,$acc,$gprotid,$start,$end,$strand,$anno"));
-  #last;
-}
-}
-# }}}
-
+my ($tmpfh, $tmpfn) = efetch_ntgbk($by_ntlen[0]->[0]);
+my $acc = mkcooc($tmpfh);
 if(-d $gbkcache) {
 copy($tmpfn, File::Spec->catfile($gbkcache, $acc . ".gbk"));
 }
 unlink($tmpfn);
 
 exit;
+
+### subs begin ###
+
+# {{{ sub mkcooc
+sub mkcooc {
+  seek($tmpfh, 0, 0); # jump to beginning of $tmpfh before SeqIO.
+  my $seqio=Bio::SeqIO->new(-fh => $tmpfh);
+
+  my $seqobj=$seqio->next_seq();
+  my $binom = $seqobj->species()->binomial();
+  # say $binom;
+  my $acc = $seqobj->accession();
+
+  # @region is list of 11 features in which the
+  # TE is in the middle of the list.
+  my @region;
+  $region[4] = undef;
+
+  my $match_seen = 0;
+  my $cdsCnt = 0;
+
+  # {{{ for my $feat ($seqobj->all_SeqFeatures())
+  for my $feat ($seqobj->all_SeqFeatures()) {
+    if($feat->primary_tag() eq 'source') {
+      if($feat->has_tag("organism")) {
+        ($binom) = $feat->get_tag_values("organism");
+      }
+    }
+    if($feat->primary_tag() eq 'CDS') {
+      unless($feat->has_tag("protein_id")) { next; }
+      my ($gprotid) = $feat->get_tag_values("protein_id");
+      if($gprotid eq $protid) {
+        $match_seen = 1;
+      }
+      if(not $match_seen) {
+        my $discard = shift(@region);
+        push(@region, $feat);
+      }
+      if($match_seen) {
+        push(@region, $feat);
+        if(scalar(@region) >= 11) {
+          last;
+        }
+      }
+    }
+  }
+  # }}}
+
+  # {{{ for my $feat (@region). Print out main_co_occur.csv.
+  my @header = qw(query organism accession protid
+  start end strand product);
+  say($ofh (join(",", @header)));
+  if($match_seen) {
+    for my $feat (@region) {
+      unless(ref($feat)) { next; }
+      my $start = $feat->start();
+      my $end = $feat->end();
+      my ($gprotid) = $feat->get_tag_values("protein_id");
+      my $strand = $feat->strand() == -1 ? "-" : "+";
+      my @anno;
+      if($feat->has_tag("gene")) {
+        my @temp = $feat->get_tag_values("gene");
+        my $temp = join(" ", @temp);
+        push(@anno, $temp);
+      }
+      if($feat->has_tag("product")) {
+        my @temp = $feat->get_tag_values("product");
+        my $temp = join(" ", @temp);
+        push(@anno, $temp);
+      }
+      my $anno = join(";", @anno);
+      say($ofh ("$protid,$binom,$acc,$gprotid,$start,$end,$strand,$anno"));
+      #last;
+    }
+  }
+  # }}}
+  return($acc);
+}
+# }}}
+
+# {{{ sub dbsource
+sub dbsource {
+  my $gpfn = shift(@_);
+  open(my $ifh, "<", $gpfn) or croak("Failed to open $gpfn.");
+  while(my $line = readline($ifh)) {
+    chomp($line);
+    if($line =~ /^DBSOURCE/) {
+      my @ll = split(/\s+/, $line);
+      my $dbs_accn = pop(@ll);
+      return($dbs_accn);
+    }
+  }
+  return();
+}
+# }}}
+
+# {{{ sub efetch_genpept
+sub efetch_genpept {
+  my $protid = shift(@_);
+my %efarg = (
+  -eutil => 'efetch',
+  -db      => 'protein',
+  -rettype => 'genpept',
+  -id      => $protid
+);
+if($apikey) {
+  $efarg{-api_key} = $apikey;
+}
+if($email) {
+  $efarg{-email} = $email;
+}
+my $factory = Bio::DB::EUtilities->new(%efarg);
+
+my $template = "genpeptXXXXXX";
+my($tmpfh, $tmpfn)=tempfile($template, DIR => $outdir, SUFFIX => '.gp');
+
+# dump <HTTP::Response> content to a file (not retained in memory)
+$factory->get_Response(-file => $tmpfn);
+return($tmpfn);
+}
+# }}}
+
+# {{{ sub efetch_ntgbk
+sub efetch_ntgbk {
+  my $ntid = shift(@_);
+  my %efarg = (
+    -eutil => 'efetch',
+    -db      => 'nucleotide',
+    -rettype => 'gbwithparts',
+    -id      => $ntid
+  );
+  if($apikey) {
+    $efarg{-api_key} = $apikey;
+  }
+  if($email) {
+    $efarg{-email} = $email;
+  }
+  my $factory = Bio::DB::EUtilities->new(%efarg);
+
+  my $template = "coocXXXXXX";
+  my($tmpfh, $tmpfn)=tempfile($template, DIR => '.', SUFFIX => '.gbk');
+
+  # dump <HTTP::Response> content to a file (not retained in memory)
+  $factory->get_Response(-file => $tmpfn);
+  return($tmpfh, $tmpfn);
+}
+# }}}
 
 # {{{ sub ntlen
 sub ntlen {
