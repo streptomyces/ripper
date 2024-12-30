@@ -29,7 +29,7 @@ my $prodigalScoreThresh  =     7.5;
 my $maxDistFromTE  =          8000;
 my $fastaOutputLimit  =          3;
 my $sameStrandReward  =          5;
-my $flankLen  =              40000;
+my $flankLen  =              17500;
 my $scan_signif_thresh =      0.05;
 my $apikey;
 my $email;
