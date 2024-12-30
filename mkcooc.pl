@@ -47,7 +47,9 @@ mkcooc.pl
 
  perl mkcooc.pl -verbose -outdir ignore/WP_054914858.1 WP_054914858.1
 
- perl mkcooc.pl -verbose -outdir ignore/WP_236176819.1 WP_236176819.1
+ perl mkcooc.pl -verbose -outdir ignore/two
+ -email govind.chandra@jic.ac.uk
+ -- WP_236176819.1
 
 =head2 Bad ones
 
