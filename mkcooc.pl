@@ -49,17 +49,19 @@ mkcooc.pl
  -email govind.chandra@gmail.com \
  -- WP_091117926.1
 
-<<<<<<< Updated upstream
  perl mkcooc.pl -verbose -outdir ignore/WP_054914858.1 WP_054914858.1
 
  perl mkcooc.pl -verbose -outdir ignore/two
  -email govind.chandra@jic.ac.uk
  -- WP_236176819.1
-=======
+
  perl mkcooc.pl -verbose -outdir ignore/one \
  -email govind.chandra@gmail.com \
  -- TFI52254.1
->>>>>>> Stashed changes
+
+ perl mkcooc.pl -verbose -outdir ignore/one \
+ -email govind.chandra@gmail.com \
+ -- TFI52254.1
 
 =head2 Bad ones
 
