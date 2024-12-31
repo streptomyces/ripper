@@ -59,9 +59,9 @@ mkcooc.pl
  -email govind.chandra@gmail.com \
  -- TFI52254.1
 
- perl mkcooc.pl -verbose -outdir ignore/one \
+ perl mkcooc.pl -verbose -outdir ignore/two \
  -email govind.chandra@gmail.com \
- -- TFI52254.1
+ -- WP_091117926.1
 
 =head2 Bad ones
 
@@ -148,7 +148,7 @@ my %esarg = (
   -eutil => 'esearch',
   -db     => 'protein',
   -term   => $query,
-  -retmax => 3
+  -retmax => 6
 );
 if($apikey) {
   $esarg{-api_key} = $apikey;
@@ -160,7 +160,14 @@ my $factory = Bio::DB::EUtilities->new(%esarg);
 my @ids = $factory->get_ids;
 # }}}
 
-# {{{ elink to get @ntids.
+# {{{ Get nucleotide ids and placein @ntids.
+
+# We first try elink. If that does not give us any nucleotide
+# identifiers we get the genpept file for the protein accession and
+# see if there is a DBSOURCE in it. If there is one then we use this
+# accession to get the nucleotide UID and place it in @ntids.
+
+my @ntids;
 my %elarg = (
   -eutil => 'elink',
   -db     => 'nucleotide',
@@ -174,7 +181,6 @@ if($email) {
   $elarg{-email} = $email;
 }
 my $factory1 = Bio::DB::EUtilities->new(%elarg);
-my @ntids;
 while (my $ds = $factory1->next_LinkSet) {
 push(@ntids, $ds->get_ids);
 }
@@ -186,13 +192,14 @@ if(@ntids) {
 else {
   say(STDERR ("No nucleotide ids for $protid from elinks."));
   say(STDERR ("Trying the genpept file."));
-# say($protid);
-my $gpfn = efetch_genpept($protid); # debugging.
-my $dbs_accn = dbsource($gpfn);
-if($dbs_accn) {
-push(@ntids, $dbs_accn);
+  my $gpfn = efetch_genpept($protid);
+  my @dbsids = dbsource($gpfn);
+  if(@dbsids) {
+    push(@ntids, @dbsids);
+  }
+  unlink($gpfn);
 }
-}
+# }}}
 
 if(@ntids) {
   if($verbose) {
@@ -200,37 +207,16 @@ if(@ntids) {
     @by_ntlen = ntlen(uniqstr(@ntids));
   }
   # for my $lr (@by_ntlen) { say(join("\t", @{$lr})); } # Debugging only
-}
-
-say(STDERR ("Failed to get nucleotide genbank for $protid"));
-
-# }}}
-
-# # {{{ efetch one nucleotide genbank file. Replaced by call to efetch_ntgbk().
-# my %efarg = (
-#   -eutil => 'efetch',
-#   -db      => 'nucleotide',
-#   -rettype => 'gbwithparts',
-#   -id      => $by_ntlen[0]->[0]
-# );
-# if($email) {
-#   $efarg{-email} = $email;
-# }
-# my $factory2 = Bio::DB::EUtilities->new(%efarg);
-# 
-# my $template = "coocXXXXXX";
-# my($tmpfh, $tmpfn)=tempfile($template, DIR => '.', SUFFIX => '.gbk');
-# 
-# # dump <HTTP::Response> content to a file (not retained in memory)
-# $factory2->get_Response(-file => $tmpfn);
-# # }}}
-
 my ($tmpfh, $tmpfn) = efetch_ntgbk($by_ntlen[0]->[0]);
 my $acc = mkcooc($tmpfh);
 if(-d $gbkcache) {
 copy($tmpfn, File::Spec->catfile($gbkcache, $acc . ".gbk"));
 }
 unlink($tmpfn);
+}
+else {
+  say(STDERR ("Failed to get nucleotide genbank for $protid"));
+}
 
 exit;
 
@@ -238,6 +224,7 @@ exit;
 
 # {{{ sub mkcooc
 sub mkcooc {
+  my $tmpfh = shift(@_);
   seek($tmpfh, 0, 0); # jump to beginning of $tmpfh before SeqIO.
   my $seqio=Bio::SeqIO->new(-fh => $tmpfh);
 
@@ -313,6 +300,28 @@ sub mkcooc {
 }
 # }}}
 
+# {{{ sub accn2uid;
+sub accn2uid {
+  my $accn = shift(@_);
+  my $query = $accn . "[accn]";
+  my %esarg = (
+    -eutil => 'esearch',
+    -db     => 'nucleotide',
+    -term   => $query,
+    -retmax => 3
+  );
+  if($apikey) {
+    $esarg{-api_key} = $apikey;
+  }
+  if($email) {
+    $esarg{-email} = $email;
+  }
+  my $factory = Bio::DB::EUtilities->new(%esarg);
+  my @ids = $factory->get_ids;
+  return(@ids);
+}
+# }}}
+
 # {{{ sub dbsource
 sub dbsource {
   my $gpfn = shift(@_);
@@ -322,7 +331,8 @@ sub dbsource {
     if($line =~ /^DBSOURCE/) {
       my @ll = split(/\s+/, $line);
       my $dbs_accn = pop(@ll);
-      return($dbs_accn);
+      my @ids = accn2uid($dbs_accn);
+      return(@ids);
     }
   }
   return();
@@ -348,7 +358,7 @@ my $factory = Bio::DB::EUtilities->new(%efarg);
 
 my $template = "genpeptXXXXXX";
 my($tmpfh, $tmpfn)=tempfile($template, DIR => $outdir, SUFFIX => '.gp');
-
+close($tmpfh);
 # dump <HTTP::Response> content to a file (not retained in memory)
 $factory->get_Response(-file => $tmpfn);
 return($tmpfn);
