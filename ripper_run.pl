@@ -173,13 +173,14 @@ while(my $line = readline($ifh)) {
   my $acc = $line;
   my $cmd_cooc = File::Spec->catfile($ripperdir, "mkcooc.pl");
   my @args_cooc = ("-outdir");
-  push(@args_cooc, File::Spec->catdir($coocoutdir, $acc), $acc);
+  push(@args_cooc, File::Spec->catdir($coocoutdir, $acc));
   if($apikey) {
     push(@args_cooc, "-apikey", $apikey);
   }
   if($email) {
     push(@args_cooc, "-email", $email);
   }
+  push(@args_cooc, $acc);
   spacelist($cmd_cooc, @args_cooc); linelist();
   unless($dryrun) {
     system($cmd_cooc, @args_cooc);

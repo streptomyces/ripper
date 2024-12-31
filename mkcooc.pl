@@ -204,15 +204,15 @@ else {
 if(@ntids) {
   if($verbose) {
     say(VERB (join(" ", uniqstr(@ntids))));
-    @by_ntlen = ntlen(uniqstr(@ntids));
   }
+  @by_ntlen = ntlen(uniqstr(@ntids));
   # for my $lr (@by_ntlen) { say(join("\t", @{$lr})); } # Debugging only
-my ($tmpfh, $tmpfn) = efetch_ntgbk($by_ntlen[0]->[0]);
-my $acc = mkcooc($tmpfh);
-if(-d $gbkcache) {
-copy($tmpfn, File::Spec->catfile($gbkcache, $acc . ".gbk"));
-}
-unlink($tmpfn);
+  my ($tmpfh, $tmpfn) = efetch_ntgbk($by_ntlen[0]->[0]);
+  my $acc = mkcooc($tmpfh);
+  if(-d $gbkcache) {
+    copy($tmpfn, File::Spec->catfile($gbkcache, $acc . ".gbk"));
+  }
+  unlink($tmpfn);
 }
 else {
   say(STDERR ("Failed to get nucleotide genbank for $protid"));
@@ -368,6 +368,7 @@ return($tmpfn);
 # {{{ sub efetch_ntgbk
 sub efetch_ntgbk {
   my $ntid = shift(@_);
+  # say("===> $ntid"); # debugging only.
   my %efarg = (
     -eutil => 'efetch',
     -db      => 'nucleotide',
@@ -384,7 +385,6 @@ sub efetch_ntgbk {
 
   my $template = "coocXXXXXX";
   my($tmpfh, $tmpfn)=tempfile($template, DIR => '.', SUFFIX => '.gbk');
-
   # dump <HTTP::Response> content to a file (not retained in memory)
   $factory->get_Response(-file => $tmpfn);
   return($tmpfh, $tmpfn);
