@@ -62,12 +62,5 @@ RUN mkdir -p /home/work/sqlite
 RUN mkdir -p /home/work/pfamscan
 RUN mkdir -p /home/work/blastdb
 
-
-############################################################
-############################################################
-############################################################
-
-# docker buildx build --platform linux/arm64,linux/amd64 \
-# -t streptomyces/stage001 --push -f 001.dockerfile .
-
+# See builds.sh
 # vim: filetype=dockerfile

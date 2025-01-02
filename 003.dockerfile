@@ -21,16 +21,6 @@ COPY HHPaths.pm /usr/local/hh-suite/scripts/
 
 WORKDIR /home/work
 
-############################################################
-############################################################
-############################################################
-
-# docker buildx build --platform linux/arm64,linux/amd64 \
-# -t streptomyces/ripdock003 --push -f 003.dockerfile .
-
-# docker pull streptomyces/ripdock003
-# docker run --rm -it -v ${PWD}:/home/mnt streptomyces/ripdock003
-
-# python rodeo_main.py -out /home/mnt/rodout /home/mnt/minitest.txt
-
+# See builds.sh
 # vim: filetype=dockerfile
+

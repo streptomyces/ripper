@@ -54,4 +54,4 @@ printf "In: %02d:%02d:%02d\n" $hh $mm $ss;
 
 # docker pull streptomyces/norodeodock
 # docker run --rm -it -v ${PWD}:/home/mnt streptomyces/norodeodock
-# ved 00{1,2,3,4}.dockerfile norodeodock.dockerfile
+# ved 00{1,2,3,4}.dockerfile ripper.dockerfile
