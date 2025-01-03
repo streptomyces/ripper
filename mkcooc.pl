@@ -215,7 +215,7 @@ if(@ntids) {
   unlink($tmpfn);
 }
 else {
-  say(STDERR ("Failed to get nucleotide genbank for $protid"));
+  die("Failed to get nucleotide genbank for $protid");
 }
 
 exit;

@@ -169,6 +169,7 @@ my $lineCnt = 0;
 while(my $line = readline($ifh)) {
   chomp($line);
   if($line =~ m/^\s*\#/ or $line =~ m/^\s*$/) {next;}
+  my $cooExitCode; # Exit code of the system call to mkcooc.pl.
   $line =~ s/\r$//;
   my $acc = $line;
   my $cmd_cooc = File::Spec->catfile($ripperdir, "mkcooc.pl");
@@ -183,26 +184,31 @@ while(my $line = readline($ifh)) {
   push(@args_cooc, $acc);
   spacelist($cmd_cooc, @args_cooc); linelist();
   unless($dryrun) {
-    system($cmd_cooc, @args_cooc);
+    $cooExitCode = system($cmd_cooc, @args_cooc);
   }
 
-  my $cmd_ripper = File::Spec->catfile($ripperdir, "ripper.pl");
-  my @args_ripper = (
-    "-minPPlen", $minPPlen,
-    "-maxPPlen", $maxPPlen,
-    "-prodigalScoreThresh", $prodigalScoreThresh,
-    "-maxDistFromTE", $maxDistFromTE,
-    "-fastaOutputLimit", $fastaOutputLimit,
-    "-sameStrandReward", $sameStrandReward,
-    "-flankLen", $flankLen
-  );
-  push(@args_ripper,"-outdir");
-  push(@args_ripper, $ripoutdir, File::Spec->catfile($coocoutdir, $acc, "main_co_occur.csv"));
-  spacelist($cmd_ripper, @args_ripper); linelist();
-  unless($dryrun) {
-    system($cmd_ripper, @args_ripper);
+  if($cooExitCode) {
+    linelist("Failed to make main_co_occur.csv for $acc");
   }
-
+  else {
+    my $cmd_ripper = File::Spec->catfile($ripperdir, "ripper.pl");
+    my @args_ripper = (
+      "-minPPlen", $minPPlen,
+      "-maxPPlen", $maxPPlen,
+      "-prodigalScoreThresh", $prodigalScoreThresh,
+      "-maxDistFromTE", $maxDistFromTE,
+      "-fastaOutputLimit", $fastaOutputLimit,
+      "-sameStrandReward", $sameStrandReward,
+      "-flankLen", $flankLen
+    );
+    push(@args_ripper,"-outdir");
+    push(@args_ripper, $ripoutdir,
+      File::Spec->catfile($coocoutdir, $acc, "main_co_occur.csv"));
+    spacelist($cmd_ripper, @args_ripper); linelist();
+    unless($dryrun) {
+      system($cmd_ripper, @args_ripper);
+    }
+  }
   $lineCnt += 1;
   if($testCnt and $lineCnt >= $testCnt) { last; }
 }
