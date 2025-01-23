@@ -37,16 +37,23 @@ GetOptions (
 
 mkcooc.pl
 
+=head2 Do not call directly
+
+This script is called by F<ripper_run.pl> and it produces output
+to be used by other scripts. On its own the output produced by
+this script does not amount to much. The examples below are for
+use testing during development.
+
 =head2 Examples
 
  perl -c mkcooc.pl
 
  perl mkcooc.pl -verbose -outdir ignore/one \
- -email govind.chandra@gmail.com \
- -- WP_236176819.1
+ -email govind.chandra@jic.ac.uk \
+ -- WP_020634200.1
 
  perl mkcooc.pl -verbose -outdir ignore/one \
- -email govind.chandra@gmail.com \
+ -email govind.chandra@jic.ac.uk \
  -- WP_091117926.1
 
  perl mkcooc.pl -verbose -outdir ignore/WP_054914858.1 WP_054914858.1
@@ -56,11 +63,11 @@ mkcooc.pl
  -- WP_236176819.1
 
  perl mkcooc.pl -verbose -outdir ignore/one \
- -email govind.chandra@gmail.com \
+ -email govind.chandra@jic.ac.uk \
  -- TFI52254.1
 
  perl mkcooc.pl -verbose -outdir ignore/two \
- -email govind.chandra@gmail.com \
+ -email govind.chandra@jic.ac.uk \
  -- WP_091117926.1
 
 =head2 Bad ones
@@ -99,6 +106,7 @@ RODEO fails to fetch nucleotide sequences for these.
 # }}} ###
 
 my $protid = $ARGV[0];
+my @xxx = ($protid);
 
 
 # {{{ Populate %conf if a configuration file 
@@ -158,6 +166,7 @@ if($email) {
 }
 my $factory = Bio::DB::EUtilities->new(%esarg);
 my @ids = $factory->get_ids;
+say(STDERR (join(" ", @ids)));
 # }}}
 
 # {{{ Get nucleotide ids and placein @ntids.
@@ -170,9 +179,10 @@ my @ids = $factory->get_ids;
 my @ntids;
 my %elarg = (
   -eutil => 'elink',
-  -db     => 'nucleotide',
-  -dbfrom => 'protein',
-  -id     => \@ids
+  -dbfrom     => 'protein',
+  -db         => 'nuccore',
+  -linkname   => 'protein_nuccore',
+  -id         => \@ids
 );
 if($apikey) {
   $elarg{-api_key} = $apikey;
