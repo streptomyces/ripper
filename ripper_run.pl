@@ -13,7 +13,6 @@ use Cwd; # Exports getcwd.
 use File::Copy;
 use File::Path qw(make_path remove_tree);
 use File::Temp qw(tempfile tempdir);
-my $command = join(" ", $0, @ARGV);
 
 # {{{ Getopt::Long
 my $conffile = qq(local.conf);

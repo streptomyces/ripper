@@ -138,8 +138,11 @@ hdesc text,
 unique(qname, qstart, qend, hname)
 );
 CTS
+unless($handle->do("drop table if exists $conf{pfamrestab}")) {
+  croak("Drop table failed.");
+}
 unless($handle->do($create_table_str)) {
-croak($create_table_str);
+  croak($create_table_str);
 }
 
 my $qstr="select fastaid, aaseq from $conf{prepeptab}";
@@ -150,7 +153,9 @@ $stmt->execute();
 fastaid in $prepeptab (ripper) look like this.
 The distant ones end in _9nnn and are scanned against
 $ripphmmdb while those within $conf{maxDistFromTE} end
-in _n and are scanned against Pfam-A.
+in _n and are scanned against Pfam-A. Actually, now
+(Jan 2025) all prepeptides are scanned against both HMM
+databases.
 
  my $ppFastaOutputCnt = 1; # in ripper.pl
  my $allFastaOutputCnt = 9001; # in ripper.pl
@@ -166,19 +171,12 @@ The close one are _1 onwards. The distant ones are _9001 onwards.
 while(my $hr=$stmt->fetchrow_hashref()) {
   my $id=$hr->{fastaid};
   my $aaseq=$hr->{aaseq};
-  # Below, for the close ones we search the Pfam-A database and
-  # for the distant ones we search ther ripps hmm database.
-  # There may be other ways of speeding this up.
-  if($id =~ m/_9\d{3,}$/) {
-    my $hmmoutfn = scan(aaseq => $aaseq, hmmdb => $ripphmmdb, name => $id);
-    hmmout_insert($hmmoutfn);
-    unlink($hmmoutfn);
-  }
-  else {
-    my $hmmoutfn = scan(aaseq => $aaseq, hmmdb => $hmmdb, name => $id);
-    hmmout_insert($hmmoutfn);
-    unlink($hmmoutfn);
-  }
+  my $hmmoutfn = scan(aaseq => $aaseq, hmmdb => $ripphmmdb, name => $id);
+  hmmout_insert($hmmoutfn);
+  unlink($hmmoutfn);
+  $hmmoutfn = scan(aaseq => $aaseq, hmmdb => $hmmdb, name => $id);
+  hmmout_insert($hmmoutfn);
+  unlink($hmmoutfn);
 }
 
 exit;
