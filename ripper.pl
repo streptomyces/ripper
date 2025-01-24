@@ -39,7 +39,7 @@ my $prodigalScoreThresh = 7.5;
 my $maxDistFromTE = 8000; # From precursor peptide to the tailoring enzyme.
 my $fastaOutputLimit = 3;
 my $sameStrandReward = 5;
-my $flankLen = 40000;
+my $flankLen = 17500;
 
 my $outdir = qq(ripout);
 my $indir;

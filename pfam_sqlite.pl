@@ -138,13 +138,14 @@ hdesc text,
 unique(qname, qstart, qend, hname)
 );
 CTS
-unless($handle->do("drop table if exists $conf{pfamrestab}")) {
-  croak("Drop table failed.");
-}
+# $conf{pfamrestab} is dropped in ripper_run.pl
 unless($handle->do($create_table_str)) {
   croak($create_table_str);
 }
 
+# $conf{prepeptab} is also dropped in ripper_run.pl and then created
+# in ripper.pl which inserts records in it everytime it is called by
+# ripper_run.pl, which is for every input protein accession.
 my $qstr="select fastaid, aaseq from $conf{prepeptab}";
 my $stmt=$handle->prepare($qstr);
 $stmt->execute();

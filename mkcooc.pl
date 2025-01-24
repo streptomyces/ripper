@@ -166,7 +166,7 @@ if($email) {
 }
 my $factory = Bio::DB::EUtilities->new(%esarg);
 my @ids = $factory->get_ids;
-# say(STDERR (join(" ", @ids)));
+say(STDERR ("$protid: ", join(" ", @ids)));
 # }}}
 
 # {{{ Get nucleotide ids and placein @ntids.

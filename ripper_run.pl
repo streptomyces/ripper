@@ -10,6 +10,7 @@ use File::Find;
 use Getopt::Long;
 use File::Spec;
 use Cwd; # Exports getcwd.
+use DBI;
 use File::Copy;
 use File::Path qw(make_path remove_tree);
 use File::Temp qw(tempfile tempdir);
@@ -133,6 +134,14 @@ else {
 select($ofh);
 # }}}
 
+# Drop the prepeptide and pfam results tables if they exist.
+my $dbfile=$conf{sqlite3fn};
+my $handle=DBI->connect("DBI:SQLite:dbname=$dbfile", '', '');
+$handle->do("drop table if exists $conf{prepeptab}");
+$handle->do("drop table if exists $conf{pfamrestab}");
+$handle->disconnect();
+
+
 # populate @infiles
 my @infiles = @ARGV;
 my $infile = $infiles[0];
@@ -252,7 +261,7 @@ while(readdir $pdh) {
   my $path = File::Spec->catfile($pnadir, $fent);
   if(-d $path) {
     if($fent =~ m/GENENET.+/) {
-      # remove_tree($path);
+      remove_tree($path);
       say("remove_tree $path");
     }
   }
