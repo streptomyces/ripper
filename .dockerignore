@@ -1,3 +1,6 @@
 */.git*
 .*.sw[op]
-
+ignore/
+files.md
+builds.sh
+ripper.md
