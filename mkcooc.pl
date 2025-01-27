@@ -106,7 +106,6 @@ RODEO fails to fetch nucleotide sequences for these.
 # }}} ###
 
 my $protid = $ARGV[0];
-my @xxx = ($protid);
 
 
 # {{{ Populate %conf if a configuration file 
