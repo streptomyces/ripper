@@ -186,22 +186,50 @@ close(ERRH);
 # $handle->disconnect();
 }
 
+=pod
+28 Jan 2025. In C<pfs()>, the prepeptide is distant if C<$fid> ends in
+C<_9\d{3}>. If the prepeptide is distant then we query to select only those
+records where the I<collection> column is I<ripp>. The I<collection> column can
+have only two values I<ripp> or I<pfam>.
+=cut
 
 # {{{ sub pfs
 sub pfs {
+  # Returns the most significant hit only as a hashref.
   my $fid = shift(@_);
-  my $cntstr = qq/select count(*) from $conf{pfamrestab} where qname = '$fid'/;
-  my ($count) = $handle->selectrow_array($cntstr);
-  if($count) {
-    # We need an "order by signif" in the query below.
-    my $qstr = qq/select * from $conf{pfamrestab} where qname = '$fid'/;
-    $qstr .= qq/ order by signif/;
-    my $stmt = $handle->prepare($qstr);
-    $stmt->execute();
-    my $hr = $stmt->fetchrow_hashref();
-    return($hr);
+  if($fid =~ m/_9\d{3,}$/) {
+    my $cntstr = qq/select count(*) from $conf{pfamrestab} where qname = '$fid'/;
+    $cntstr .= qq/ and collection = 'ripp'/;
+    my ($count) = $handle->selectrow_array($cntstr);
+    if($count) {
+      # We need an "order by signif" in the query below.
+      my $qstr = qq/select * from $conf{pfamrestab} where qname = '$fid'/;
+      $qstr .= qq/ and collection = 'ripp'/;
+      $qstr .= qq/ order by signif/;
+      my $stmt = $handle->prepare($qstr);
+      $stmt->execute();
+      my $hr = $stmt->fetchrow_hashref();
+      return($hr);
+    }
+    else {
+      return(0);
+    }
   }
-  else { return 0; }
+  else {
+    my $cntstr = qq/select count(*) from $conf{pfamrestab} where qname = '$fid'/;
+    my ($count) = $handle->selectrow_array($cntstr);
+    if($count) {
+      # We need an "order by signif" in the query below.
+      my $qstr = qq/select * from $conf{pfamrestab} where qname = '$fid'/;
+      $qstr .= qq/ order by signif/;
+      my $stmt = $handle->prepare($qstr);
+      $stmt->execute();
+      my $hr = $stmt->fetchrow_hashref();
+      return($hr);
+    }
+    else { return 0; }
+  }
+  return(0);
 }
 # }}}
 
