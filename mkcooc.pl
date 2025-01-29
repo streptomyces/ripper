@@ -50,7 +50,7 @@ use testing during development.
 
  perl mkcooc.pl -verbose -outdir ignore/one \
  -email govind.chandra@jic.ac.uk \
- -- WP_020634200.1
+ -- MBW4496662.1
 
  perl mkcooc.pl -verbose -outdir ignore/one \
  -email govind.chandra@jic.ac.uk \
@@ -175,6 +175,13 @@ say(STDERR ("$protid: ", join(" ", @ids)));
 # see if there is a DBSOURCE in it. If there is one then we use this
 # accession to get the nucleotide UID and place it in @ntids.
 
+# # If we do something like below
+# unless(@ids) {
+#   push(@ids, $protid);
+# }
+# # We get the error below.
+# # MSG: NCBI LinkSet error: protein: BLOB ID IS NOT IMPLEMENTED
+
 my @ntids;
 my %elarg = (
   -eutil => 'elink',
@@ -210,7 +217,8 @@ else {
 }
 # }}}
 
-if(@ntids) {
+# {{{ if @ntids we proceed else die().
+if(scalar(@ntids) > 1) {
   if($verbose) {
     say(VERB (join(" ", uniqstr(@ntids))));
   }
@@ -223,9 +231,21 @@ if(@ntids) {
   }
   unlink($tmpfn);
 }
+elsif(scalar(@ntids) == 1) {
+  if($verbose) {
+    say(VERB (join(" ", uniqstr(@ntids))));
+  }
+  my ($tmpfh, $tmpfn) = efetch_ntgbk($ntids[0]);
+  my $acc = mkcooc($tmpfh);
+  if(-d $gbkcache) {
+    copy($tmpfn, File::Spec->catfile($gbkcache, $acc . ".gbk"));
+  }
+  unlink($tmpfn);
+}
 else {
   die("Failed to get nucleotide genbank for $protid");
 }
+# }}}
 
 exit;
 
@@ -309,44 +329,50 @@ sub mkcooc {
 }
 # }}}
 
-# {{{ sub accn2uid;
-sub accn2uid {
-  my $accn = shift(@_);
-  my $query = $accn . "[accn]";
-  my %esarg = (
-    -eutil => 'esearch',
-    -db     => 'nucleotide',
-    -term   => $query,
-    -retmax => 3
-  );
-  if($apikey) {
-    $esarg{-api_key} = $apikey;
-  }
-  if($email) {
-    $esarg{-email} = $email;
-  }
-  my $factory = Bio::DB::EUtilities->new(%esarg);
-  my @ids = $factory->get_ids;
-  return(@ids);
-}
-# }}}
-
 # {{{ sub dbsource
 sub dbsource {
   my $gpfn = shift(@_);
+  say(STDERR ("In dbsource: $gpfn"));
   open(my $ifh, "<", $gpfn) or croak("Failed to open $gpfn.");
   while(my $line = readline($ifh)) {
     chomp($line);
     if($line =~ /^DBSOURCE/) {
       my @ll = split(/\s+/, $line);
       my $dbs_accn = pop(@ll);
-      my @ids = accn2uid($dbs_accn);
-      return(@ids);
+      # my @ids = accn2uid($dbs_accn);
+      say(STDERR ("In dbsource. Found $dbs_accn."));
+      return($dbs_accn);
     }
   }
   return();
 }
 # }}}
+
+# # {{{ sub accn2uid. No longer used. Commented out.
+# # Used to be called from inside dbsource();
+# sub accn2uid {
+#   my $accn = shift(@_);
+#   $accn =~ s/\.\d+$//;
+#   say(STDERR ("In accn2uid: $accn"));
+#   my $query = $accn . "[ACCN]";
+#   say(STDERR ("In accn2uid: $query"));
+#   my %esarg = (
+#     -eutil => 'efetch',
+#     -db     => 'nuccore',
+#     -term   => $accn,
+#     -format => 'uid'
+#   );
+#   if($apikey) {
+#     $esarg{-api_key} = $apikey;
+#   }
+#   if($email) {
+#     $esarg{-email} = $email;
+#   }
+#   my $factory = Bio::DB::EUtilities->new(%esarg);
+#   my @ids = $factory->get_ids;
+#   return(@ids);
+# }
+# # }}}
 
 # {{{ sub efetch_genpept
 sub efetch_genpept {
@@ -377,10 +403,10 @@ return($tmpfn);
 # {{{ sub efetch_ntgbk
 sub efetch_ntgbk {
   my $ntid = shift(@_);
-  # say("===> $ntid"); # debugging only.
+  say(STDERR "Fetching $ntid");
   my %efarg = (
     -eutil => 'efetch',
-    -db      => 'nucleotide',
+    -db      => 'nuccore',
     -rettype => 'gbwithparts',
     -id      => $ntid
   );
@@ -407,7 +433,7 @@ sub ntlen {
   for my $ntid (@ntids) {
     my %efarg = (
       -eutil => 'esummary',
-      -db      => 'nucleotide',
+      -db      => 'nuccore',
       -rettype => 'docsum',
       -id      => $ntid
     );
