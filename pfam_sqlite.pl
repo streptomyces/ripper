@@ -124,6 +124,7 @@ my $create_table_str = <<"CTS";
 create table if not exists $conf{pfamrestab} (
 qname text,
 qlen integer,
+collection text,
 hname text,
 hlen integer,
 qstart integer,
@@ -154,9 +155,7 @@ $stmt->execute();
 fastaid in $prepeptab (ripper) look like this.
 The distant ones end in _9nnn and are scanned against
 $ripphmmdb while those within $conf{maxDistFromTE} end
-in _n and are scanned against Pfam-A. Actually, now
-(Jan 2025) all prepeptides are scanned against both HMM
-databases.
+in _n and are scanned against Pfam-A. 
 
  my $ppFastaOutputCnt = 1; # in ripper.pl
  my $allFastaOutputCnt = 9001; # in ripper.pl
@@ -167,16 +166,19 @@ databases.
  WP_253094575_9016
 
 The close one are _1 onwards. The distant ones are _9001 onwards.
+
+Hits recorded in $conf{pfamrestab} contain the database
+name under the column I<collection>.
 =cut
 
 while(my $hr=$stmt->fetchrow_hashref()) {
   my $id=$hr->{fastaid};
   my $aaseq=$hr->{aaseq};
   my $hmmoutfn = scan(aaseq => $aaseq, hmmdb => $ripphmmdb, name => $id);
-  hmmout_insert($hmmoutfn);
+  hmmout_insert($hmmoutfn, "ripp");
   unlink($hmmoutfn);
   $hmmoutfn = scan(aaseq => $aaseq, hmmdb => $hmmdb, name => $id);
-  hmmout_insert($hmmoutfn);
+  hmmout_insert($hmmoutfn, "pfam");
   unlink($hmmoutfn);
 }
 
@@ -185,6 +187,7 @@ exit;
 # {{{ sub hmmout_insert
 sub hmmout_insert {
   my $hmmoutfn = shift(@_);
+  my $collection = shift(@_);
   my $copyFlag = 0;
   my @hr = hspHashes($hmmoutfn);
   for my $hr (@hr) {
@@ -194,26 +197,23 @@ sub hmmout_insert {
       my $hcov = sprintf("%.3f", $hr->{alnlen}/$pfl{$bacc});
 
       my $instr = qq/insert or replace into $conf{pfamrestab}/;
-      $instr .= qq/ (qname, qlen, hname, hlen, qstart, qend, qcov, hstart, hend,/;
+      $instr .= qq/ (qname, qlen, collection, hname, hlen, qstart,/;
+      $instr .= qq/ qend, qcov, hstart, hend,/;
       $instr .= qq/ hcov, fracid, signif, hdesc)/;
-      $instr .= qq/ values(/;
-      $instr .= $handle->quote($hr->{qname}) . ", " ;
-      $instr .= $hr->{qlen} . ", ";
-      $instr .= $handle->quote($hr->{hname}) . ", " ;
-      $instr .= $pfl{$bacc} . ", ";
-      $instr .= $hr->{qstart} . ", ";
-      $instr .= $hr->{qend} . ", ";
-      $instr .= $hr->{qcov} . ", ";
-      $instr .= $hr->{hstart} . ", ";
-      $instr .= $hr->{hend} . ", ";
-      $instr .= $hcov . ", ";
-      $instr .= $hr->{fracid} . ", ";
-      $instr .= $hr->{signif} .", ";
-      $instr .= $handle->quote($hr->{hdesc});
-      $instr .= qq/)/;
-      # linelist($instr);
-      unless($handle->do($instr)) {
+      $instr .= qq/ values(?,?,?,?,?,?,?,?,?,?,?,?,?,?)/;
+      my $instmt = $handle->prepare($instr);
+      my %hh = %{$hr};
+      $hh{collection} = $collection;
+      $hh{hlen} = $pfl{$bacc};
+      $hh{hcov} = sprintf("%.3f", $hr->{alnlen}/$pfl{$bacc});
+
+      my @keys = qw(qname qlen collection hname hlen qstart qend qcov);
+      push(@keys, qw(hstart hend hcov fracid signif hdesc));
+      my @exargs = @hh{@keys};
+
+      unless($instmt->execute(@exargs)) {
         linelistE($instr);
+        linelistE(join(" ", @exargs));
       }
     }
   }
@@ -259,35 +259,6 @@ sub pflens {
     }
     close(PFT);
   }
-  return(%rethash);
-}
-# }}}
-
-
-# {{{ sub pflens_old
-sub pflens_old {
-  my $pfamhmmdatfn = File::Spec->catfile($conf{pfamdir}, $conf{pfamhmmdatfn});
-  open(PFT, "<", $pfamhmmdatfn) or croak "Failed to open $pfamhmmdatfn";
-  my %rethash;
-  local $/ = "\n//\n";
-    while(<PFT>) {
-      my $record = $_;
-      chomp($record);
-      my @lines = split(/\n/, $record);
-      my %hmmrec;
-      for my $line (@lines) {
-        chomp($line);
-        $line =~ s/^#=GF\s+//;
-        my @ll = split(/\s+/, $line);
-        $hmmrec{$ll[0]} = $ll[1];
-      }
-      if(exists($hmmrec{AC}) and exists($hmmrec{ML})) {
-        my $acc = $hmmrec{AC};
-        $acc =~ s/\.\d+$//;
-        $rethash{$acc} = $hmmrec{ML};
-      }
-    }
-  close(PFT);
   return(%rethash);
 }
 # }}}
